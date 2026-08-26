@@ -1,0 +1,10 @@
+line-length = 100
+target-version = "py312"
+
+[lint]
+select = ["E", "F", "I", "UP", "B", "DJ"]
+ignore = ["E501"]
+
+[lint.per-file-ignores]
+"*/migrations/*" = ["E", "F"]
+"config/settings/*" = ["F403", "F405"]

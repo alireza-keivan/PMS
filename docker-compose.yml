@@ -1,0 +1,17 @@
+# Local development dependencies. The Django app runs on the host against these.
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: villa
+      POSTGRES_PASSWORD: villa
+      POSTGRES_DB: villadash
+    ports: ["5433:5432"]   # 5433 on the host: 5432 is often already taken by a local Postgres
+    volumes: [pgdata:/var/lib/postgresql/data]
+
+  redis:
+    image: redis:7-alpine
+    ports: ["6380:6379"]   # 6380 for the same reason
+
+volumes:
+  pgdata:

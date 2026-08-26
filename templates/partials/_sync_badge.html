@@ -1,0 +1,11 @@
+{% load i18n %}
+{# Honesty about data freshness. Never render a basic-tier figure as live. #}
+{% if organization.has_live_sync %}
+  <span class="rounded-full bg-green-50 px-2 py-1 text-xs text-green-800">
+    {% blocktranslate %}Updated just now{% endblocktranslate %}
+  </span>
+{% else %}
+  <span class="rounded-full bg-sand-100 px-2 py-1 text-xs text-ink-600">
+    {% blocktranslate %}From calendar links. Dates only, and can be a few hours behind.{% endblocktranslate %}
+  </span>
+{% endif %}

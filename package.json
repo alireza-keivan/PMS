@@ -1,0 +1,13 @@
+{
+  "name": "villa-dashboard",
+  "private": true,
+  "description": "Tailwind build only. No JS bundler - HTMX and Alpine are served as static files.",
+  "scripts": {
+    "css": "tailwindcss -i ./static/css/src.css -o ./static/css/tailwind.css --watch",
+    "css:build": "tailwindcss -i ./static/css/src.css -o ./static/css/tailwind.css --minify"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.17",
+    "@tailwindcss/forms": "^0.5.10"
+  }
+}

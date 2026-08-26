@@ -1,0 +1,6 @@
+-r base.txt
+
+gunicorn==23.0.0
+uvicorn[standard]==0.34.0    # ASGI worker, for async Ninja webhook views
+whitenoise==6.8.2
+sentry-sdk[django]==2.20.0

@@ -1,0 +1,82 @@
+"""The tenant boundary.
+
+One Organization is one client operator running 3-15 villas. Every piece of
+client data hangs off it, and the sync tier is set here because it determines
+how honest the UI has to be about what the data actually is.
+"""
+
+from django.db import models
+from django.utils.translation import gettext_lazy as _
+
+from apps.core.models import TimeStampedModel
+
+
+class Organization(TimeStampedModel):
+    class SyncTier(models.TextChoices):
+        # Beds24 API: near-real-time, full guest details, pricing, messaging.
+        PREMIUM = "premium", _("Connected accounts")
+        # iCal feeds: one-way, refreshed every few hours by the OTA, dates only.
+        BASIC = "basic", _("Calendar links only")
+
+    name = models.CharField(max_length=160)
+    slug = models.SlugField(unique=True)
+    sync_tier = models.CharField(
+        max_length=10, choices=SyncTier.choices, default=SyncTier.BASIC
+    )
+    default_currency = models.CharField(
+        max_length=3,
+        default="IDR",
+        help_text=_("Currency the owner wants reports displayed in."),
+    )
+    whatsapp_number = models.CharField(max_length=32, blank=True)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ["name"]
+
+    def __str__(self):
+        return self.name
+
+    @property
+    def has_live_sync(self) -> bool:
+        """Whether booking data is near-real-time and complete.
+
+        Gate any UI that claims freshness or shows guest names, pricing or
+        messages on this. On the basic tier those fields are simply absent, and
+        presenting stale availability as live is the exact failure this product
+        exists to prevent.
+        """
+        return self.sync_tier == self.SyncTier.PREMIUM
+
+
+class Membership(TimeStampedModel):
+    """Which people can see which operator's data, and in what capacity."""
+
+    class Role(models.TextChoices):
+        OWNER = "owner", _("Owner")        # sees money, reports, all villas
+        MANAGER = "manager", _("Manager")  # day-to-day ops, all villas
+        STAFF = "staff", _("Staff")        # daily task view, assigned villas only
+
+    user = models.ForeignKey(
+        "accounts.User", on_delete=models.CASCADE, related_name="memberships"
+    )
+    organization = models.ForeignKey(
+        Organization, on_delete=models.CASCADE, related_name="memberships"
+    )
+    role = models.CharField(max_length=20, choices=Role.choices, default=Role.STAFF)
+    villas = models.ManyToManyField(
+        "villas.Villa",
+        blank=True,
+        related_name="assigned_members",
+        help_text=_("Staff only. Leave empty for access to every villa."),
+    )
+
+    class Meta:
+        unique_together = [("user", "organization")]
+
+    def __str__(self):
+        return f"{self.user} @ {self.organization} ({self.get_role_display()})"
+
+    @property
+    def can_see_money(self) -> bool:
+        return self.role in {self.Role.OWNER, self.Role.MANAGER}
