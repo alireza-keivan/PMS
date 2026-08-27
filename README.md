@@ -24,11 +24,22 @@ python manage.py runserver
 Ports are deliberately 5433/6380 so the containers do not collide with a
 Postgres or Redis already installed on the machine.
 
-Tailwind is a separate process during development:
+Tailwind runs via the standalone CLI - no Node/npm required:
 
 ```bash
-npm install
-npm run css                   # watch mode
+scripts/get_tailwind_cli.sh                                       # once, fetches .bin/tailwindcss
+.bin/tailwindcss -i static/css/src.css -o static/css/tailwind.css --watch
+```
+
+(If Node is available, `npm install && npm run css` does the same thing.)
+
+To seed the database with realistic, interconnected demo data - two operators,
+guests, bookings, compliance documents in various states - for browsing in
+admin or the dashboard:
+
+```bash
+python manage.py seed_demo_data          # safe to re-run; refuses to duplicate
+python manage.py seed_demo_data --flush  # wipes and rebuilds the demo data
 ```
 
 ## Commands
@@ -71,6 +82,12 @@ locale/          en, id
 Three audiences are kept deliberately separate in the URL layout:
 `/` staff and owners (session auth), `/stay/` guests (signed link, no account),
 `/villa/` public villa pages (no auth), `/api/` webhooks only.
+
+The only screen built past admin so far is the owner dashboard at `/`
+(`apps/reporting/views.py`) - today's occupancy, this month's revenue
+(converted to the operator's own currency, excluding anything with no
+exchange rate on file rather than guessing), who's arriving and leaving, and
+who still owes money.
 
 ### Two ideas worth knowing before editing models
 

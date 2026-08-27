@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% translate "Messages" %}{% endblock %}
+
+{% block content %}
+{% if no_organization %}
+  <div class="rounded-lg border border-sand-200 bg-white p-4 shadow-sm sm:p-6">
+    <p class="text-ink-900">
+      {% translate "Your account isn't linked to a property yet." %}
+    </p>
+    <p class="mt-2 text-sm text-ink-600">
+      {% translate "Ask an owner to add you, or use the admin panel to set this up." %}
+    </p>
+  </div>
+{% else %}
+
+  <div class="mb-4 flex items-center justify-between">
+    <h1 class="text-xl font-semibold text-ink-900">{% translate "Messages" %}</h1>
+    <p class="text-sm text-ink-600">
+      {% blocktranslate count n=conversations|length %}
+        {{ n }} conversation
+      {% plural %}
+        {{ n }} conversations
+      {% endblocktranslate %}
+    </p>
+  </div>
+
+  <div class="mb-6 flex flex-wrap gap-2 text-sm">
+    <a href="?" class="rounded-full px-3 py-1 {% if not selected_villa %}bg-teal-600 text-white{% else %}bg-sand-100 text-ink-600 hover:bg-sand-200{% endif %}">
+      {% translate "All" %}
+    </a>
+    {% for villa in villas %}
+      <a
+        href="?villa={{ villa.pk }}"
+        class="rounded-full px-3 py-1 {% if selected_villa == villa.pk|stringformat:'s' %}bg-teal-600 text-white{% else %}bg-sand-100 text-ink-600 hover:bg-sand-200{% endif %}"
+      >
+        {{ villa.name }}
+      </a>
+    {% endfor %}
+    <a href="?villa=staff" class="rounded-full px-3 py-1 {% if selected_villa == 'staff' %}bg-teal-600 text-white{% else %}bg-sand-100 text-ink-600 hover:bg-sand-200{% endif %}">
+      {% translate "Staff" %}
+    </a>
+  </div>
+
+  {% if conversations %}
+    <div class="divide-y divide-sand-100 overflow-hidden rounded-lg border border-sand-200 bg-white shadow-sm">
+      {% for convo in conversations %}
+        <a href="{% url 'messaging:thread' convo.pk %}" class="flex items-center justify-between gap-4 px-4 py-3 hover:bg-sand-50">
+          <div class="min-w-0">
+            <p class="truncate font-medium text-ink-900">
+              {% if convo.guest %}
+                {{ convo.guest.full_name }}
+              {% elif convo.staff_label %}
+                {{ convo.staff_label }} <span class="text-ink-600">({% translate "staff" %})</span>
+              {% else %}
+                {{ convo.phone }}
+              {% endif %}
+              {% if convo.villa %}
+                <span class="ml-1 text-xs font-normal text-ink-500">· {{ convo.villa.name }}</span>
+              {% endif %}
+            </p>
+            <p class="truncate text-sm text-ink-600">
+              {% if convo.last_message %}
+                {% if convo.last_message.direction == "out" %}<span class="text-ink-500">{% translate "You:" %}</span> {% endif %}
+                {{ convo.last_message.body|truncatechars:80 }}
+              {% else %}
+                {% translate "No messages yet" %}
+              {% endif %}
+            </p>
+          </div>
+          <div class="flex flex-shrink-0 flex-col items-end gap-1">
+            <span class="whitespace-nowrap text-xs text-ink-500">
+              {% if convo.last_message %}{{ convo.last_message.when|date:"j M, H:i" }}{% endif %}
+            </span>
+            {% if convo.window_is_open %}
+              <span class="rounded-full bg-teal-50 px-2 py-0.5 text-[11px] text-teal-700">{% translate "Open" %}</span>
+            {% else %}
+              <span class="rounded-full bg-amber-50 px-2 py-0.5 text-[11px] text-amber-800">{% translate "Template only" %}</span>
+            {% endif %}
+          </div>
+        </a>
+      {% endfor %}
+    </div>
+  {% elif selected_villa %}
+    <div class="rounded-lg border border-sand-200 bg-white p-6 text-center shadow-sm">
+      <p class="text-ink-900">{% translate "No conversations in this category." %}</p>
+      <p class="mt-1 text-sm text-ink-600">
+        <a href="?" class="text-teal-700 underline">{% translate "Show all conversations" %}</a>
+      </p>
+    </div>
+  {% else %}
+    <div class="rounded-lg border border-sand-200 bg-white p-6 text-center shadow-sm">
+      <p class="text-ink-900">{% translate "No conversations yet." %}</p>
+      <p class="mt-1 text-sm text-ink-600">
+        {% translate "Conversations show up here once a guest or staff member messages you on WhatsApp." %}
+      </p>
+    </div>
+  {% endif %}
+
+{% endif %}
+{% endblock %}

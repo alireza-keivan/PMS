@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% if conversation.guest %}{{ conversation.guest.full_name }}{% else %}{{ conversation.phone }}{% endif %}{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+  <a href="{% url 'messaging:inbox' %}" class="text-sm text-ink-600 underline">{% translate "Back to messages" %}</a>
+</div>
+
+<div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+  <div>
+    <h1 class="text-xl font-semibold text-ink-900">
+      {% if conversation.guest %}{{ conversation.guest.full_name }}{% else %}{{ conversation.phone }}{% endif %}
+    </h1>
+    <p class="text-sm text-ink-600">
+      {{ conversation.phone }}{% if villa %} · {{ villa.name }}{% endif %}
+    </p>
+  </div>
+  {% if conversation.window_is_open %}
+    <span class="rounded-full bg-teal-50 px-3 py-1 text-xs text-teal-700">
+      {% translate "They messaged recently - you can write freely" %}
+    </span>
+  {% else %}
+    <span class="rounded-full bg-amber-50 px-3 py-1 text-xs text-amber-800">
+      {% translate "Over 24 hours since they wrote - only an approved template can be sent" %}
+    </span>
+  {% endif %}
+</div>
+
+<div class="flex flex-col rounded-lg border border-sand-200 bg-white shadow-sm">
+  <div id="thread-messages" class="flex flex-col gap-3 overflow-y-auto p-4" style="max-height: 60vh;">
+    {% for message in timeline %}
+      {% include "messaging/_message.html" %}
+    {% empty %}
+      <p class="text-sm text-ink-600">{% translate "No messages yet." %}</p>
+    {% endfor %}
+  </div>
+
+  <form
+    hx-post="{% url 'messaging:reply' conversation.pk %}"
+    hx-target="#thread-messages"
+    hx-swap="beforeend"
+    class="border-t border-sand-200 p-4"
+    x-data="{ templateId: '' }"
+    @reply-sent.window="$refs.body.value = ''; templateId = ''"
+  >
+    <div id="reply-error"></div>
+
+    {% if templates %}
+      <div class="mb-2">
+        <select
+          name="template" x-model="templateId"
+          @change="$refs.body.value = $event.target.selectedOptions[0].dataset.body || ''"
+          class="w-full rounded border border-sand-200 px-3 py-2 text-sm focus:border-teal-500 focus:outline-none sm:w-auto"
+        >
+          <option value="">{% translate "No template - write freely" %}</option>
+          {% for t in templates %}
+            <option value="{{ t.pk }}" data-body="{% if t.language == 'id' %}{{ t.body_id }}{% else %}{{ t.body_en }}{% endif %}">{{ t.name }} ({{ t.language }})</option>
+          {% endfor %}
+        </select>
+      </div>
+    {% elif not conversation.window_is_open %}
+      <p class="mb-2 text-sm text-ink-600">
+        {% translate "No approved template on file yet - nothing can be sent until one is approved, or they message you again." %}
+      </p>
+    {% endif %}
+
+    <div class="flex gap-2">
+      <textarea
+        x-ref="body" name="body" rows="2" required
+        {% if not conversation.window_is_open and not templates %}disabled{% endif %}
+        placeholder="{% translate 'Type a message' %}"
+        class="flex-1 rounded border border-sand-200 px-3 py-2 text-sm focus:border-teal-500 focus:outline-none"
+      ></textarea>
+      <button
+        type="submit"
+        {% if not conversation.window_is_open and not templates %}disabled{% endif %}
+        class="self-start rounded bg-teal-600 px-4 py-2 text-sm font-medium text-white hover:bg-teal-700 disabled:opacity-50"
+      >
+        {% translate "Send" %}
+      </button>
+    </div>
+  </form>
+</div>
+{% endblock %}

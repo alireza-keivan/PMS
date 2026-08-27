@@ -3,7 +3,11 @@
 from .base import *  # noqa: F403
 
 DEBUG = True
-ALLOWED_HOSTS = ["localhost", "127.0.0.1", "0.0.0.0"]
+# "*" is fine here because this file is local-dev only and never loaded in
+# production (config/wsgi.py and config/asgi.py both default to settings.prod).
+# Needed so a phone on the same WiFi can reach this machine by its LAN IP -
+# Django checks the incoming Host header against this list.
+ALLOWED_HOSTS = ["*"]
 
 INSTALLED_APPS += ["debug_toolbar"]  # noqa: F405
 MIDDLEWARE.insert(0, "debug_toolbar.middleware.DebugToolbarMiddleware")  # noqa: F405

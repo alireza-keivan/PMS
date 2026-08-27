@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{{ guest.full_name }}{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+  <a href="{% url 'guests:list' %}" class="text-sm text-ink-600 underline">{% translate "Back to guests" %}</a>
+</div>
+
+<div class="mb-6 flex flex-wrap items-start justify-between gap-3">
+  <div>
+    <h1 class="text-xl font-semibold text-ink-900">{{ guest.full_name }}</h1>
+    <p class="mt-1 text-sm text-ink-600">
+      {{ guest.email|default:"" }}
+      {% if guest.email and guest.phone %} - {% endif %}
+      {{ guest.phone|default:"" }}
+      {% if not guest.email and not guest.phone %}{% translate "No contact details on file" %}{% endif %}
+    </p>
+  </div>
+  <div class="flex gap-2">
+    {% if guest.is_returning %}
+      <span class="rounded-full bg-teal-50 px-3 py-1 text-xs text-teal-700">
+        {% blocktranslate count n=guest.total_stays %}{{ n }} stay{% plural %}{{ n }} stays{% endblocktranslate %}
+      </span>
+    {% endif %}
+    {% if guest.nationality %}
+      <span class="rounded-full bg-sand-100 px-3 py-1 text-xs text-ink-600">{{ guest.nationality }}</span>
+    {% endif %}
+  </div>
+</div>
+
+<div class="grid gap-6 lg:grid-cols-2">
+
+  <section class="rounded-lg border border-sand-200 bg-white p-4 shadow-sm sm:p-6">
+    <h2 class="mb-3 font-semibold text-ink-900">{% translate "Bookings" %}</h2>
+    {% if bookings %}
+      <ul class="divide-y divide-sand-100">
+        {% for booking in bookings %}
+          <li class="py-2">
+            <p class="text-ink-900">
+              {{ booking.villa.name }}
+              <span class="text-ink-600">- {{ booking.check_in|date:"j M Y" }} {% translate "to" %} {{ booking.check_out|date:"j M Y" }}</span>
+            </p>
+            <p class="text-xs text-ink-600">
+              {{ booking.get_channel_display }} - {{ booking.get_status_display }}
+              {% if not booking.has_guest_details %} - {% translate "dates only, no further detail" %}{% endif %}
+            </p>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="text-sm text-ink-600">{% translate "No bookings on file." %}</p>
+    {% endif %}
+  </section>
+
+  <section class="rounded-lg border border-sand-200 bg-white p-4 shadow-sm sm:p-6">
+    <h2 class="mb-3 font-semibold text-ink-900">{% translate "Requests" %}</h2>
+    {% if requests %}
+      <ul class="divide-y divide-sand-100">
+        {% for req in requests %}
+          <li class="py-2">
+            <p class="text-ink-900">
+              {{ req.get_kind_display }}
+              <span class="rounded-full bg-sand-100 px-2 py-0.5 text-xs text-ink-600">{{ req.get_status_display }}</span>
+            </p>
+            {% if req.message %}<p class="text-xs text-ink-600">{{ req.message }}</p>{% endif %}
+            <p class="text-xs text-ink-600">{{ req.created_at|date:"j M Y, H:i" }}</p>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="text-sm text-ink-600">{% translate "No requests yet." %}</p>
+    {% endif %}
+  </section>
+
+  <section class="rounded-lg border border-sand-200 bg-white p-4 shadow-sm sm:p-6">
+    <h2 class="mb-3 font-semibold text-ink-900">{% translate "Private feedback" %}</h2>
+    {% if feedback_entries %}
+      <ul class="divide-y divide-sand-100">
+        {% for entry in feedback_entries %}
+          <li class="py-2">
+            <p class="text-ink-900">
+              {{ entry.rating }}/5
+              {% if entry.escalated_to_owner %}
+                <span class="rounded-full bg-red-50 px-2 py-0.5 text-xs text-red-700">{% translate "Sent to owner" %}</span>
+              {% endif %}
+            </p>
+            {% if entry.comment %}<p class="text-xs text-ink-600">{{ entry.comment }}</p>{% endif %}
+            <p class="text-xs text-ink-600">{{ entry.created_at|date:"j M Y" }}</p>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="text-sm text-ink-600">{% translate "No feedback yet." %}</p>
+    {% endif %}
+  </section>
+
+  <section class="rounded-lg border border-sand-200 bg-white p-4 shadow-sm sm:p-6">
+    <h2 class="mb-3 font-semibold text-ink-900">{% translate "Police report reminders" %}</h2>
+    {% if police_reports %}
+      <ul class="divide-y divide-sand-100">
+        {% for report in police_reports %}
+          <li class="py-2">
+            <p class="text-ink-900">
+              {{ report.booking.villa.name }}
+              {% if report.is_overdue %}
+                <span class="rounded-full bg-red-50 px-2 py-0.5 text-xs text-red-700">{% translate "Overdue" %}</span>
+              {% else %}
+                <span class="rounded-full bg-sand-100 px-2 py-0.5 text-xs text-ink-600">{{ report.get_status_display }}</span>
+              {% endif %}
+            </p>
+            <p class="text-xs text-ink-600">{% translate "Deadline" %}: {{ report.deadline|date:"j M Y, H:i" }}</p>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="text-sm text-ink-600">{% translate "None on file." %}</p>
+    {% endif %}
+  </section>
+
+  <section class="rounded-lg border border-sand-200 bg-white p-4 shadow-sm sm:p-6 lg:col-span-2">
+    <h2 class="mb-3 font-semibold text-ink-900">{% translate "Recent activity" %}</h2>
+    {% if recent_activity %}
+      <ul class="divide-y divide-sand-100">
+        {% for event in recent_activity %}
+          <li class="flex items-center justify-between py-2">
+            <p class="text-ink-900">
+              {{ event.get_kind_display }}
+              {% if event.subject %}<span class="text-ink-600">- {{ event.subject }}</span>{% endif %}
+            </p>
+            <p class="text-xs text-ink-600">{{ event.occurred_at|date:"j M Y, H:i" }}</p>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="text-sm text-ink-600">{% translate "Nothing recorded yet." %}</p>
+    {% endif %}
+  </section>
+
+  {% if guest.notes %}
+    <section class="rounded-lg border border-sand-200 bg-white p-4 shadow-sm sm:p-6 lg:col-span-2">
+      <h2 class="mb-3 font-semibold text-ink-900">{% translate "Internal notes" %}</h2>
+      <p class="text-sm text-ink-600">{% translate "Staff only - never shown to the guest." %}</p>
+      <p class="mt-2 text-sm text-ink-900">{{ guest.notes|linebreaksbr }}</p>
+    </section>
+  {% endif %}
+
+</div>
+{% endblock %}

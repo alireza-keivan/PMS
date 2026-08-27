@@ -1,0 +1,138 @@
+{% load i18n %}
+{% comment %}
+Shared by add.html and edit.html - the five required fields plus everything
+optional, collapsed behind "more details". Included inside a <form> that
+already has {% csrf_token %} and its own submit/cancel buttons.
+{% endcomment %}
+
+<div class="mb-4">
+  <label class="mb-1 block text-sm text-ink-600" for="{{ form.name.id_for_label }}">{{ form.name.label }} *</label>
+  {{ form.name }}
+  {% if form.name.errors %}<p class="mt-1 text-sm text-red-700">{{ form.name.errors|join:" " }}</p>{% endif %}
+</div>
+
+<div class="mb-4">
+  <label class="mb-1 block text-sm text-ink-600" for="{{ form.property_type.id_for_label }}">{{ form.property_type.label }} *</label>
+  {{ form.property_type }}
+</div>
+
+<div class="mb-4">
+  <label class="mb-1 block text-sm text-ink-600" for="{{ form.bedrooms.id_for_label }}">{{ form.bedrooms.label }} *</label>
+  {{ form.bedrooms }}
+  {% if form.bedrooms.errors %}<p class="mt-1 text-sm text-red-700">{{ form.bedrooms.errors|join:" " }}</p>{% endif %}
+</div>
+
+<div class="mb-4">
+  <p class="mb-1 text-sm text-ink-600">{% translate "Amenities" %} *</p>
+  <div class="grid grid-cols-2 gap-1 text-sm text-ink-900">
+    {{ form.amenities }}
+  </div>
+  {% if form.amenities.errors %}<p class="mt-1 text-sm text-red-700">{{ form.amenities.errors|join:" " }}</p>{% endif %}
+</div>
+
+<div class="mb-4">
+  <label class="mb-1 block text-sm text-ink-600" for="{{ form.cover_photo.id_for_label }}">{% translate "Photo" %}{% if not villa %} *{% endif %}</label>
+  {% if villa %}
+    {% with cover=villa.photos.all|dictsort:"is_cover"|last %}
+      {% if cover %}
+        <img src="{{ cover.image.url }}" alt="" class="mb-2 h-24 w-32 rounded object-cover">
+      {% endif %}
+    {% endwith %}
+  {% endif %}
+  {{ form.cover_photo }}
+  <p class="mt-1 text-xs text-ink-600">{{ form.cover_photo.help_text }}</p>
+  {% if form.cover_photo.errors %}<p class="mt-1 text-sm text-red-700">{{ form.cover_photo.errors|join:" " }}</p>{% endif %}
+</div>
+
+<button
+  type="button"
+  class="mb-4 text-sm font-medium text-teal-700 underline"
+  @click="showMore = !showMore"
+  x-text="showMore ? '{% translate "Show fewer details" %}' : '{% translate "Add more details" %}'"
+></button>
+
+<div x-show="showMore" x-cloak class="space-y-4">
+  <div class="grid grid-cols-2 gap-3">
+    <div>
+      <label class="mb-1 block text-sm text-ink-600" for="{{ form.address.id_for_label }}">{{ form.address.label }}</label>
+      {{ form.address }}
+    </div>
+    <div>
+      <label class="mb-1 block text-sm text-ink-600" for="{{ form.area.id_for_label }}">{% translate "Area" %}</label>
+      {{ form.area }}
+    </div>
+  </div>
+
+  <div class="grid grid-cols-2 gap-3">
+    <div>
+      <label class="mb-1 block text-sm text-ink-600" for="{{ form.bathrooms.id_for_label }}">{{ form.bathrooms.label }}</label>
+      {{ form.bathrooms }}
+    </div>
+    <div>
+      <label class="mb-1 block text-sm text-ink-600" for="{{ form.max_guests.id_for_label }}">{% translate "Max guests" %}</label>
+      {{ form.max_guests }}
+    </div>
+  </div>
+
+  <div class="grid grid-cols-2 gap-3">
+    <div>
+      <label class="mb-1 block text-sm text-ink-600" for="{{ form.size_sqm.id_for_label }}">{{ form.size_sqm.label }}</label>
+      {{ form.size_sqm }}
+    </div>
+    <div></div>
+  </div>
+
+  <div class="grid grid-cols-2 gap-3">
+    <div>
+      <label class="mb-1 block text-sm text-ink-600" for="{{ form.base_nightly_rate.id_for_label }}">
+        {% translate "Nightly rate" %}
+        {% if organization %}({{ organization.default_currency }}){% endif %}
+      </label>
+      {{ form.base_nightly_rate }}
+    </div>
+    <div>
+      <label class="mb-1 block text-sm text-ink-600" for="{{ form.base_monthly_rate.id_for_label }}">
+        {% translate "Monthly rate" %}
+        {% if organization %}({{ organization.default_currency }}){% endif %}
+      </label>
+      {{ form.base_monthly_rate }}
+    </div>
+  </div>
+
+  <div>
+    <label class="mb-1 block text-sm text-ink-600" for="{{ form.google_maps_url.id_for_label }}">{% translate "Google Maps link" %}</label>
+    {{ form.google_maps_url }}
+  </div>
+
+  <div class="grid grid-cols-3 gap-3">
+    <div>
+      <label class="mb-1 block text-sm text-ink-600" for="{{ form.check_in_time.id_for_label }}">{% translate "Check-in time" %}</label>
+      {{ form.check_in_time }}
+    </div>
+    <div>
+      <label class="mb-1 block text-sm text-ink-600" for="{{ form.check_out_time.id_for_label }}">{% translate "Check-out time" %}</label>
+      {{ form.check_out_time }}
+    </div>
+    <div>
+      <label class="mb-1 block text-sm text-ink-600" for="{{ form.min_nights.id_for_label }}">{% translate "Minimum nights" %}</label>
+      {{ form.min_nights }}
+    </div>
+  </div>
+
+  <div>
+    <label class="mb-1 block text-sm text-ink-600" for="{{ form.description_en.id_for_label }}">{% translate "Description (English)" %}</label>
+    {{ form.description_en }}
+  </div>
+  <div>
+    <label class="mb-1 block text-sm text-ink-600" for="{{ form.description_id.id_for_label }}">{% translate "Description (Bahasa Indonesia)" %}</label>
+    {{ form.description_id }}
+  </div>
+
+  <label class="flex items-center gap-2 text-sm text-ink-900">
+    {{ form.is_listed_publicly }}
+    {% translate "Give this villa its own public web page" %}
+  </label>
+  <p class="text-xs text-ink-600">
+    {% translate "Not built yet - this just marks the villa as ready for when it is." %}
+  </p>
+</div>

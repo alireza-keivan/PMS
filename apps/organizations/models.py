@@ -18,11 +18,27 @@ class Organization(TimeStampedModel):
         # iCal feeds: one-way, refreshed every few hours by the OTA, dates only.
         BASIC = "basic", _("Calendar links only")
 
+    class PlanTier(models.TextChoices):
+        STARTER = "starter", _("Starter")
+        GROWTH = "growth", _("Growth")
+        PRO = "pro", _("Pro")
+
+    # How many villas each plan allows. No billing behind this yet - an admin
+    # sets the tier by hand until real subscription management exists - but
+    # the limit itself is real and enforced, not just decorative. Sized to
+    # the operator range this product targets - see CLAUDE.md.
+    PLAN_VILLA_LIMITS = {
+        PlanTier.STARTER: 5,
+        PlanTier.GROWTH: 10,
+        PlanTier.PRO: 15,
+    }
+
     name = models.CharField(max_length=160)
     slug = models.SlugField(unique=True)
     sync_tier = models.CharField(
         max_length=10, choices=SyncTier.choices, default=SyncTier.BASIC
     )
+    plan = models.CharField(max_length=10, choices=PlanTier.choices, default=PlanTier.STARTER)
     default_currency = models.CharField(
         max_length=3,
         default="IDR",
@@ -47,6 +63,14 @@ class Organization(TimeStampedModel):
         exists to prevent.
         """
         return self.sync_tier == self.SyncTier.PREMIUM
+
+    @property
+    def villa_limit(self) -> int:
+        return self.PLAN_VILLA_LIMITS[self.plan]
+
+    @property
+    def can_add_villa(self) -> bool:
+        return self.villas.filter(is_active=True).count() < self.villa_limit
 
 
 class Membership(TimeStampedModel):

@@ -62,6 +62,32 @@ class Conversation(TenantOwnedModel):
         return timezone.now() - self.last_inbound_at < timedelta(hours=24)
 
 
+class InboundMessage(TenantOwnedModel):
+    """A message the guest or staff member actually sent us.
+
+    Kept as its own model rather than folding into OutboundMessage with a
+    `direction` flag - delivery status, templates and provider errors only
+    ever apply to what we send, so a shared table would carry a pile of
+    columns that are always null on one side.
+    """
+
+    conversation = models.ForeignKey(
+        Conversation, on_delete=models.CASCADE, related_name="inbound_messages"
+    )
+    body = models.TextField()
+    provider_message_id = models.CharField(max_length=120, blank=True)
+    # Separate from created_at (row-creation audit trail) because a webhook
+    # delivery can lag behind when the provider says the message actually
+    # arrived - same split OutboundMessage makes between created_at and sent_at.
+    received_at = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        ordering = ["-received_at"]
+
+    def __str__(self):
+        return f"{self.conversation.phone}: {self.body[:40]}"
+
+
 class OutboundMessage(TenantOwnedModel):
     """One message queued for delivery.
 

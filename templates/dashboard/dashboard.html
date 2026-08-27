@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% translate "Today" %}{% endblock %}
+
+{% block content %}
+{% if no_organization %}
+  <div class="rounded-lg border border-sand-200 bg-white p-4 shadow-sm sm:p-6">
+    <p class="text-ink-900">
+      {% translate "Your account isn't linked to a property yet." %}
+    </p>
+    <p class="mt-2 text-sm text-ink-600">
+      {% translate "Ask an owner to add you, or use the admin panel to set this up." %}
+    </p>
+  </div>
+{% else %}
+
+  <div class="mb-6 flex items-center justify-between">
+    <h1 class="text-xl font-semibold text-ink-900">{{ today|date:"l, j F" }}</h1>
+    {% include "partials/_sync_badge.html" %}
+  </div>
+
+  {# One clear glance at the day - occupancy, money, and who still owes it. #}
+  <div class="mb-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+    <div class="rounded-lg border border-sand-200 bg-white p-4 shadow-sm sm:p-6">
+      <p class="text-sm text-ink-600">{% translate "Occupied today" %}</p>
+      <p class="mt-1 text-2xl font-semibold text-ink-900">{{ occupancy_percent }}%</p>
+      <p class="text-xs text-ink-600">{{ occupied_villas }} {% translate "of" %} {{ total_villas }}</p>
+    </div>
+    <div class="rounded-lg border border-sand-200 bg-white p-4 shadow-sm sm:p-6">
+      <p class="text-sm text-ink-600">{% translate "Revenue this month" %}</p>
+      <p class="mt-1 text-2xl font-semibold text-ink-900">
+        {{ organization.default_currency }} {{ revenue_this_month|floatformat:0 }}
+      </p>
+      {% if revenue_unconverted_count %}
+        <p class="text-xs text-amber-700">
+          {% blocktranslate count n=revenue_unconverted_count %}
+            {{ n }} payment left out - no exchange rate on file
+          {% plural %}
+            {{ n }} payments left out - no exchange rate on file
+          {% endblocktranslate %}
+        </p>
+      {% endif %}
+    </div>
+    <div class="rounded-lg border border-sand-200 bg-white p-4 shadow-sm sm:p-6">
+      <p class="text-sm text-ink-600">{% translate "Arriving today" %}</p>
+      <p class="mt-1 text-2xl font-semibold text-ink-900">{{ arriving_today|length }}</p>
+    </div>
+    <div class="rounded-lg border border-sand-200 bg-white p-4 shadow-sm sm:p-6">
+      <p class="text-sm text-ink-600">{% translate "Leaving today" %}</p>
+      <p class="mt-1 text-2xl font-semibold text-ink-900">{{ departing_today|length }}</p>
+    </div>
+    <div class="rounded-lg border border-sand-200 bg-white p-4 shadow-sm sm:p-6">
+      <p class="text-sm text-ink-600">{% translate "Needs doing" %}</p>
+      <p class="mt-1 text-2xl font-semibold {% if needs_doing_count %}text-red-700{% else %}text-ink-900{% endif %}">
+        {{ needs_doing_count }}
+      </p>
+    </div>
+  </div>
+
+  <div class="grid gap-6 lg:grid-cols-2">
+    <section class="rounded-lg border border-sand-200 bg-white p-4 shadow-sm sm:p-6">
+      <h2 class="mb-3 font-semibold text-ink-900">{% translate "Arriving today" %}</h2>
+      {% if arriving_today %}
+        <ul class="divide-y divide-sand-100">
+          {% for booking in arriving_today %}
+            <li class="py-2">
+              <p class="text-ink-900">
+                {% if booking.guest %}{{ booking.guest.full_name }}{% else %}{% translate "Not available" %}{% endif %}
+                <span class="text-ink-600">- {{ booking.villa.name }}</span>
+              </p>
+              <p class="text-xs text-ink-600">{{ booking.get_channel_display }}</p>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="text-sm text-ink-600">{% translate "No arrivals today." %}</p>
+      {% endif %}
+    </section>
+
+    <section class="rounded-lg border border-sand-200 bg-white p-4 shadow-sm sm:p-6">
+      <h2 class="mb-3 font-semibold text-ink-900">{% translate "Leaving today" %}</h2>
+      {% if departing_today %}
+        <ul class="divide-y divide-sand-100">
+          {% for booking in departing_today %}
+            <li class="py-2">
+              <p class="text-ink-900">
+                {% if booking.guest %}{{ booking.guest.full_name }}{% else %}{% translate "Not available" %}{% endif %}
+                <span class="text-ink-600">- {{ booking.villa.name }}</span>
+              </p>
+              <p class="text-xs text-ink-600">{{ booking.get_channel_display }}</p>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="text-sm text-ink-600">{% translate "No departures today." %}</p>
+      {% endif %}
+    </section>
+
+    <section class="rounded-lg border border-sand-200 bg-white p-4 shadow-sm sm:p-6 lg:col-span-2">
+      <h2 class="mb-3 font-semibold text-ink-900">{% translate "Still owed" %}</h2>
+      {% if outstanding_payments %}
+        <ul class="divide-y divide-sand-100">
+          {% for payment in outstanding_payments %}
+            <li class="flex items-center justify-between py-2">
+              <div>
+                <p class="text-ink-900">
+                  {% if payment.booking.guest %}{{ payment.booking.guest.full_name }}{% else %}{% translate "Not available" %}{% endif %}
+                  <span class="text-ink-600">- {{ payment.booking.villa.name }}</span>
+                </p>
+                <p class="text-xs text-ink-600">{{ payment.booking.check_in }}</p>
+              </div>
+              <p class="font-semibold text-ink-900">{{ payment.currency }} {{ payment.amount }}</p>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="text-sm text-ink-600">{% translate "Nothing outstanding." %}</p>
+      {% endif %}
+    </section>
+  </div>
+
+{% endif %}
+{% endblock %}

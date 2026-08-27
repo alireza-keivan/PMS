@@ -1,5 +1,7 @@
 """Villas and their photos."""
 
+from datetime import time
+
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
@@ -7,14 +9,50 @@ from apps.core.models import TenantOwnedModel
 
 
 class Villa(TenantOwnedModel):
+    class PropertyType(models.TextChoices):
+        VILLA = "villa", _("Villa")
+        GUESTHOUSE = "guesthouse", _("Guesthouse")
+        APARTMENT = "apartment", _("Apartment")
+        HOUSE = "house", _("House")
+
+    # ---- identity -----------------------------------------------------
     name = models.CharField(max_length=160)
     slug = models.SlugField(help_text=_("Used in the villa's public web address."))
+    property_type = models.CharField(
+        max_length=20, choices=PropertyType.choices, default=PropertyType.VILLA
+    )
+
+    # ---- location -------------------------------------------------------
     area = models.CharField(
         max_length=80, blank=True, help_text=_("Canggu, Ubud, Uluwatu, Seminyak.")
     )
     address = models.TextField(blank=True)
+    google_maps_url = models.URLField(
+        blank=True, help_text=_("Paste a Google Maps link so staff and guests can find it.")
+    )
+
+    # ---- capacity ---------------------------------------------------------
     bedrooms = models.PositiveSmallIntegerField(default=1)
+    bathrooms = models.PositiveSmallIntegerField(default=1)
     max_guests = models.PositiveSmallIntegerField(default=2)
+    size_sqm = models.PositiveIntegerField(
+        null=True, blank=True, verbose_name=_("size (m²)")
+    )
+
+    # ---- booking rules ------------------------------------------------
+    # Sensible Bali-standard defaults - editable per villa.
+    check_in_time = models.TimeField(default=time(14, 0))
+    check_out_time = models.TimeField(default=time(11, 0))
+    min_nights = models.PositiveSmallIntegerField(default=1)
+    base_nightly_rate = models.DecimalField(
+        max_digits=12, decimal_places=2, null=True, blank=True,
+        help_text=_("Indicative rate only, in the operator's own reporting currency. "
+                     "Real prices per booking live on the booking itself."),
+    )
+    base_monthly_rate = models.DecimalField(
+        max_digits=14, decimal_places=2, null=True, blank=True,
+        help_text=_("For long-stay guests. Same currency as the nightly rate."),
+    )
 
     # Bilingual free text. Kept as explicit per-language fields rather than
     # gettext because this is operator-authored content, not interface copy.

@@ -26,6 +26,10 @@ db.sqlite3
 node_modules/
 /static/css/tailwind.css
 
+# Standalone Tailwind CLI binary (~40MB) - fetched by scripts/get_tailwind_cli.sh,
+# not committed. Lets styling build without Node - see README.
+/.bin/
+
 # Compiled translations - built on deploy
 *.mo
 

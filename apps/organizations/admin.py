@@ -11,7 +11,7 @@ class MembershipInline(admin.TabularInline):
 
 @admin.register(Organization)
 class OrganizationAdmin(admin.ModelAdmin):
-    list_display = ("name", "sync_tier", "default_currency", "is_active")
-    list_filter = ("sync_tier", "is_active")
+    list_display = ("name", "plan", "sync_tier", "default_currency", "is_active")
+    list_filter = ("plan", "sync_tier", "is_active")
     prepopulated_fields = {"slug": ("name",)}
     inlines = [MembershipInline]

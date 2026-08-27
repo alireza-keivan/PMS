@@ -1,3 +1,9 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Alpine hides [x-cloak] elements once it loads, but doesn't ship this rule
+   itself - without it, the mobile sidebar overlay flashes visible on load. */
+[x-cloak] {
+  display: none;
+}

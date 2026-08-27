@@ -1,0 +1,81 @@
+{% load i18n %}
+{% comment %}
+Off-canvas on small screens (toggled by sidebarOpen, set in base.html and
+flipped by the topbar's menu button), always visible from lg: up. This is
+exactly the small, local UI state Alpine is meant for - see CLAUDE.md.
+{% endcomment %}
+<aside
+  class="fixed inset-y-0 left-0 z-40 w-64 -translate-x-full border-r border-sand-200 bg-white transition-transform duration-200 ease-in-out lg:static lg:translate-x-0"
+  :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'"
+>
+  <div class="flex h-16 items-center border-b border-sand-200 px-4">
+    <span class="text-lg font-semibold text-ink-900">{% translate "Villa Dashboard" %}</span>
+  </div>
+
+  <nav class="space-y-1 px-2 py-4">
+    {% url 'reporting:dashboard' as today_url %}
+    {% url 'bookings:calendar' as bookings_url %}
+    {% url 'villas:list' as villas_url %}
+    {% url 'guests:list' as guests_url %}
+    {% url 'compliance:action_needed' as compliance_url %}
+    {% url 'messaging:inbox' as messages_url %}
+    {% url 'marketing_admin:overview' as marketing_url %}
+
+    <a href="{{ today_url }}" class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium {% if request.path == today_url %}bg-teal-50 text-teal-700{% else %}text-ink-600 hover:bg-sand-100 hover:text-ink-900{% endif %}">
+      <svg class="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75" />
+      </svg>
+      {% translate "Today" %}
+    </a>
+
+    <a href="{{ bookings_url }}" class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium {% if request.path == bookings_url %}bg-teal-50 text-teal-700{% else %}text-ink-600 hover:bg-sand-100 hover:text-ink-900{% endif %}">
+      <svg class="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+      </svg>
+      {% translate "Bookings" %}
+    </a>
+
+    <a href="{{ villas_url }}" class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium {% if request.path == villas_url %}bg-teal-50 text-teal-700{% else %}text-ink-600 hover:bg-sand-100 hover:text-ink-900{% endif %}">
+      <svg class="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 21h19.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21" />
+      </svg>
+      {% translate "Villas" %}
+    </a>
+
+    <a href="{{ guests_url }}" class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium {% if request.path == guests_url %}bg-teal-50 text-teal-700{% else %}text-ink-600 hover:bg-sand-100 hover:text-ink-900{% endif %}">
+      <svg class="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
+      </svg>
+      {% translate "Guests" %}
+    </a>
+
+    <a href="{{ compliance_url }}" class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium {% if request.path == compliance_url %}bg-teal-50 text-teal-700{% else %}text-ink-600 hover:bg-sand-100 hover:text-ink-900{% endif %}">
+      <svg class="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z" />
+      </svg>
+      {% translate "Compliance" %}
+    </a>
+
+    <a href="{{ messages_url }}" class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium {% if request.path == messages_url %}bg-teal-50 text-teal-700{% else %}text-ink-600 hover:bg-sand-100 hover:text-ink-900{% endif %}">
+      <svg class="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z" />
+      </svg>
+      {% translate "Messages" %}
+    </a>
+
+    <a href="{{ marketing_url }}" class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium {% if request.path == marketing_url %}bg-teal-50 text-teal-700{% else %}text-ink-600 hover:bg-sand-100 hover:text-ink-900{% endif %}">
+      <svg class="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M10.34 15.84c-.688-.06-1.386-.09-2.09-.09H7.5a4.5 4.5 0 110-9h.75c.704 0 1.402-.03 2.09-.09m0 9.18c.253.962.584 1.892.985 2.783.247.55.06 1.21-.463 1.511l-.657.38c-.551.318-1.26.117-1.527-.461a20.845 20.845 0 01-1.44-4.282m3.102.069a18.03 18.03 0 01-.59-4.59c0-1.586.205-3.124.59-4.59m0 9.18a23.848 23.848 0 018.835 2.535M10.34 6.66a23.847 23.847 0 008.835-2.535m0 0A23.74 23.74 0 0018.795 3m.38 1.125a23.91 23.91 0 011.014 5.395m-1.014 8.855c-.118.38-.245.754-.38 1.125m.38-1.125a23.91 23.91 0 001.014-5.395m0-3.46c.495.413.811 1.035.811 1.73s-.316 1.317-.811 1.73m0-3.46a24.347 24.347 0 010 3.46" />
+      </svg>
+      {% translate "Marketing" %}
+    </a>
+  </nav>
+</aside>
+
+{% comment %}Dims the page behind the sidebar on mobile when it's open.{% endcomment %}
+<div
+  x-show="sidebarOpen"
+  x-cloak
+  @click="sidebarOpen = false"
+  class="fixed inset-0 z-30 bg-black/30 lg:hidden"
+></div>

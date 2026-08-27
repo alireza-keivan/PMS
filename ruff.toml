@@ -6,5 +6,5 @@ select = ["E", "F", "I", "UP", "B", "DJ"]
 ignore = ["E501"]
 
 [lint.per-file-ignores]
-"*/migrations/*" = ["E", "F"]
+"*/migrations/*" = ["E", "F", "I"]
 "config/settings/*" = ["F403", "F405"]
