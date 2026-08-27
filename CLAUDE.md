@@ -75,6 +75,9 @@ See @villa-dashboard-features.md for the full feature list, grouped by category,
 ## Logging
 Along the way, build a logging system to see how each section works. It should be very detailed and functional.
 
+## communication
+Whenever chatting with me, be simple and don't use jargons. you can use tech words, but not English jargons.
+
 ## Build order
 1. Beds24 sync + owner reporting dashboard (the foundational data pipeline everything else depends on)
 2. Compliance document vault + action-needed status view (cheap, low-risk, high demo value — mostly reading and displaying data)
