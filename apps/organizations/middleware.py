@@ -3,9 +3,13 @@
 Sets `request.organization` for authenticated users so views and querysets have
 a single, consistent source of scope. Views must still filter explicitly - this
 middleware supplies the value, it does not enforce its use.
-"""
 
-from django.utils.functional import SimpleLazyObject
+Resolved eagerly, not wrapped in SimpleLazyObject: a lazy proxy wrapping None
+is not None, so a view checking `if request.organization is None:` - the
+natural way to guard a tenant-scoped view - would silently always be False.
+One membership lookup per request is cheap enough at this project's scale
+that the laziness isn't worth that footgun.
+"""
 
 
 def _resolve_organization(request):
@@ -25,5 +29,5 @@ class OrganizationMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
-        request.organization = SimpleLazyObject(lambda: _resolve_organization(request))
+        request.organization = _resolve_organization(request)
         return self.get_response(request)
