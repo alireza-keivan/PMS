@@ -1,0 +1,4 @@
+{% load i18n %}
+<p id="action-needed-count" hx-swap-oob="true" class="mt-1 text-3xl font-semibold {% if action_count %}text-red-700{% else %}text-ink-900{% endif %}">
+  {{ action_count }}
+</p>

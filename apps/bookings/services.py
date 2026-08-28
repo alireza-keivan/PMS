@@ -121,10 +121,11 @@ def _build_groups(villas: list) -> list:
     groups = []
     for area_key, bucket in ordered:
         group_id = f"area-{area_key}"
-        toggle_html = (
-            f'<span class="cal-area-toggle" data-group-id="{group_id}">'
-            f"&#9662; {bucket['label']}</span>"
-        )
+        # Collapse/expand is detected via vis-timeline's own click event
+        # (properties.what === "group-label"), not a data-* attribute here -
+        # vis-timeline runs custom group HTML through an XSS sanitizer that
+        # doesn't allowlist data-* attributes, so one would just get stripped.
+        toggle_html = f'<span class="cal-area-toggle">&#9662; {bucket["label"]}</span>'
         groups.append({"id": group_id, "content": toggle_html, "nestedGroups": bucket["villa_ids"]})
     for v in villas:
         groups.append({"id": str(v.id), "content": v.name})

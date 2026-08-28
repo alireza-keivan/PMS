@@ -46,22 +46,20 @@
   background: rgba(47, 143, 131, 0.12);
 }
 
-/* --- day-of-week / day-number header, rendered via format.minorLabels.day --- */
-.cal-weekday {
-  font-size: 0.65rem;
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
-  color: #5c5851;
-  text-align: center;
-  line-height: 1.2;
-}
-
+/* --- day-of-week / day-number header, rendered via format.minorLabels ---
+ * vis-timeline's own label boxes (.vis-text) are single-line - overflow:
+ * hidden, white-space: nowrap, sized from single-line text metrics before
+ * any custom content is considered. A two-line stacked label silently gets
+ * clipped inside that box, so the weekday and day number render on one
+ * line ("Fri 28") instead of stacked - still shows both, just not stacked. */
 .cal-daynum {
-  font-size: 0.85rem;
   font-weight: 600;
   color: #1f1d1a;
-  text-align: center;
-  line-height: 1.3;
+}
+
+.cal-weekday {
+  text-transform: uppercase;
+  color: #5c5851;
 }
 
 /* --- collapsible area group header --- */

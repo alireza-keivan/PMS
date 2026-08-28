@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load i18n %}
 
-{% block title %}{% translate "Guests" %}{% endblock %}
+{% block title %}{% translate "Reservations" %}{% endblock %}
 
 {% block content %}
 {% if no_organization %}
@@ -15,87 +15,149 @@
   </div>
 {% else %}
 
-  <div class="mb-6 flex items-center justify-between">
-    <h1 class="text-xl font-semibold text-ink-900">{% translate "Guests" %}</h1>
-    <p class="text-sm text-ink-600">
-      {% blocktranslate count n=page_obj.paginator.count %}
-        {{ n }} guest on file
-      {% plural %}
-        {{ n }} guests on file
-      {% endblocktranslate %}
-    </p>
+  <div class="mb-4 flex items-center justify-between">
+    <h1 class="text-xl font-semibold text-ink-900">{% translate "Reservations" %}</h1>
+    <a href="{% url 'bookings:add' %}" class="rounded bg-teal-600 px-4 py-2 text-sm font-medium text-white hover:bg-teal-700">
+      {% translate "Create reservation" %}
+    </a>
   </div>
 
-  <form method="get" class="mb-4">
-    <input
-      type="text" name="q" value="{{ query }}"
-      placeholder="{% translate 'Search by name, email, or phone' %}"
-      class="w-full max-w-sm rounded border border-sand-200 px-3 py-2 text-sm focus:border-teal-500 focus:outline-none sm:w-80"
-    >
+  <form method="get" class="mb-6 rounded-lg border border-sand-200 bg-white p-4 shadow-sm">
+    <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div>
+        <label class="mb-1 block text-xs text-ink-600">{% translate "Guest name" %}</label>
+        <input type="text" name="guest_name" value="{{ guest_name }}"
+               class="w-full rounded border border-sand-200 px-3 py-2 text-sm focus:border-teal-500 focus:outline-none">
+      </div>
+      <div>
+        <label class="mb-1 block text-xs text-ink-600">{% translate "Booking reference" %}</label>
+        <input type="text" disabled placeholder="{% translate 'Not available yet' %}"
+               class="w-full rounded border border-sand-200 bg-sand-50 px-3 py-2 text-sm text-ink-600">
+      </div>
+      <div>
+        <label class="mb-1 block text-xs text-ink-600">{% translate "Invoice number" %}</label>
+        <input type="text" disabled placeholder="{% translate 'Not available yet' %}"
+               class="w-full rounded border border-sand-200 bg-sand-50 px-3 py-2 text-sm text-ink-600">
+      </div>
+      <div>
+        <label class="mb-1 block text-xs text-ink-600">{% translate "Villa" %}</label>
+        <select name="villa" class="w-full rounded border border-sand-200 px-3 py-2 text-sm focus:border-teal-500 focus:outline-none">
+          <option value="" {% if not villa_id %}selected{% endif %}>{% translate "All villas" %}</option>
+          {% for v in villas %}
+            <option value="{{ v.pk }}" {% if villa_id == v.pk %}selected{% endif %}>{{ v.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div>
+        <label class="mb-1 block text-xs text-ink-600">{% translate "Date type" %}</label>
+        <select name="date_type" class="w-full rounded border border-sand-200 px-3 py-2 text-sm focus:border-teal-500 focus:outline-none">
+          <option value="check_in" {% if date_type == "check_in" %}selected{% endif %}>{% translate "Check-in" %}</option>
+          <option value="check_out" {% if date_type == "check_out" %}selected{% endif %}>{% translate "Check-out" %}</option>
+        </select>
+      </div>
+      <div>
+        <label class="mb-1 block text-xs text-ink-600">{% translate "Status" %}</label>
+        <select name="status" class="w-full rounded border border-sand-200 px-3 py-2 text-sm focus:border-teal-500 focus:outline-none">
+          <option value="" {% if not status %}selected{% endif %}>{% translate "All statuses" %}</option>
+          {% for value, label in status_choices %}
+            <option value="{{ value }}" {% if status == value %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div>
+        <label class="mb-1 block text-xs text-ink-600">{% translate "Date from" %}</label>
+        <input type="date" name="date_from" value="{{ date_from|date:'Y-m-d' }}"
+               class="w-full rounded border border-sand-200 px-3 py-2 text-sm focus:border-teal-500 focus:outline-none">
+      </div>
+      <div>
+        <label class="mb-1 block text-xs text-ink-600">{% translate "Date to" %}</label>
+        <input type="date" name="date_to" value="{{ date_to|date:'Y-m-d' }}"
+               class="w-full rounded border border-sand-200 px-3 py-2 text-sm focus:border-teal-500 focus:outline-none">
+      </div>
+      <div>
+        <label class="mb-1 block text-xs text-ink-600">{% translate "Booked through" %}</label>
+        <select name="source" class="w-full rounded border border-sand-200 px-3 py-2 text-sm focus:border-teal-500 focus:outline-none">
+          <option value="" {% if not source %}selected{% endif %}>{% translate "All sources" %}</option>
+          {% for value, label in channel_choices %}
+            <option value="{{ value }}" {% if source == value %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+    <div class="mt-3">
+      <button type="submit" class="rounded bg-teal-600 px-4 py-2 text-sm font-medium text-white hover:bg-teal-700">
+        {% translate "Search" %}
+      </button>
+    </div>
   </form>
 
-  {% if guests %}
+  <p class="mb-3 text-sm text-ink-600">
+    {% blocktranslate count n=total_count %}{{ n }} reservation found{% plural %}{{ n }} reservations found{% endblocktranslate %}
+  </p>
+
+  {% if groups %}
     <div class="overflow-x-auto rounded-lg border border-sand-200 bg-white shadow-sm">
       <table class="w-full text-left text-sm">
         <thead class="border-b border-sand-200 text-xs uppercase text-ink-600">
           <tr>
-            <th class="px-4 py-3 font-medium">{% translate "Name" %}</th>
-            <th class="px-4 py-3 font-medium">{% translate "Contact" %}</th>
-            <th class="px-4 py-3 font-medium">{% translate "Nationality" %}</th>
-            <th class="px-4 py-3 font-medium">{% translate "Stays" %}</th>
-            <th class="px-4 py-3 font-medium">{% translate "Last seen" %}</th>
+            <th class="px-4 py-3 font-medium">{% translate "Guest" %}</th>
+            <th class="px-4 py-3 font-medium">{% translate "Reference" %}</th>
+            <th class="px-4 py-3 font-medium">{% translate "Booked via" %}</th>
+            <th class="px-4 py-3 font-medium">{% translate "Guests" %}</th>
+            <th class="px-4 py-3 font-medium">{% translate "Check-in" %}</th>
+            <th class="px-4 py-3 font-medium">{% translate "Check-out" %}</th>
+            <th class="px-4 py-3 font-medium">{% translate "Booked on" %}</th>
+            <th class="px-4 py-3 font-medium">{% translate "ETA" %}</th>
+            <th class="px-4 py-3 font-medium">{% translate "Villa" %}</th>
+            <th class="px-4 py-3 font-medium">{% translate "Total" %}</th>
+            <th class="px-4 py-3 font-medium">{% translate "Outstanding" %}</th>
+            <th class="px-4 py-3 font-medium">{% translate "Invoice" %}</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-sand-100">
-          {% for guest in guests %}
-            <tr class="hover:bg-sand-50">
-              <td class="px-4 py-3">
-                <a href="{% url 'guests:detail' guest.pk %}" class="font-medium text-ink-900 hover:text-teal-700">
-                  {{ guest.full_name }}
-                </a>
+          {% for group in groups %}
+            <tr class="bg-sand-50">
+              <td colspan="12" class="px-4 py-2 text-xs font-medium text-ink-900">
+                {{ group.date|date:"l, j F Y" }}
               </td>
-              <td class="px-4 py-3 text-ink-600">
-                {{ guest.email|default:"" }}{% if guest.email and guest.phone %}<br>{% endif %}{{ guest.phone|default:"" }}
-                {% if not guest.email and not guest.phone %}-{% endif %}
-              </td>
-              <td class="px-4 py-3 text-ink-600">{{ guest.nationality|default:"-" }}</td>
-              <td class="whitespace-nowrap px-4 py-3 text-ink-600">
-                {{ guest.total_stays }}
-                {% if guest.is_returning %}
-                  <span class="ml-1 rounded-full bg-teal-50 px-2 py-0.5 text-xs text-teal-700">{% translate "Returning" %}</span>
-                {% endif %}
-              </td>
-              <td class="px-4 py-3 text-ink-600">{{ guest.last_seen|date:"j M Y"|default:"-" }}</td>
             </tr>
+            {% for row in group.rows %}
+              {% with booking=row.booking %}
+                <tr class="hover:bg-sand-50">
+                  <td class="px-4 py-3">
+                    {% if booking.has_guest_details %}
+                      <a href="{% url 'guests:detail' booking.guest.pk %}" class="font-medium text-ink-900 hover:text-teal-700">
+                        {{ booking.guest.full_name }}
+                      </a>
+                    {% else %}
+                      <span class="text-ink-600">{% translate "Booked" %}</span>
+                    {% endif %}
+                  </td>
+                  <td class="whitespace-nowrap px-4 py-3 font-mono text-xs text-ink-600">{{ booking.reference }}</td>
+                  <td class="px-4 py-3 text-ink-600">{{ booking.get_channel_display }}</td>
+                  <td class="px-4 py-3 text-ink-600">{{ booking.guest_count }}</td>
+                  <td class="whitespace-nowrap px-4 py-3 text-ink-600">{{ booking.check_in|date:"d-m-Y" }}</td>
+                  <td class="whitespace-nowrap px-4 py-3 text-ink-600">{{ booking.check_out|date:"d-m-Y" }}</td>
+                  <td class="whitespace-nowrap px-4 py-3 text-ink-600">{{ booking.created_at|date:"d-m-Y" }}</td>
+                  <td class="px-4 py-3 text-ink-600">–</td>
+                  <td class="px-4 py-3 text-ink-600">{{ booking.villa.name }}</td>
+                  <td class="whitespace-nowrap px-4 py-3 text-ink-600">
+                    {% if row.total_amount %}{{ row.currency }} {{ row.total_amount }}{% else %}-{% endif %}
+                  </td>
+                  <td class="whitespace-nowrap px-4 py-3 {% if row.amount_owed %}font-medium text-amber-700{% else %}text-ink-600{% endif %}">
+                    {% if row.amount_owed %}{{ row.currency }} {{ row.amount_owed }}{% else %}-{% endif %}
+                  </td>
+                  <td class="px-4 py-3 text-ink-600">–</td>
+                </tr>
+              {% endwith %}
+            {% endfor %}
           {% endfor %}
         </tbody>
       </table>
     </div>
-
-    {% if page_obj.has_other_pages %}
-      <div class="mt-4 flex items-center justify-center gap-4 text-sm">
-        {% if page_obj.has_previous %}
-          <a href="?q={{ query }}&page={{ page_obj.previous_page_number }}" class="text-teal-700 underline">{% translate "Previous" %}</a>
-        {% endif %}
-        <span class="text-ink-600">
-          {% blocktranslate with current=page_obj.number total=page_obj.paginator.num_pages %}
-            Page {{ current }} of {{ total }}
-          {% endblocktranslate %}
-        </span>
-        {% if page_obj.has_next %}
-          <a href="?q={{ query }}&page={{ page_obj.next_page_number }}" class="text-teal-700 underline">{% translate "Next" %}</a>
-        {% endif %}
-      </div>
-    {% endif %}
-
   {% else %}
     <div class="rounded-lg border border-sand-200 bg-white p-6 text-center shadow-sm">
-      {% if query %}
-        <p class="text-ink-900">{% translate "No guests match that search." %}</p>
-      {% else %}
-        <p class="text-ink-900">{% translate "No guests yet." %}</p>
-        <p class="mt-1 text-sm text-ink-600">{% translate "Guests appear here once a booking with their details comes in." %}</p>
-      {% endif %}
+      <p class="text-ink-900">{% translate "No reservations match this search." %}</p>
     </div>
   {% endif %}
 

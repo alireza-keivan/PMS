@@ -6,7 +6,12 @@
 (function () {
   "use strict";
 
-  document.addEventListener("DOMContentLoaded", function () {
+  // "load", not "DOMContentLoaded": vis-timeline measures the container's
+  // actual laid-out width when it's constructed, and stylesheets (Tailwind,
+  // vis-timeline's own CSS) aren't guaranteed to have been applied yet at
+  // DOMContentLoaded - a too-early measurement can leave the widget stuck
+  // showing a far wider date range than the one actually requested.
+  window.addEventListener("load", function () {
     var container = document.getElementById("calendar-timeline");
     if (!container) return; // no_organization state - nothing to build
 
@@ -47,9 +52,13 @@
     });
 
     timeline.on("click", function (props) {
-      var toggle = props.event && props.event.target.closest(".cal-area-toggle");
-      if (toggle) {
-        toggleGroup(toggle.dataset.groupId);
+      // vis-timeline's own click event already tells us which group's label
+      // was clicked (props.what === "group-label") - reading a custom
+      // data-* attribute off the clicked DOM node isn't reliable, since
+      // vis-timeline runs custom group/item HTML through an XSS sanitizer
+      // that doesn't allowlist data-* attributes.
+      if (props.what === "group-label" && props.group != null && String(props.group).indexOf("area-") === 0) {
+        toggleGroup(props.group);
         return;
       }
       if (props.item != null) {
@@ -69,7 +78,12 @@
       groupsDataSet.add(data.groups);
       itemsDataSet.clear();
       itemsDataSet.add(data.items);
-      timeline.setWindow(node.dataset.start, node.dataset.rangeEnd);
+      timeline.setWindow(node.dataset.start, node.dataset.rangeEnd, { animation: false });
+      // Defensive: force a re-measure of the container/axis. Without this,
+      // a redraw that happens to land before the container's final layout
+      // (e.g. right after an HTMX swap collapses/expands other page
+      // content) can leave the day columns sized for the wrong width.
+      timeline.redraw();
     }
 
     function toggleGroup(groupId) {
@@ -89,11 +103,15 @@
     }
 
     function formatDayHeader(date) {
+      // vis-timeline's own label boxes are single-line (overflow: hidden,
+      // white-space: nowrap, sized before any custom content is measured) -
+      // a two-line stacked label silently gets clipped inside that box, so
+      // weekday and day number render on one line instead.
       var lang = document.documentElement.lang || "en";
       var weekday = new Intl.DateTimeFormat(lang, { weekday: "short" }).format(date);
       return (
-        '<div class="cal-weekday">' + weekday + "</div>" +
-        '<div class="cal-daynum">' + date.getDate() + "</div>"
+        '<span class="cal-weekday">' + weekday + "</span> " +
+        '<span class="cal-daynum">' + date.getDate() + "</span>"
       );
     }
 

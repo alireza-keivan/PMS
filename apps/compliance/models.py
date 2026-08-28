@@ -14,24 +14,58 @@ from django.utils.translation import gettext_lazy as _
 from apps.core.models import TenantOwnedModel
 
 
+class ComplianceDocumentType(models.Model):
+    """A kind of document trackable in the vault.
+
+    Global types (organization=None) are set up in the Django admin - they can
+    carry a blank template staff can download and fill in, plus defaults for
+    how long the document stays valid and how early to warn before it expires.
+    Custom types (organization set) are created by a client inline on the Add
+    Document form and only ever appear in that client's own dropdown.
+    """
+
+    organization = models.ForeignKey(
+        "organizations.Organization", on_delete=models.CASCADE, null=True, blank=True,
+        related_name="compliance_document_types",
+        help_text=_("Leave empty for a type available to every client."),
+    )
+    name = models.CharField(max_length=120)
+    template_file = models.FileField(
+        upload_to="compliance/templates/", null=True, blank=True,
+        help_text=_("A blank template staff can download and fill in."),
+    )
+    default_validity_days = models.PositiveIntegerField(
+        null=True, blank=True,
+        help_text=_(
+            "How long this document is normally valid for, used to suggest an "
+            "expiry date. Leave blank if it doesn't expire."
+        ),
+    )
+    default_reminder_days = models.PositiveSmallIntegerField(
+        default=60, help_text=_("Start warning this many days before it runs out.")
+    )
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ["name"]
+
+    def __str__(self):
+        return self.name
+
+
 class ComplianceDocument(TenantOwnedModel):
     """A licence or permit, with an expiry we watch (feature #14).
 
     Entirely internal - storing a document here involves no government system.
     """
 
-    class Kind(models.TextChoices):
-        NIB = "nib", _("Business licence (NIB)")
-        PBG = "pbg", _("Building approval (PBG)")
-        SLF = "slf", _("Building safety certificate (SLF)")
-        TAX = "tax", _("Tax registration")
-        OTHER = "other", _("Other document")
-
     villa = models.ForeignKey(
         "villas.Villa", on_delete=models.CASCADE, related_name="documents",
         null=True, blank=True, help_text=_("Leave empty if it covers the whole business."),
     )
-    kind = models.CharField(max_length=20, choices=Kind.choices)
+    document_type = models.ForeignKey(
+        ComplianceDocumentType, on_delete=models.PROTECT, related_name="documents", null=True,
+    )
     reference_number = models.CharField(max_length=120, blank=True)
     file = models.FileField(upload_to="compliance/%Y/")
     issued_on = models.DateField(null=True, blank=True)
@@ -45,7 +79,7 @@ class ComplianceDocument(TenantOwnedModel):
         ordering = ["expires_on"]
 
     def __str__(self):
-        return f"{self.get_kind_display()} - {self.villa or self.organization}"
+        return f"{self.document_type.name} - {self.villa or self.organization}"
 
     @property
     def needs_attention(self) -> bool:

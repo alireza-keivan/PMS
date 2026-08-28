@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% translate "Add document" %}{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-2xl rounded-lg border border-sand-200 bg-white p-4 shadow-sm sm:p-6">
+  <h1 class="mb-4 text-lg font-semibold text-ink-900">{% translate "Add document" %}</h1>
+
+  {% if form.non_field_errors %}
+    <p class="mb-4 rounded bg-red-50 p-3 text-sm text-red-700">{{ form.non_field_errors|join:" " }}</p>
+  {% endif %}
+
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="space-y-4">
+      <div>
+        <label class="mb-1 block text-sm text-ink-600" for="{{ form.kind.id_for_label }}">{% translate "Type" %}</label>
+        {{ form.kind }}
+        {% if form.kind.errors %}<p class="mt-1 text-sm text-red-700">{{ form.kind.errors|join:" " }}</p>{% endif %}
+      </div>
+      <div>
+        <label class="mb-1 block text-sm text-ink-600" for="{{ form.villa.id_for_label }}">{% translate "Villa" %}</label>
+        {{ form.villa }}
+        <p class="mt-1 text-xs text-ink-600">{% translate "Leave blank if this covers the whole business." %}</p>
+      </div>
+      <div>
+        <label class="mb-1 block text-sm text-ink-600" for="{{ form.reference_number.id_for_label }}">{% translate "Reference number" %}</label>
+        {{ form.reference_number }}
+      </div>
+      <div>
+        <label class="mb-1 block text-sm text-ink-600" for="{{ form.file.id_for_label }}">{% translate "File" %}</label>
+        {{ form.file }}
+        {% if form.file.errors %}<p class="mt-1 text-sm text-red-700">{{ form.file.errors|join:" " }}</p>{% endif %}
+      </div>
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="mb-1 block text-sm text-ink-600" for="{{ form.issued_on.id_for_label }}">{% translate "Issued on" %}</label>
+          {{ form.issued_on }}
+        </div>
+        <div>
+          <label class="mb-1 block text-sm text-ink-600" for="{{ form.expires_on.id_for_label }}">{% translate "Expires on" %}</label>
+          {{ form.expires_on }}
+        </div>
+      </div>
+      <div>
+        <label class="mb-1 block text-sm text-ink-600" for="{{ form.reminder_days.id_for_label }}">
+          {% translate "Remind us this many days before it expires" %}
+        </label>
+        {{ form.reminder_days }}
+      </div>
+      <div>
+        <label class="mb-1 block text-sm text-ink-600" for="{{ form.notes.id_for_label }}">{% translate "Notes" %}</label>
+        {{ form.notes }}
+      </div>
+    </div>
+
+    <div class="mt-6 flex items-center gap-3">
+      <button type="submit" class="rounded bg-teal-600 px-4 py-2 text-sm font-medium text-white hover:bg-teal-700">
+        {% translate "Add document" %}
+      </button>
+      <a href="{% url 'compliance:documents' %}" class="text-sm text-ink-600 underline">{% translate "Cancel" %}</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

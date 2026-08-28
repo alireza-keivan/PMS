@@ -20,11 +20,13 @@
       {% include "bookings/_calendar_panel.html" %}
     </div>
 
-    {# The vis-timeline mount point lives outside the HTMX swap target, on
-       purpose - it's created exactly once by calendar.js and reused for
-       every later filter/range change. Only the toolbar and the embedded
-       JSON above get swapped; calendar.js reacts to that swap and feeds the
-       fresh data into this same timeline instance rather than rebuilding it. #}
+    {% comment %}
+      The vis-timeline mount point lives outside the HTMX swap target, on
+      purpose - it's created exactly once by calendar.js and reused for
+      every later filter/range change. Only the toolbar and the embedded
+      JSON above get swapped; calendar.js reacts to that swap and feeds the
+      fresh data into this same timeline instance rather than rebuilding it.
+    {% endcomment %}
     <div
       id="calendar-timeline"
       class="rounded-lg border border-sand-200 bg-white shadow-sm"
