@@ -8,24 +8,13 @@
   <a href="{% url 'messaging:inbox' %}" class="text-sm text-ink-600 underline">{% translate "Back to messages" %}</a>
 </div>
 
-<div class="mb-4 flex flex-wrap items-center justify-between gap-3">
-  <div>
-    <h1 class="text-xl font-semibold text-ink-900">
-      {% if conversation.guest %}{{ conversation.guest.full_name }}{% else %}{{ conversation.phone }}{% endif %}
-    </h1>
-    <p class="text-sm text-ink-600">
-      {{ conversation.phone }}{% if villa %} · {{ villa.name }}{% endif %}
-    </p>
-  </div>
-  {% if conversation.window_is_open %}
-    <span class="rounded-full bg-teal-50 px-3 py-1 text-xs text-teal-700">
-      {% translate "They messaged recently - you can write freely" %}
-    </span>
-  {% else %}
-    <span class="rounded-full bg-amber-50 px-3 py-1 text-xs text-amber-800">
-      {% translate "Over 24 hours since they wrote - only an approved template can be sent" %}
-    </span>
-  {% endif %}
+<div class="mb-4">
+  <h1 class="text-xl font-semibold text-ink-900">
+    {% if conversation.guest %}{{ conversation.guest.full_name }}{% else %}{{ conversation.phone }}{% endif %}
+  </h1>
+  <p class="text-sm text-ink-600">
+    {{ conversation.phone }}{% if villa %} · {{ villa.name }}{% endif %}
+  </p>
 </div>
 
 <div class="flex flex-col rounded-lg border border-sand-200 bg-white shadow-sm">
@@ -56,7 +45,7 @@
         >
           <option value="">{% translate "No template - write freely" %}</option>
           {% for t in templates %}
-            <option value="{{ t.pk }}" data-body="{% if t.language == 'id' %}{{ t.body_id }}{% else %}{{ t.body_en }}{% endif %}">{{ t.name }} ({{ t.language }})</option>
+            <option value="{{ t.pk }}" data-body="{{ t.body }}">{{ t.name }} ({{ t.language }})</option>
           {% endfor %}
         </select>
       </div>

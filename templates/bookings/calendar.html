@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block title %}{% translate "Bookings" %}{% endblock %}
+
+{% block content %}
+{% if no_organization %}
+  <div class="rounded-lg border border-sand-200 bg-white p-4 shadow-sm sm:p-6">
+    <p class="text-ink-900">
+      {% translate "Your account isn't linked to a property yet." %}
+    </p>
+    <p class="mt-2 text-sm text-ink-600">
+      {% translate "Ask an owner to add you, or use the admin panel to set this up." %}
+    </p>
+  </div>
+{% else %}
+
+  <div class="relative">
+    <div id="calendar-panel" hx-indicator="#calendar-loading">
+      {% include "bookings/_calendar_panel.html" %}
+    </div>
+
+    {# The vis-timeline mount point lives outside the HTMX swap target, on
+       purpose - it's created exactly once by calendar.js and reused for
+       every later filter/range change. Only the toolbar and the embedded
+       JSON above get swapped; calendar.js reacts to that swap and feeds the
+       fresh data into this same timeline instance rather than rebuilding it. #}
+    <div
+      id="calendar-timeline"
+      class="rounded-lg border border-sand-200 bg-white shadow-sm"
+      role="region"
+      aria-label="{% translate 'Booking calendar' %}"
+    ></div>
+
+    <div id="calendar-loading" class="htmx-indicator absolute inset-0 z-10 flex items-center justify-center bg-white/60">
+      <span class="rounded-full bg-white px-4 py-2 text-sm text-ink-600 shadow-sm">{% translate "Loading…" %}</span>
+    </div>
+  </div>
+
+  {% include "bookings/_legend.html" %}
+  {% include "bookings/_side_panel.html" %}
+
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+  <link rel="stylesheet" href="{% static 'css/vis-timeline.min.css' %}">
+  <link rel="stylesheet" href="{% static 'css/calendar.css' %}">
+  <script src="{% static 'js/vis-timeline.min.js' %}" defer></script>
+  <script src="{% static 'js/calendar.js' %}" defer></script>
+{% endblock %}

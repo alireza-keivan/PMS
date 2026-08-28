@@ -1,0 +1,63 @@
+{% load i18n %}
+{% if no_organization %}
+  <div class="rounded-lg border border-sand-200 bg-white p-4 shadow-sm sm:p-6">
+    <p class="text-ink-900">{% translate "Your account isn't linked to a property yet." %}</p>
+  </div>
+{% else %}
+
+<div class="mb-4 flex flex-wrap items-center gap-3">
+
+  <div class="flex items-center gap-1">
+    <a href="{{ nav.range_back }}" hx-get="{{ nav.range_back }}" hx-target="#calendar-panel" hx-push-url="true"
+       class="rounded px-2 py-1.5 text-ink-600 hover:bg-sand-100" aria-label="{% translate 'Back one range' %}">&laquo;</a>
+    <a href="{{ nav.day_back }}" hx-get="{{ nav.day_back }}" hx-target="#calendar-panel" hx-push-url="true"
+       class="rounded px-2 py-1.5 text-ink-600 hover:bg-sand-100" aria-label="{% translate 'Back one day' %}">&lsaquo;</a>
+    <a href="{{ nav.today }}" hx-get="{{ nav.today }}" hx-target="#calendar-panel" hx-push-url="true"
+       class="rounded-full bg-sand-100 px-3 py-1.5 text-sm font-medium text-ink-900 hover:bg-sand-200">{% translate "Today" %}</a>
+    <a href="{{ nav.day_forward }}" hx-get="{{ nav.day_forward }}" hx-target="#calendar-panel" hx-push-url="true"
+       class="rounded px-2 py-1.5 text-ink-600 hover:bg-sand-100" aria-label="{% translate 'Forward one day' %}">&rsaquo;</a>
+    <a href="{{ nav.range_forward }}" hx-get="{{ nav.range_forward }}" hx-target="#calendar-panel" hx-push-url="true"
+       class="rounded px-2 py-1.5 text-ink-600 hover:bg-sand-100" aria-label="{% translate 'Forward one range' %}">&raquo;</a>
+  </div>
+
+  <p class="text-sm font-medium text-ink-900 whitespace-nowrap">
+    {% blocktranslate with start=start|date:"j M" end=range_end|date:"j M Y" %}{{ start }} – {{ end }}{% endblocktranslate %}
+  </p>
+
+  <input
+    type="hidden" name="days" value="{{ days }}"
+  >
+
+  <input
+    type="date" name="start" value="{{ start|date:'Y-m-d' }}"
+    hx-get="{% url 'bookings:calendar' %}" hx-trigger="change" hx-include="[name=days],[name=q]"
+    hx-target="#calendar-panel" hx-push-url="true"
+    aria-label="{% translate 'Jump to date' %}"
+    class="rounded border border-sand-200 px-2 py-1.5 text-sm focus:border-teal-500 focus:outline-none"
+  >
+
+  <div class="flex gap-1">
+    {% for tab in range_size_tabs %}
+      <a href="{{ tab.href }}" hx-get="{{ tab.href }}" hx-target="#calendar-panel" hx-push-url="true"
+         class="rounded-full px-3 py-1.5 text-sm {% if tab.active %}bg-teal-600 text-white{% else %}bg-sand-100 text-ink-600 hover:bg-sand-200{% endif %}">
+        {% blocktranslate with n=tab.label %}{{ n }} days{% endblocktranslate %}
+      </a>
+    {% endfor %}
+  </div>
+
+  <input
+    type="search" name="q" value="{{ q }}" placeholder="{% translate 'Search guest or villa' %}"
+    hx-get="{% url 'bookings:calendar' %}" hx-trigger="input changed delay:400ms" hx-include="[name=start],[name=days]"
+    hx-target="#calendar-panel" hx-push-url="true"
+    class="w-56 rounded border border-sand-200 px-3 py-1.5 text-sm focus:border-teal-500 focus:outline-none"
+  >
+
+  <a href="{% url 'bookings:add' %}" class="ml-auto rounded bg-teal-600 px-4 py-2 text-sm font-medium text-white hover:bg-teal-700">
+    {% translate "New booking" %}
+  </a>
+
+</div>
+
+<script type="application/json" id="calendar-data" data-start="{{ start|date:'Y-m-d' }}" data-range-end="{{ range_end|date:'Y-m-d' }}">{{ calendar_data_json|safe }}</script>
+
+{% endif %}

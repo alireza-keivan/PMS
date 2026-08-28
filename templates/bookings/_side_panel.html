@@ -1,0 +1,55 @@
+{% load i18n %}
+<div
+  x-data="{ open: false, booking: null }"
+  @booking-selected.window="open = true; booking = $event.detail"
+  x-show="open"
+  x-cloak
+  @keydown.escape.window="open = false"
+  class="fixed inset-0 z-40"
+>
+  <div class="absolute inset-0 bg-black/30" @click="open = false"></div>
+
+  <div class="absolute inset-y-0 right-0 w-full max-w-sm overflow-y-auto border-l border-sand-200 bg-white p-6 shadow-lg">
+    <div class="mb-4 flex items-start justify-between">
+      <h2 class="text-lg font-semibold text-ink-900" x-text="booking && booking.content"></h2>
+      <button type="button" @click="open = false" class="text-ink-600 hover:text-ink-900" aria-label="{% translate 'Close' %}">&times;</button>
+    </div>
+
+    <template x-if="booking">
+      <div class="space-y-4">
+        <p class="text-sm text-ink-600" x-text="booking.dateRangeLabel"></p>
+
+        <p x-show="!booking.has_guest_details" class="rounded bg-amber-50 p-3 text-xs text-amber-800">
+          {% translate "This villa is on a basic calendar link - guest details aren't available, only the dates." %}
+        </p>
+
+        <dl class="divide-y divide-sand-100 text-sm">
+          <div class="flex justify-between py-2">
+            <dt class="text-ink-600">{% translate "Guests" %}</dt>
+            <dd class="text-ink-900" x-text="booking.guest_count"></dd>
+          </div>
+          <div class="flex justify-between py-2">
+            <dt class="text-ink-600">{% translate "Booked via" %}</dt>
+            <dd class="text-ink-900" x-text="booking.channel_display"></dd>
+          </div>
+          <div class="flex justify-between py-2">
+            <dt class="text-ink-600">{% translate "Status" %}</dt>
+            <dd class="text-ink-900" x-text="booking.status_display"></dd>
+          </div>
+          <template x-if="booking.can_see_money && booking.total_amount">
+            <div class="flex justify-between py-2">
+              <dt class="text-ink-600">{% translate "Total" %}</dt>
+              <dd class="text-ink-900" x-text="booking.currency + ' ' + booking.total_amount"></dd>
+            </div>
+          </template>
+          <template x-if="booking.can_see_money && booking.amount_owed && Number(booking.amount_owed) > 0">
+            <div class="flex justify-between py-2">
+              <dt class="text-ink-600">{% translate "Still owed" %}</dt>
+              <dd class="font-medium text-amber-800" x-text="booking.currency + ' ' + booking.amount_owed"></dd>
+            </div>
+          </template>
+        </dl>
+      </div>
+    </template>
+  </div>
+</div>

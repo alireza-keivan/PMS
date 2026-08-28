@@ -1,0 +1,73 @@
+/* Booking calendar - status colors, weekend/today shading, and the small
+ * bits vis-timeline itself doesn't style. Hand-authored plain CSS (not run
+ * through the Tailwind build) since these are custom classes, not utilities.
+ */
+
+/* --- status colors: one color per bar, see apps/bookings/services.py --- */
+.cal-status-confirmed { background-color: #2f8f83; border-color: #256f66; }
+.cal-status-checked_in { background-color: #3b82f6; border-color: #2563eb; }
+.cal-status-checked_out { background-color: #8a7f6d; border-color: #6b6154; }
+.cal-status-blocked { background-color: #5c5851; border-color: #423f3a; }
+.cal-status-payment_incomplete { background-color: #f59e0b; border-color: #b45309; }
+
+.cal-status-confirmed,
+.cal-status-checked_in,
+.cal-status-checked_out,
+.cal-status-blocked,
+.cal-status-payment_incomplete {
+  color: #ffffff;
+}
+
+/* Calendar-only bookings (no guest name available) get a texture, not a new
+ * color - stays visibly distinct without adding a 6th legend entry. */
+.cal-no-detail {
+  background-image: repeating-linear-gradient(
+    45deg, rgba(255, 255, 255, 0.28) 0, rgba(255, 255, 255, 0.28) 4px,
+    transparent 4px, transparent 9px
+  );
+}
+
+/* Keep a bar's guest name readable even on a one-night-wide bar. */
+.vis-item .vis-item-content {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.8rem;
+  padding: 2px 6px;
+}
+
+/* --- weekend / today shading - vis-timeline applies these classes itself --- */
+.vis-time-axis .vis-grid.vis-saturday,
+.vis-time-axis .vis-grid.vis-sunday {
+  background: rgba(138, 127, 109, 0.07);
+}
+
+.vis-time-axis .vis-grid.vis-today {
+  background: rgba(47, 143, 131, 0.12);
+}
+
+/* --- day-of-week / day-number header, rendered via format.minorLabels.day --- */
+.cal-weekday {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  color: #5c5851;
+  text-align: center;
+  line-height: 1.2;
+}
+
+.cal-daynum {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #1f1d1a;
+  text-align: center;
+  line-height: 1.3;
+}
+
+/* --- collapsible area group header --- */
+.cal-area-toggle {
+  cursor: pointer;
+  font-weight: 600;
+  color: #1f1d1a;
+  user-select: none;
+}

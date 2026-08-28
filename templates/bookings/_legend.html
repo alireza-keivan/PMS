@@ -1,0 +1,9 @@
+{% load i18n %}
+<div class="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-sm text-ink-600">
+  {% for item in legend %}
+    <span class="flex items-center gap-1.5">
+      <span class="h-3 w-3 rounded-sm cal-status-{{ item.key }}"></span>
+      {{ item.label }}
+    </span>
+  {% endfor %}
+</div>
