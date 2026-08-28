@@ -38,7 +38,7 @@
         <tbody class="divide-y divide-sand-100">
           {% for doc in documents %}
             <tr class="hover:bg-sand-50">
-              <td class="px-4 py-3 text-ink-900">{{ doc.get_kind_display }}</td>
+              <td class="px-4 py-3 text-ink-900">{{ doc.document_type.name }}</td>
               <td class="px-4 py-3 text-ink-600">{{ doc.villa.name|default:_("Whole business") }}</td>
               <td class="px-4 py-3 text-ink-600">{{ doc.reference_number|default:"-" }}</td>
               <td class="px-4 py-3 text-ink-600">{{ doc.expires_on|date:"j M Y"|default:"-" }}</td>

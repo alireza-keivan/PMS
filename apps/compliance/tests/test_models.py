@@ -9,13 +9,16 @@ from django.core.files.base import ContentFile
 from django.utils import timezone
 
 from apps.bookings.models import Booking
-from apps.compliance.models import ComplianceDocument, PoliceReport
+from apps.compliance.models import ComplianceDocument, ComplianceDocumentType, PoliceReport
 from apps.guests.services import find_or_create_guest
 
 
 def _document(org, villa, expires_on, reminder_days=60):
+    doc_type, _created = ComplianceDocumentType.objects.get_or_create(
+        organization=None, name="Business licence (NIB)",
+    )
     return ComplianceDocument.objects.create(
-        organization=org, villa=villa, kind=ComplianceDocument.Kind.NIB,
+        organization=org, villa=villa, document_type=doc_type,
         file=ContentFile(b"fake pdf", name="nib.pdf"),
         expires_on=expires_on, reminder_days=reminder_days,
     )

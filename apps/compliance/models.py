@@ -64,7 +64,7 @@ class ComplianceDocument(TenantOwnedModel):
         null=True, blank=True, help_text=_("Leave empty if it covers the whole business."),
     )
     document_type = models.ForeignKey(
-        ComplianceDocumentType, on_delete=models.PROTECT, related_name="documents", null=True,
+        ComplianceDocumentType, on_delete=models.PROTECT, related_name="documents",
     )
     reference_number = models.CharField(max_length=120, blank=True)
     file = models.FileField(upload_to="compliance/%Y/")

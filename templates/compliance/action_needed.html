@@ -39,7 +39,7 @@
           {% for doc in documents_needing_attention %}
             <li class="py-2">
               <p class="text-ink-900">
-                {{ doc.get_kind_display }}
+                {{ doc.document_type.name }}
                 <span class="text-ink-600">- {{ doc.villa.name|default:_("Whole business") }}</span>
               </p>
               <p class="text-xs {% if doc.expires_on and doc.expires_on < today %}text-red-700{% else %}text-ink-600{% endif %}">

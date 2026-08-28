@@ -42,7 +42,7 @@ from PIL import Image, ImageDraw
 
 from apps.accounts.models import User
 from apps.bookings.models import Booking, BookingPayment
-from apps.compliance.models import ComplianceDocument, PoliceReport
+from apps.compliance.models import ComplianceDocument, ComplianceDocumentType, PoliceReport
 from apps.core.calendar import BaliHoliday
 from apps.guests.models import Guest, GuestActivity, GuestFeedback, GuestRequest
 from apps.guests.services import find_or_create_guest
@@ -652,10 +652,16 @@ class Command(BaseCommand):
 
     # ------------------------------------------------------------ compliance
 
+    def _doc_type(self, name):
+        # The migration that introduced ComplianceDocumentType already
+        # created these 5 global types, so seeding just looks them up rather
+        # than recreating them.
+        return ComplianceDocumentType.objects.get(organization=None, name=name)
+
     def _build_compliance(self):
-        def document(org, villa, kind, ref, expires_on, reminder_days=60):
+        def document(org, villa, doc_type, ref, expires_on, reminder_days=60):
             return ComplianceDocument.objects.get_or_create(
-                organization=org, villa=villa, kind=kind, reference_number=ref,
+                organization=org, villa=villa, document_type=doc_type, reference_number=ref,
                 defaults=dict(
                     file=ContentFile(b"%PDF-1.4 demo placeholder\n", name=f"{ref}.pdf"),
                     expires_on=expires_on, reminder_days=reminder_days,
@@ -663,13 +669,17 @@ class Command(BaseCommand):
             )[0]
 
         d = timezone.timedelta
-        document(self.canggu, None, ComplianceDocument.Kind.NIB, "NIB-8120000123456", self.today + d(days=400))
-        document(self.canggu, self.villa_sunset, ComplianceDocument.Kind.PBG,
+        nib = self._doc_type("Business licence (NIB)")
+        pbg = self._doc_type("Building approval (PBG)")
+        slf = self._doc_type("Building safety certificate (SLF)")
+        tax = self._doc_type("Tax registration")
+        document(self.canggu, None, nib, "NIB-8120000123456", self.today + d(days=400))
+        document(self.canggu, self.villa_sunset, pbg,
                  "PBG-DPMPTSP-2023-00456", self.today + d(days=20))  # needs attention soon
-        document(self.canggu, self.villa_ombak, ComplianceDocument.Kind.SLF,
+        document(self.canggu, self.villa_ombak, slf,
                  "SLF-2021-00987", self.today - d(days=15), reminder_days=90)  # already expired
-        document(self.ubud, None, ComplianceDocument.Kind.NIB, "NIB-8120000998877", self.today + d(days=500))
-        document(self.ubud, self.villa_hutan, ComplianceDocument.Kind.TAX, "NPWP-01.234.567.8-901.000", None)
+        document(self.ubud, None, nib, "NIB-8120000998877", self.today + d(days=500))
+        document(self.ubud, self.villa_hutan, tax, "NPWP-01.234.567.8-901.000", None)
 
         def police_report(booking, guest, deadline, status, marked_by=None, marked_at=None):
             return PoliceReport.objects.get_or_create(
@@ -1022,8 +1032,11 @@ class Command(BaseCommand):
 
         # ---- compliance: one NIB for the business, PBG + SLF per villa ----
         expiry_offsets = [-20, 15, 45, 200, 400]  # mix of expired, urgent, and healthy
+        nib = self._doc_type("Business licence (NIB)")
+        pbg = self._doc_type("Building approval (PBG)")
+        slf = self._doc_type("Building safety certificate (SLF)")
         ComplianceDocument.objects.get_or_create(
-            organization=org, villa=None, kind=ComplianceDocument.Kind.NIB,
+            organization=org, villa=None, document_type=nib,
             reference_number="NIB-8120000555111",
             defaults=dict(
                 file=ContentFile(b"%PDF-1.4 demo placeholder\n", name="nib-horizon.pdf"),
@@ -1031,13 +1044,14 @@ class Command(BaseCommand):
             ),
         )
         for i, villa in enumerate(villas):
-            for kind in (ComplianceDocument.Kind.PBG, ComplianceDocument.Kind.SLF):
-                offset = expiry_offsets[(i + (kind == ComplianceDocument.Kind.SLF)) % len(expiry_offsets)]
+            for doc_type in (pbg, slf):
+                offset = expiry_offsets[(i + (doc_type == slf)) % len(expiry_offsets)]
+                slug = "pbg" if doc_type == pbg else "slf"
                 ComplianceDocument.objects.get_or_create(
-                    organization=org, villa=villa, kind=kind,
-                    reference_number=f"{kind.upper()}-{2020 + i}-{i:03d}",
+                    organization=org, villa=villa, document_type=doc_type,
+                    reference_number=f"{slug.upper()}-{2020 + i}-{i:03d}",
                     defaults=dict(
-                        file=ContentFile(b"%PDF-1.4 demo placeholder\n", name=f"{kind}-{villa.slug}.pdf"),
+                        file=ContentFile(b"%PDF-1.4 demo placeholder\n", name=f"{slug}-{villa.slug}.pdf"),
                         expires_on=self.today + d(days=offset),
                     ),
                 )

@@ -11,13 +11,32 @@
     <p class="mb-4 rounded bg-red-50 p-3 text-sm text-red-700">{{ form.non_field_errors|join:" " }}</p>
   {% endif %}
 
-  <form method="post" enctype="multipart/form-data">
+  <form method="post" enctype="multipart/form-data" x-data="{ addingNew: {% if form.new_type_name.value %}true{% else %}false{% endif %} }">
     {% csrf_token %}
     <div class="space-y-4">
-      <div>
-        <label class="mb-1 block text-sm text-ink-600" for="{{ form.kind.id_for_label }}">{% translate "Type" %}</label>
-        {{ form.kind }}
-        {% if form.kind.errors %}<p class="mt-1 text-sm text-red-700">{{ form.kind.errors|join:" " }}</p>{% endif %}
+      <div x-show="!addingNew">
+        <label class="mb-1 block text-sm text-ink-600" for="{{ form.document_type.id_for_label }}">{% translate "Type" %}</label>
+        {{ form.document_type }}
+        {% if form.document_type.errors %}<p class="mt-1 text-sm text-red-700">{{ form.document_type.errors|join:" " }}</p>{% endif %}
+        <a id="document-type-template-link" href="#" target="_blank" rel="noopener" class="mt-1 hidden text-sm text-teal-700 underline">
+          {% translate "Download blank template" %}
+        </a>
+        <button type="button" @click="addingNew = true" class="mt-1 block text-sm text-teal-700 underline">
+          {% translate "+ Add your own type" %}
+        </button>
+      </div>
+      <div x-show="addingNew" x-cloak class="space-y-4 rounded border border-sand-200 p-3">
+        <button type="button" @click="addingNew = false" class="text-sm text-ink-600 underline">
+          {% translate "Choose from the list instead" %}
+        </button>
+        <div>
+          <label class="mb-1 block text-sm text-ink-600" for="{{ form.new_type_name.id_for_label }}">{{ form.new_type_name.label }}</label>
+          {{ form.new_type_name }}
+        </div>
+        <div>
+          <label class="mb-1 block text-sm text-ink-600" for="{{ form.new_type_reminder_days.id_for_label }}">{{ form.new_type_reminder_days.label }}</label>
+          {{ form.new_type_reminder_days }}
+        </div>
       </div>
       <div>
         <label class="mb-1 block text-sm text-ink-600" for="{{ form.villa.id_for_label }}">{% translate "Villa" %}</label>
@@ -63,4 +82,47 @@
     </div>
   </form>
 </div>
+<script type="application/json" id="document-type-meta">{{ document_type_meta|safe }}</script>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  (function () {
+    var meta = JSON.parse(document.getElementById("document-type-meta").textContent);
+    var typeSelect = document.getElementById("{{ form.document_type.id_for_label }}");
+    var templateLink = document.getElementById("document-type-template-link");
+    var reminderInput = document.getElementById("{{ form.reminder_days.id_for_label }}");
+    var issuedInput = document.getElementById("{{ form.issued_on.id_for_label }}");
+    var expiresInput = document.getElementById("{{ form.expires_on.id_for_label }}");
+    if (!typeSelect) return;
+
+    function addDays(isoDate, days) {
+      var date = new Date(isoDate + "T00:00:00");
+      date.setDate(date.getDate() + days);
+      return date.toISOString().slice(0, 10);
+    }
+
+    function applyType() {
+      var info = meta[typeSelect.value];
+      if (!info) {
+        templateLink.classList.add("hidden");
+        return;
+      }
+      if (info.template_url) {
+        templateLink.href = info.template_url;
+        templateLink.classList.remove("hidden");
+      } else {
+        templateLink.classList.add("hidden");
+      }
+      if (reminderInput) reminderInput.value = info.reminder_days;
+      if (expiresInput && !expiresInput.value && issuedInput.value && info.validity_days) {
+        expiresInput.value = addDays(issuedInput.value, info.validity_days);
+      }
+    }
+
+    typeSelect.addEventListener("change", applyType);
+    if (issuedInput) issuedInput.addEventListener("change", applyType);
+    applyType();
+  })();
+</script>
 {% endblock %}
