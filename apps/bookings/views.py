@@ -2,7 +2,6 @@
 see CLAUDE.md rule 5 (never write to live booking data without confirmation).
 """
 
-import json
 from datetime import date, timedelta
 
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -10,7 +9,11 @@ from django.shortcuts import render
 from django.utils import timezone
 from django.views.generic import TemplateView
 
-from apps.bookings.services import CALENDAR_STATUS_LABELS, build_calendar_data
+from apps.bookings.services import (
+    CALENDAR_STATUS_LABELS,
+    STATUS_BAR_STYLE,
+    build_calendar_rows,
+)
 
 VALID_RANGE_SIZES = [7, 14, 30]
 DEFAULT_RANGE_SIZE = 14
@@ -36,21 +39,25 @@ class CalendarView(LoginRequiredMixin, TemplateView):
         days = _parse_days(self.request.GET.get("days"))
         q = self.request.GET.get("q", "").strip()
 
-        data = build_calendar_data(self.request, start=start, days=days, q=q)
+        data = build_calendar_rows(self.request, start=start, days=days, q=q)
 
         context.update(
-            calendar_data_json=json.dumps(data),
+            day_columns=data["day_columns"],
+            rows=data["rows"],
             start=start,
             days=days,
             q=q,
             today=today,
-            range_end=start + timedelta(days=days),
+            range_end=start + timedelta(days=days - 1),
             range_size_tabs=[
                 {"label": str(n), "href": _tab_href(self.request, days=n), "active": n == days}
                 for n in VALID_RANGE_SIZES
             ],
             nav=_nav_hrefs(self.request, start, days),
-            legend=[{"key": key, "label": label} for key, label in CALENDAR_STATUS_LABELS.items()],
+            legend=[
+                {"key": key, "label": label, "style": STATUS_BAR_STYLE[key]}
+                for key, label in CALENDAR_STATUS_LABELS.items()
+            ],
         )
         return context
 

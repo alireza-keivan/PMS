@@ -1,6 +1,10 @@
 """The one session-authenticated route on the otherwise webhook-only Ninja
-API - see config/api.py's docstring. The booking calendar's own JS re-fetches
-this endpoint whenever the visible date range or filters change.
+API - see config/api.py's docstring.
+
+The calendar page itself does NOT use this: it renders its grid server-side
+and refreshes over HTMX. This endpoint stays for scripted/external callers
+that want the same range of bookings as JSON, in a flat groups+items shape
+(area -> villa -> room).
 """
 
 from datetime import date
@@ -39,6 +43,8 @@ class ItemOut(Schema):
     has_guest_details: bool
     can_see_money: bool
     reference: str
+    villa_name: str
+    room_display: str | None = None
     total_amount: str | None = None
     amount_owed: str | None = None
     currency: str | None = None

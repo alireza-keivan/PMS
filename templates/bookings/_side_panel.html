@@ -1,54 +1,58 @@
 {% load i18n %}
+{% comment %}
+Booking detail card. Read-only: it reports what the booking is, and offers no
+way to change or remove it - see CLAUDE.md rule 5. `detail` is set by a bar's
+click handler in _calendar_panel.html and is a plain dataset object, so every
+value below is already a rendered string.
+{% endcomment %}
 <div
-  x-data="{ open: false, booking: null }"
-  @booking-selected.window="open = true; booking = $event.detail"
-  x-show="open"
-  x-cloak
-  @keydown.escape.window="open = false"
-  class="fixed inset-0 z-40"
+  x-show="detail" x-cloak
+  @keydown.escape.window="detail = null"
+  class="fixed inset-0 z-50 flex items-center justify-center"
+  style="background:rgba(32,30,29,.4);"
+  @click="detail = null"
 >
-  <div class="absolute inset-0 bg-black/30" @click="open = false"></div>
+  <div class="w-[400px] rounded-card border border-sand-300 bg-sand-100 p-s6 shadow-lg" @click.stop>
+    <template x-if="detail">
+      <div>
+        <div class="mb-s2 flex items-center gap-2">
+          <span class="inline-block h-[9px] w-[9px] rounded-full" :style="detail.dotstyle"></span>
+          <span class="text-[11.5px] opacity-65" x-text="detail.status"></span>
+        </div>
 
-  <div class="absolute inset-y-0 right-0 w-full max-w-sm overflow-y-auto border-l border-sand-200 bg-white p-6 shadow-lg">
-    <div class="mb-4 flex items-start justify-between">
-      <h2 class="text-lg font-semibold text-ink-900" x-text="booking && booking.content"></h2>
-      <button type="button" @click="open = false" class="text-ink-600 hover:text-ink-900" aria-label="{% translate 'Close' %}">&times;</button>
-    </div>
+        <h4 class="m-0 mb-0.5 text-[20px]" x-text="detail.guest"></h4>
+        <div class="mb-0.5 text-[12.5px] opacity-70">
+          <span x-text="detail.villa"></span><span x-show="detail.room"> · <span x-text="detail.room"></span></span>
+        </div>
+        <div class="mb-s3 text-[12.5px] opacity-70">
+          <span x-text="detail.dates"></span>
+          (<span x-text="detail.nights"></span> {% translate "nights" %})
+        </div>
 
-    <template x-if="booking">
-      <div class="space-y-4">
-        <p class="text-sm text-ink-600" x-text="booking.dateRangeLabel"></p>
-
-        <p x-show="!booking.has_guest_details" class="rounded bg-amber-50 p-3 text-xs text-amber-800">
+        <p x-show="!detail.detail" class="mb-s3 rounded-md bg-teal-50 p-s3 text-xs text-teal-800">
           {% translate "This villa is on a basic calendar link - guest details aren't available, only the dates." %}
         </p>
 
-        <dl class="divide-y divide-sand-100 text-sm">
+        <dl class="mb-s4 divide-y divide-sand-300/60 text-sm">
           <div class="flex justify-between py-2">
-            <dt class="text-ink-600">{% translate "Guests" %}</dt>
-            <dd class="text-ink-900" x-text="booking.guest_count"></dd>
+            <dt class="opacity-65">{% translate "Guests" %}</dt>
+            <dd x-text="detail.guests"></dd>
           </div>
           <div class="flex justify-between py-2">
-            <dt class="text-ink-600">{% translate "Booked via" %}</dt>
-            <dd class="text-ink-900" x-text="booking.channel_display"></dd>
+            <dt class="opacity-65">{% translate "Booked via" %}</dt>
+            <dd x-text="detail.channel"></dd>
           </div>
-          <div class="flex justify-between py-2">
-            <dt class="text-ink-600">{% translate "Status" %}</dt>
-            <dd class="text-ink-900" x-text="booking.status_display"></dd>
-          </div>
-          <template x-if="booking.can_see_money && booking.total_amount">
+          <template x-if="detail.money && detail.owed">
             <div class="flex justify-between py-2">
-              <dt class="text-ink-600">{% translate "Total" %}</dt>
-              <dd class="text-ink-900" x-text="booking.currency + ' ' + booking.total_amount"></dd>
-            </div>
-          </template>
-          <template x-if="booking.can_see_money && booking.amount_owed && Number(booking.amount_owed) > 0">
-            <div class="flex justify-between py-2">
-              <dt class="text-ink-600">{% translate "Still owed" %}</dt>
-              <dd class="font-medium text-amber-800" x-text="booking.currency + ' ' + booking.amount_owed"></dd>
+              <dt class="opacity-65">{% translate "Still owed" %}</dt>
+              <dd class="font-semibold text-teal-700" x-text="detail.currency + ' ' + detail.owed"></dd>
             </div>
           </template>
         </dl>
+
+        <div class="flex justify-end">
+          <button type="button" class="btn btn-secondary" @click="detail = null">{% translate "Close" %}</button>
+        </div>
       </div>
     </template>
   </div>

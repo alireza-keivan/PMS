@@ -8,6 +8,7 @@ truthfully say about a given row.
 
 import uuid
 
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
@@ -37,6 +38,15 @@ class Booking(TenantOwnedModel):
     reference = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
     villa = models.ForeignKey(
         "villas.Villa", on_delete=models.PROTECT, related_name="bookings"
+    )
+    room = models.ForeignKey(
+        "villas.Room", on_delete=models.PROTECT, null=True, blank=True, related_name="bookings",
+        help_text=_(
+            "Optional - only set once a villa's rooms are defined individually. PROTECT (not "
+            "SET_NULL) on purpose: the calendar only draws bookings on room rows, so a booking "
+            "silently losing its room would silently disappear from view - see apps/bookings/"
+            "services.py's build_calendar_rows()."
+        ),
     )
     guest = models.ForeignKey(
         "guests.Guest", on_delete=models.SET_NULL, null=True, blank=True,
@@ -78,6 +88,11 @@ class Booking(TenantOwnedModel):
     def __str__(self):
         who = self.guest.full_name if self.guest else _("Not available")
         return f"{who} - {self.villa} ({self.check_in} to {self.check_out})"
+
+    def clean(self):
+        super().clean()
+        if self.room_id and self.room.villa_id != self.villa_id:
+            raise ValidationError({"room": _("That room doesn't belong to this booking's villa.")})
 
     @property
     def nights(self) -> int:

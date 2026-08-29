@@ -5,120 +5,139 @@
 
 {% block content %}
 {% if no_organization %}
-  <div class="rounded-lg border border-sand-200 bg-white p-4 shadow-sm sm:p-6">
-    <p class="text-ink-900">
-      {% translate "Your account isn't linked to a property yet." %}
-    </p>
-    <p class="mt-2 text-sm text-ink-600">
+  <div class="card">
+    <p class="text-ink-900">{% translate "Your account isn't linked to a property yet." %}</p>
+    <p class="mt-2 text-sm opacity-70">
       {% translate "Ask an owner to add you, or use the admin panel to set this up." %}
     </p>
   </div>
 {% else %}
 
-  <div class="mb-6 flex items-center justify-between">
-    <h1 class="text-xl font-semibold text-ink-900">{{ today|date:"l, j F" }}</h1>
-    {% include "partials/_sync_badge.html" %}
-  </div>
+<h2 class="mb-0.5 text-[32px]">{% translate "Today" %}</h2>
+<p class="m-0 mb-s6 opacity-55">{{ today|date:"l, j F" }}</p>
 
-  {# One clear glance at the day - occupancy, money, and who still owes it. #}
-  <div class="mb-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
-    <div class="rounded-lg border border-sand-200 bg-white p-4 shadow-sm sm:p-6">
-      <p class="text-sm text-ink-600">{% translate "Occupied today" %}</p>
-      <p class="mt-1 text-2xl font-semibold text-ink-900">{{ occupancy_percent }}%</p>
-      <p class="text-xs text-ink-600">{{ occupied_villas }} {% translate "of" %} {{ total_villas }}</p>
-    </div>
-    <div class="rounded-lg border border-sand-200 bg-white p-4 shadow-sm sm:p-6">
-      <p class="text-sm text-ink-600">{% translate "Revenue this month" %}</p>
-      <p class="mt-1 text-2xl font-semibold text-ink-900">
-        {{ organization.default_currency }} {{ revenue_this_month|floatformat:0 }}
+{% comment %}One clear glance at the day - occupancy, money, and compliance,
+not part of the design handoff's own Today layout but real spec'd features
+(CLAUDE.md feature #5) worth keeping alongside it, not dropping.{% endcomment %}
+<div class="mb-s6 grid grid-cols-1 gap-s4 sm:grid-cols-3">
+  <div class="card">
+    <p class="text-sm opacity-65">{% translate "Occupied today" %}</p>
+    <p class="mt-1 text-2xl font-semibold">{{ occupancy_percent }}%</p>
+    <p class="text-xs opacity-65">{{ occupied_villas }} {% translate "of" %} {{ total_villas }}</p>
+  </div>
+  <div class="card">
+    <p class="text-sm opacity-65">{% translate "Revenue this month" %}</p>
+    <p class="mt-1 text-2xl font-semibold">
+      {{ organization.default_currency }} {{ revenue_this_month|floatformat:0 }}
+    </p>
+    {% if revenue_unconverted_count %}
+      <p class="text-xs text-amber-700">
+        {% blocktranslate count n=revenue_unconverted_count %}
+          {{ n }} payment left out - no exchange rate on file
+        {% plural %}
+          {{ n }} payments left out - no exchange rate on file
+        {% endblocktranslate %}
       </p>
-      {% if revenue_unconverted_count %}
-        <p class="text-xs text-amber-700">
-          {% blocktranslate count n=revenue_unconverted_count %}
-            {{ n }} payment left out - no exchange rate on file
-          {% plural %}
-            {{ n }} payments left out - no exchange rate on file
-          {% endblocktranslate %}
-        </p>
-      {% endif %}
+    {% endif %}
+  </div>
+  <div class="card">
+    <p class="text-sm opacity-65">{% translate "Needs doing" %}</p>
+    <p class="mt-1 text-2xl font-semibold {% if needs_doing_count %}text-red-700{% endif %}">
+      {{ needs_doing_count }}
+    </p>
+  </div>
+</div>
+
+<div class="grid grid-cols-1 gap-s6 sm:grid-cols-3">
+
+  {% comment %}Arriving{% endcomment %}
+  <div>
+    <div class="mb-s3 flex items-center gap-2">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8c491a" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+      <h4 class="m-0">{% translate "Arriving today" %}</h4>
+      <span class="tag tag-neutral ml-auto">{{ arriving_today|length }}</span>
     </div>
-    <div class="rounded-lg border border-sand-200 bg-white p-4 shadow-sm sm:p-6">
-      <p class="text-sm text-ink-600">{% translate "Arriving today" %}</p>
-      <p class="mt-1 text-2xl font-semibold text-ink-900">{{ arriving_today|length }}</p>
-    </div>
-    <div class="rounded-lg border border-sand-200 bg-white p-4 shadow-sm sm:p-6">
-      <p class="text-sm text-ink-600">{% translate "Leaving today" %}</p>
-      <p class="mt-1 text-2xl font-semibold text-ink-900">{{ departing_today|length }}</p>
-    </div>
-    <div class="rounded-lg border border-sand-200 bg-white p-4 shadow-sm sm:p-6">
-      <p class="text-sm text-ink-600">{% translate "Needs doing" %}</p>
-      <p class="mt-1 text-2xl font-semibold {% if needs_doing_count %}text-red-700{% else %}text-ink-900{% endif %}">
-        {{ needs_doing_count }}
-      </p>
+    <div class="card max-h-[320px] overflow-y-auto overscroll-contain p-0">
+      {% for booking in arriving_today %}
+        <div class="flex items-center gap-s3 border-b border-sand-300/60 p-s3 last:border-b-0">
+          <span class="flex h-[34px] w-[34px] flex-none items-center justify-center rounded-full bg-accent2-200 font-display text-[13px] text-accent2-800">
+            {% if booking.guest %}{{ booking.guest.full_name|slice:":1"|upper }}{% else %}?{% endif %}
+          </span>
+          <div class="min-w-0 flex-1">
+            <div class="text-[13.5px] font-semibold">
+              {% if booking.guest %}{{ booking.guest.full_name }}{% else %}{% translate "Not available" %}{% endif %}
+            </div>
+            <div class="text-xs opacity-65">{{ booking.villa.name }}</div>
+          </div>
+          <div class="flex-none max-w-[110px] text-right text-[11.5px] opacity-65">
+            {% blocktranslate with time=booking.villa.check_in_time|time:"g:i A" %}Check-in {{ time }}{% endblocktranslate %}
+          </div>
+        </div>
+      {% empty %}
+        <div class="p-s4 text-[13px] opacity-60">{% translate "No one arriving today" %}</div>
+      {% endfor %}
     </div>
   </div>
 
-  <div class="grid gap-6 lg:grid-cols-2">
-    <section class="rounded-lg border border-sand-200 bg-white p-4 shadow-sm sm:p-6">
-      <h2 class="mb-3 font-semibold text-ink-900">{% translate "Arriving today" %}</h2>
-      {% if arriving_today %}
-        <ul class="divide-y divide-sand-100">
-          {% for booking in arriving_today %}
-            <li class="py-2">
-              <p class="text-ink-900">
-                {% if booking.guest %}{{ booking.guest.full_name }}{% else %}{% translate "Not available" %}{% endif %}
-                <span class="text-ink-600">- {{ booking.villa.name }}</span>
-              </p>
-              <p class="text-xs text-ink-600">{{ booking.get_channel_display }}</p>
-            </li>
-          {% endfor %}
-        </ul>
-      {% else %}
-        <p class="text-sm text-ink-600">{% translate "No arrivals today." %}</p>
-      {% endif %}
-    </section>
-
-    <section class="rounded-lg border border-sand-200 bg-white p-4 shadow-sm sm:p-6">
-      <h2 class="mb-3 font-semibold text-ink-900">{% translate "Leaving today" %}</h2>
-      {% if departing_today %}
-        <ul class="divide-y divide-sand-100">
-          {% for booking in departing_today %}
-            <li class="py-2">
-              <p class="text-ink-900">
-                {% if booking.guest %}{{ booking.guest.full_name }}{% else %}{% translate "Not available" %}{% endif %}
-                <span class="text-ink-600">- {{ booking.villa.name }}</span>
-              </p>
-              <p class="text-xs text-ink-600">{{ booking.get_channel_display }}</p>
-            </li>
-          {% endfor %}
-        </ul>
-      {% else %}
-        <p class="text-sm text-ink-600">{% translate "No departures today." %}</p>
-      {% endif %}
-    </section>
-
-    <section class="rounded-lg border border-sand-200 bg-white p-4 shadow-sm sm:p-6 lg:col-span-2">
-      <h2 class="mb-3 font-semibold text-ink-900">{% translate "Still owed" %}</h2>
-      {% if outstanding_payments %}
-        <ul class="divide-y divide-sand-100">
-          {% for payment in outstanding_payments %}
-            <li class="flex items-center justify-between py-2">
-              <div>
-                <p class="text-ink-900">
-                  {% if payment.booking.guest %}{{ payment.booking.guest.full_name }}{% else %}{% translate "Not available" %}{% endif %}
-                  <span class="text-ink-600">- {{ payment.booking.villa.name }}</span>
-                </p>
-                <p class="text-xs text-ink-600">{{ payment.booking.check_in }}</p>
-              </div>
-              <p class="font-semibold text-ink-900">{{ payment.currency }} {{ payment.amount }}</p>
-            </li>
-          {% endfor %}
-        </ul>
-      {% else %}
-        <p class="text-sm text-ink-600">{% translate "Nothing outstanding." %}</p>
-      {% endif %}
-    </section>
+  {% comment %}Departing{% endcomment %}
+  <div>
+    <div class="mb-s3 flex items-center gap-2">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8c491a" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      <h4 class="m-0">{% translate "Leaving today" %}</h4>
+      <span class="tag tag-neutral ml-auto">{{ departing_today|length }}</span>
+    </div>
+    <div class="card max-h-[320px] overflow-y-auto overscroll-contain p-0">
+      {% for booking in departing_today %}
+        <div class="flex items-center gap-s3 border-b border-sand-300/60 p-s3 last:border-b-0">
+          <span class="flex h-[34px] w-[34px] flex-none items-center justify-center rounded-full bg-sand-300 font-display text-[13px] text-ink-700">
+            {% if booking.guest %}{{ booking.guest.full_name|slice:":1"|upper }}{% else %}?{% endif %}
+          </span>
+          <div class="min-w-0 flex-1">
+            <div class="text-[13.5px] font-semibold">
+              {% if booking.guest %}{{ booking.guest.full_name }}{% else %}{% translate "Not available" %}{% endif %}
+            </div>
+            <div class="text-xs opacity-65">{{ booking.villa.name }}</div>
+          </div>
+          <div class="flex-none max-w-[110px] text-right text-[11.5px] opacity-65">
+            {% blocktranslate with time=booking.villa.check_out_time|time:"g:i A" %}Check-out {{ time }}{% endblocktranslate %}
+          </div>
+        </div>
+      {% empty %}
+        <div class="p-s4 text-[13px] opacity-60">{% translate "No one leaving today" %}</div>
+      {% endfor %}
+    </div>
   </div>
+
+  {% comment %}Still owe money{% endcomment %}
+  <div>
+    <div class="mb-s3 flex items-center gap-2">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8c491a" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>
+      <h4 class="m-0">{% translate "Still owe money" %}</h4>
+      <span class="tag tag-accent ml-auto">{{ outstanding_payments|length }}</span>
+    </div>
+    <div class="card max-h-[320px] overflow-y-auto overscroll-contain p-0">
+      {% for payment in outstanding_payments %}
+        <div class="flex items-center gap-s3 border-b border-sand-300/60 p-s3 last:border-b-0">
+          <span class="flex h-[34px] w-[34px] flex-none items-center justify-center rounded-full bg-teal-200 font-display text-[13px] text-teal-800">
+            {% if payment.booking.guest %}{{ payment.booking.guest.full_name|slice:":1"|upper }}{% else %}?{% endif %}
+          </span>
+          <div class="min-w-0 flex-1">
+            <div class="text-[13.5px] font-semibold">
+              {% if payment.booking.guest %}{{ payment.booking.guest.full_name }}{% else %}{% translate "Not available" %}{% endif %}
+            </div>
+            <div class="text-xs opacity-65">{{ payment.booking.villa.name }}</div>
+          </div>
+          <div class="flex-none text-right text-[12.5px] font-semibold text-teal-700">
+            {{ payment.currency }} {{ payment.amount }}
+          </div>
+        </div>
+      {% empty %}
+        <div class="p-s4 text-[13px] opacity-60">{% translate "Everyone is paid up" %}</div>
+      {% endfor %}
+    </div>
+  </div>
+
+</div>
 
 {% endif %}
 {% endblock %}

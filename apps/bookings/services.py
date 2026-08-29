@@ -1,5 +1,10 @@
-"""Calendar query and business logic, shared by the page view (apps.bookings.views)
-and the JSON endpoint (apps.bookings.api) so both build the exact same data.
+"""Calendar query and business logic.
+
+Two presenters over one query:
+  - build_calendar_rows() backs the server-rendered grid (apps.bookings.views).
+    The grid is plain HTML + CSS grid, not a JS timeline widget - see the
+    design handoff in New UI mockups/design_handoff_villa_dashboard/README.md.
+  - build_calendar_data() backs the JSON endpoint (apps.bookings.api).
 """
 
 from datetime import timedelta
@@ -13,7 +18,7 @@ from django.utils.translation import gettext_lazy as _
 
 from apps.bookings.models import Booking, BookingPayment
 from apps.organizations.models import Membership
-from apps.villas.models import Villa
+from apps.villas.models import Room, Villa
 
 CALENDAR_STATUS_LABELS = {
     "confirmed": _("Confirmed"),
@@ -77,9 +82,11 @@ def scoped_villas(request):
     return list(villas.order_by("name")), membership
 
 
-def build_calendar_data(request, start, days, q) -> dict:
+def _calendar_query(request, start, days, q):
+    """The one query behind both presenters: which villas/rooms are visible,
+    and which bookings fall inside the window.
+    """
     org = request.organization
-    today = timezone.localdate()
     range_end = start + timedelta(days=days)
 
     villas, membership = scoped_villas(request)
@@ -100,39 +107,220 @@ def build_calendar_data(request, start, days, q) -> dict:
         Booking.objects.filter(
             organization=org, villa_id__in=[v.id for v in villas],
             check_in__lt=range_end, check_out__gt=start,
-        ).exclude(status=Booking.Status.CANCELLED).select_related("villa", "guest")
+        ).exclude(status=Booking.Status.CANCELLED).select_related("villa", "guest", "room")
     )
     payments = payment_summary_by_booking(org, [b.id for b in bookings])
+    rooms_by_villa = _rooms_by_villa([v.id for v in villas])
+    return villas, bookings, payments, rooms_by_villa, membership
 
-    groups = _build_groups(villas)
-    items = [_build_item(b, today, payments.get(b.id, {}), membership.can_see_money) for b in bookings]
+
+def build_calendar_data(request, start, days, q) -> dict:
+    today = timezone.localdate()
+    villas, bookings, payments, rooms_by_villa, membership = _calendar_query(request, start, days, q)
+
+    groups = _build_groups(villas, bookings, rooms_by_villa)
+    items = [
+        _build_item(b, today, payments.get(b.id, {}), membership.can_see_money, rooms_by_villa)
+        for b in bookings
+    ]
     return {"groups": groups, "items": items}
 
 
-def _build_groups(villas: list) -> list:
+# One swatch colour per villa, cycled - purely decorative, so it's derived
+# from position rather than stored on the model. Values are the design
+# system's accent-300 / accent-2-300 / neutral-300 steps.
+VILLA_SWATCHES = ["#ffc6a5", "#ccdbb2", "#dcd3c4"]
+
+# Room types are named per villa now, so a tag colour can't be looked up by
+# name. Cycled by the type's position within its own villa instead, which keeps
+# a villa's types visually distinct and stable as it is renamed.
+ROOM_CATEGORY_TAGS = ["tag-neutral", "tag-accent", "tag-accent-2"]
+
+
+def _category_tag(room) -> str:
+    if room.category_id is None:
+        return "tag-neutral"
+    return ROOM_CATEGORY_TAGS[room.category.sort_order % len(ROOM_CATEGORY_TAGS)]
+
+# Bar fills, straight from the design handoff's status table. Blocked is a
+# hatch rather than a flat fill so "not available" never reads as a real stay.
+STATUS_BAR_STYLE = {
+    "confirmed": "background:#e1eecc;color:#3d472b;",
+    "checked_in": "background:#8fa073;color:#f5ead8;",
+    "checked_out": "background:#eee7db;color:#82796a;",
+    "blocked": (
+        "background:repeating-linear-gradient(135deg,#dcd3c4 0 6px,#eee7db 6px 12px);"
+        "color:#645c50;border:1px dashed #a19786;"
+    ),
+    "payment_incomplete": "background:#ffe1d0;color:#643312;border:1px solid #d67f48;",
+}
+
+
+def build_calendar_rows(request, start, days, q) -> dict:
+    """The server-rendered grid: a list of day columns, and a flat list of
+    rows (area header / villa header / room) the template walks in order.
+    Flat rather than nested so the template stays a single simple loop.
+    """
+    today = timezone.localdate()
+    villas, bookings, payments, rooms_by_villa, membership = _calendar_query(request, start, days, q)
+
+    day_columns = [
+        {
+            "date": start + timedelta(days=i),
+            "is_today": start + timedelta(days=i) == today,
+        }
+        for i in range(days)
+    ]
+
+    bookings_by_room: dict = {}
+    for booking in bookings:
+        bookings_by_room.setdefault(booking.room_id, []).append(booking)
+
+    # Area buckets, alphabetical, with the catch-all "Other" pinned last.
+    buckets: dict = {}
+    for villa in villas:
+        key = slugify(villa.area) if villa.area else "other"
+        buckets.setdefault(key, {"label": villa.area or str(_("Other")), "villas": []})
+        buckets[key]["villas"].append(villa)
+    ordered_areas = sorted(buckets.items(), key=lambda kv: (kv[0] == "other", kv[1]["label"]))
+
+    rows = []
+    swatch_index = 0
+    for _area_key, bucket in ordered_areas:
+        rows.append({"kind": "area", "label": bucket["label"]})
+        for villa in bucket["villas"]:
+            rooms = rooms_by_villa.get(villa.id, [])
+            rows.append({
+                "kind": "villa",
+                "id": villa.id,
+                "name": villa.name,
+                "slug": villa.slug,
+                "swatch": VILLA_SWATCHES[swatch_index % len(VILLA_SWATCHES)],
+                "room_count": len(rooms),
+            })
+            swatch_index += 1
+            for room in rooms:
+                rows.append({
+                    "kind": "room",
+                    "id": room.id,
+                    "villa_id": villa.id,
+                    "villa_slug": villa.slug,
+                    "name": room.name,
+                    "category_label": room.category.name if room.category_id else "",
+                    "tag_class": _category_tag(room),
+                    "bars": [
+                        _build_bar(b, today, payments.get(b.id, {}), membership.can_see_money, start, days)
+                        for b in bookings_by_room.get(room.id, [])
+                    ],
+                })
+            rows.append({"kind": "add_room", "villa_id": villa.id, "villa_slug": villa.slug})
+
+    return {"day_columns": day_columns, "rows": rows}
+
+
+def _build_bar(booking, today, payment, can_see_money, start, days) -> dict:
+    """One booking bar, positioned as a percentage of the visible window.
+
+    A stay that starts before the window (or ends after it) is clamped to the
+    edge rather than dropped, so a guest who is mid-stay on the first visible
+    day still shows up.
+    """
+    status = calendar_status(booking, today, payment.get("amount_owed") or Decimal("0"))
+    label = booking.guest.full_name if booking.has_guest_details else gettext("Booked")
+
+    start_offset = max(0, (booking.check_in - start).days)
+    end_offset = min(days, (booking.check_out - start).days)
+    span = max(1, end_offset - start_offset)
+
+    left = (start_offset / days) * 100
+    width = (span / days) * 100
+
+    bar = {
+        "id": booking.id,
+        "label": label,
+        "status": status,
+        "status_display": str(CALENDAR_STATUS_LABELS[status]),
+        "style": (
+            f"left:calc({left:.4f}% + 3px);width:calc({width:.4f}% - 6px);"
+            + STATUS_BAR_STYLE[status]
+        ),
+        "villa_name": booking.villa.name,
+        "room_name": booking.room.name if booking.room_id else "",
+        "date_range": f"{booking.check_in.strftime('%d %b')} – {booking.check_out.strftime('%d %b')}",
+        "nights": booking.nights,
+        "guest_count": booking.guest_count,
+        "channel_display": booking.get_channel_display(),
+        "has_guest_details": booking.has_guest_details,
+        "can_see_money": can_see_money,
+        "amount_owed": None,
+        "currency": None,
+    }
+    if can_see_money:
+        owed = payment.get("amount_owed")
+        bar["amount_owed"] = str(owed) if owed is not None else None
+        bar["currency"] = payment.get("currency")
+    return bar
+
+
+def _rooms_by_villa(villa_ids: list) -> dict:
+    """{villa_id: [Room, ...]} for every active room across the given villas.
+    A villa absent from this dict has no rooms defined - the common case
+    today - and keeps rendering as one flat row, same as before rooms existed.
+
+    Room types come along on the same query: each room row draws its type as a
+    tag, so fetching them lazily would be one extra query per room.
+    """
+    buckets: dict = {}
+    rooms = (
+        Room.objects.filter(villa_id__in=villa_ids, is_active=True)
+        .select_related("category").order_by("category__sort_order", "id")
+    )
+    for room in rooms:
+        buckets.setdefault(room.villa_id, []).append(room)
+    return buckets
+
+
+def _build_groups(villas: list, bookings: list, rooms_by_villa: dict) -> list:
     buckets = {}
     for v in villas:
         area_key = slugify(v.area) if v.area else "other"
         bucket = buckets.setdefault(area_key, {"label": v.area or str(_("Other")), "villa_ids": []})
-        bucket["villa_ids"].append(str(v.id))
+        bucket["villa_ids"].append(f"villa-{v.id}")
 
     ordered = sorted(buckets.items(), key=lambda kv: (kv[0] == "other", kv[1]["label"]))
 
     groups = []
     for area_key, bucket in ordered:
         group_id = f"area-{area_key}"
-        # Collapse/expand is detected via vis-timeline's own click event
-        # (properties.what === "group-label"), not a data-* attribute here -
-        # vis-timeline runs custom group HTML through an XSS sanitizer that
-        # doesn't allowlist data-* attributes, so one would just get stripped.
-        toggle_html = f'<span class="cal-area-toggle">&#9662; {bucket["label"]}</span>'
-        groups.append({"id": group_id, "content": toggle_html, "nestedGroups": bucket["villa_ids"]})
+        groups.append({"id": group_id, "content": bucket["label"], "nestedGroups": bucket["villa_ids"]})
+
+    # Villa ids and room ids are different tables' autoincrement PKs, so
+    # group ids are namespaced ("villa-<id>" / "room-<id>") to avoid a
+    # numeric collision now that both can appear as leaf group ids.
+    villas_needing_unassigned = {
+        b.villa_id for b in bookings if b.room_id is None and b.villa_id in rooms_by_villa
+    }
+
     for v in villas:
-        groups.append({"id": str(v.id), "content": v.name})
+        rooms = rooms_by_villa.get(v.id, [])
+        if not rooms:
+            groups.append({"id": f"villa-{v.id}", "content": v.name})
+            continue
+
+        room_group_ids = [f"room-{r.id}" for r in rooms]
+        if v.id in villas_needing_unassigned:
+            room_group_ids.append(f"room-none-{v.id}")
+
+        groups.append({"id": f"villa-{v.id}", "content": v.name, "nestedGroups": room_group_ids})
+        for r in rooms:
+            groups.append({"id": f"room-{r.id}", "content": r.name})
+        if v.id in villas_needing_unassigned:
+            groups.append({"id": f"room-none-{v.id}", "content": str(_("Unassigned"))})
+
     return groups
 
 
-def _build_item(booking: Booking, today, payment: dict, can_see_money: bool) -> dict:
+def _build_item(booking: Booking, today, payment: dict, can_see_money: bool, rooms_by_villa: dict) -> dict:
     status = calendar_status(booking, today, payment.get("amount_owed") or Decimal("0"))
     content = booking.guest.full_name if booking.has_guest_details else gettext("Booked")
 
@@ -152,9 +340,16 @@ def _build_item(booking: Booking, today, payment: dict, can_see_money: bool) -> 
         booking.get_channel_display(),
     ])
 
+    if booking.room_id:
+        group = f"room-{booking.room_id}"
+    elif rooms_by_villa.get(booking.villa_id):
+        group = f"room-none-{booking.villa_id}"
+    else:
+        group = f"villa-{booking.villa_id}"
+
     item = {
         "id": booking.id,
-        "group": str(booking.villa_id),
+        "group": group,
         "start": booking.check_in.isoformat(),
         "end": booking.check_out.isoformat(),
         "content": content,
@@ -167,6 +362,8 @@ def _build_item(booking: Booking, today, payment: dict, can_see_money: bool) -> 
         "has_guest_details": booking.has_guest_details,
         "can_see_money": can_see_money,
         "reference": str(booking.reference),
+        "villa_name": booking.villa.name,
+        "room_display": booking.room.name if booking.room_id else None,
         "total_amount": None,
         "amount_owed": None,
         "currency": None,

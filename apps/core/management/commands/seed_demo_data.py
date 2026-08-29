@@ -51,7 +51,7 @@ from apps.messaging.models import Conversation, InboundMessage, MessageTemplate,
 from apps.organizations.models import Membership, Organization
 from apps.reporting.fx import ExchangeRate
 from apps.sync.models import RawPayload, SyncAccount, SyncRun
-from apps.villas.models import Amenity, Villa, VillaPhoto
+from apps.villas.models import Amenity, Room, Villa, VillaPhoto, create_room_type
 
 DEMO_ORG_SLUGS = ["canggu-coastal", "ubud-green", "bali-horizon"]
 DEMO_PASSWORD = "DemoPass123!"
@@ -127,8 +127,13 @@ class Command(BaseCommand):
                 return
             self.stdout.write("Removing existing demo data...")
             # Booking.villa is PROTECT on purpose - see apps/bookings/models.py -
-            # so bookings have to go before the organization cascade can reach villas.
+            # so bookings have to go before the organization cascade can reach
+            # villas. ComplianceDocument.document_type is PROTECT too (never
+            # let a type disappear out from under a document that uses it),
+            # which blocks the org cascade from reaching a document's own
+            # (possibly org-scoped) ComplianceDocumentType - same fix, go first.
             Booking.objects.filter(organization__in=existing).delete()
+            ComplianceDocument.objects.filter(organization__in=existing).delete()
             existing.delete()
 
         self.today = timezone.localdate()
@@ -423,7 +428,53 @@ class Command(BaseCommand):
             self.rina, self.today + d(days=40), self.today + d(days=43), MANUAL,
         )
 
+        self._build_rooms()
         self._build_payments()
+
+    def _build_rooms(self):
+        """Give two villas (one per org) nicely named, mixed-category rooms so
+        the calendar's villa->room nesting shows real variety out of the box.
+
+        Every villa already starts with one room per bedroom under a single
+        room type (see apps.villas.models.provision_starter_rooms), so this
+        renames those rooms in place rather than adding more - adding would
+        push a villa's room count past the number it advertises on the villa
+        list.
+        """
+        def name_rooms(villa, named):
+            """Apply (name, type name) pairs to the villa's existing rooms, in
+            order. Any room beyond the end of the list keeps its default name.
+            Room types are per villa, so each one is looked up - and created
+            if this villa doesn't have it yet - on its own villa.
+            """
+            types = {c.name: c for c in villa.room_categories.all()}
+            for _name, type_name in named:
+                if type_name not in types:
+                    types[type_name] = create_room_type(villa, type_name, how_many=0)
+            rooms = list(villa.rooms.order_by("id"))
+            for room_obj, (name, type_name) in zip(rooms, named):
+                room_obj.name = name
+                room_obj.category = types.get(type_name)
+                room_obj.save(update_fields=["name", "category"])
+            return rooms
+
+        sunset_rooms = name_rooms(self.villa_sunset, [
+            ("Sunset 1", "Deluxe"),
+            ("Sunset 2", "Deluxe"),
+            ("Sunset 3", "Standard"),
+        ])
+        hutan_rooms = name_rooms(self.villa_hutan, [
+            ("Hutan 1", "Standard"),
+            ("Hutan 2", "Suite"),
+        ])
+
+        # A couple of real bookings assigned to a room, and one left
+        # unassigned on purpose - exercises the calendar's synthetic
+        # "Unassigned" row alongside real room rows.
+        self.b_james_current.room = sunset_rooms[0]
+        self.b_james_current.save(update_fields=["room"])
+        self.b_sophie.room = hutan_rooms[0]
+        self.b_sophie.save(update_fields=["room"])
 
     def _build_payments(self):
         def payment(booking_obj, kind, amount, currency, received_on=None, outstanding=False, stripe=""):

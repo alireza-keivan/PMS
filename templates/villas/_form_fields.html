@@ -1,8 +1,12 @@
 {% load i18n %}
 {% comment %}
-Shared by add.html and edit.html - the five required fields plus everything
+Shared by add.html and edit.html - the required fields plus everything
 optional, collapsed behind "more details". Included inside a <form> that
 already has {% csrf_token %} and its own submit/cancel buttons.
+
+Rooms appear here only when adding a villa, where they are part of setting it
+up. On an existing villa they have a panel of their own further down the edit
+page, because by then there are real rooms to rename and count.
 {% endcomment %}
 
 <div class="mb-4">
@@ -16,11 +20,60 @@ already has {% csrf_token %} and its own submit/cancel buttons.
   {{ form.property_type }}
 </div>
 
-<div class="mb-4">
-  <label class="mb-1 block text-sm text-ink-600" for="{{ form.bedrooms.id_for_label }}">{{ form.bedrooms.label }} *</label>
-  {{ form.bedrooms }}
-  {% if form.bedrooms.errors %}<p class="mt-1 text-sm text-red-700">{{ form.bedrooms.errors|join:" " }}</p>{% endif %}
-</div>
+{% if not villa %}
+  {{ room_type_rows|json_script:"room-type-rows" }}
+  <div
+    class="mb-4"
+    x-data="{
+      rows: JSON.parse(document.getElementById('room-type-rows').textContent)
+              .map((row, i) => ({ ...row, uid: i })),
+      nextUid: 0,
+      init() { this.nextUid = this.rows.length },
+      add() { this.rows.push({ name: '', count: 1, uid: this.nextUid++ }) },
+    }"
+  >
+    <p class="mb-1 text-sm text-ink-600">{% translate "Rooms" %} *</p>
+    <p class="mb-2 text-xs text-ink-600">
+      {% translate "Name each kind of room this villa has, and say how many there are." %}
+    </p>
+
+    <template x-for="(row, i) in rows" :key="row.uid">
+      <div class="mb-2 flex items-end gap-2">
+        <div class="flex-1">
+          <label class="mb-1 block text-xs text-ink-600" :for="'room_type_name_' + row.uid">
+            {% translate "Room type" %}
+          </label>
+          <input
+            type="text" name="room_type_name" x-model="row.name" :id="'room_type_name_' + row.uid"
+            placeholder="{% translate 'e.g. Deluxe' %}"
+            class="w-full rounded border border-sand-200 px-3 py-2 focus:border-teal-500 focus:outline-none"
+          >
+        </div>
+        <div class="w-28">
+          <label class="mb-1 block text-xs text-ink-600" :for="'room_type_count_' + row.uid">
+            {% translate "How many" %}
+          </label>
+          <input
+            type="number" name="room_type_count" x-model="row.count" :id="'room_type_count_' + row.uid"
+            min="1" max="{{ max_rooms_per_type }}"
+            class="w-full rounded border border-sand-200 px-3 py-2 focus:border-teal-500 focus:outline-none"
+          >
+        </div>
+        <button
+          type="button" class="mb-2 text-sm text-red-700 underline"
+          x-show="rows.length > 1" @click="rows.splice(i, 1)"
+        >{% translate "Remove" %}</button>
+      </div>
+    </template>
+
+    <button type="button" class="text-sm font-medium text-teal-700 underline" @click="add()">
+      + {% translate "Add another room type" %}
+    </button>
+    <p class="mt-2 text-xs text-ink-600">
+      {% translate "The first room takes the type's name and the rest are numbered - Deluxe, Deluxe 2, Deluxe 3. You can rename any of them afterwards." %}
+    </p>
+  </div>
+{% endif %}
 
 <div class="mb-4">
   <p class="mb-1 text-sm text-ink-600">{% translate "Amenities" %} *</p>

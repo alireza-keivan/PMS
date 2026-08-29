@@ -82,8 +82,8 @@ def _valid_payload(**overrides):
     """A complete, valid add-villa submission - mirrors what a real browser
     sends once Django's ModelForm pre-fills the model's own defaults
     (bathrooms, check-in/out times, minimum nights) into the empty form, and
-    includes the two fields that are mandatory: at least one amenity and a
-    cover photo.
+    includes the three things that are mandatory: at least one room type with
+    a number, at least one amenity, and a cover photo.
     """
     default_amenity, _created = Amenity.objects.get_or_create(
         name_en="Pool", defaults={"name_id": "Kolam renang"}
@@ -93,7 +93,8 @@ def _valid_payload(**overrides):
         "property_type": "villa",
         "address": "Jl. Test No. 1",
         "area": "Canggu",
-        "bedrooms": 3,
+        "room_type_name": ["Deluxe"],
+        "room_type_count": [3],
         "bathrooms": 1,
         "max_guests": 6,
         "check_in_time": "14:00",
@@ -147,7 +148,10 @@ def test_direct_post_cannot_bypass_the_disabled_button(owner_client, org):
     count_before = Villa.objects.count()
     owner_client.post(
         reverse("villas:add"),
-        {"name": "Sneaky Villa", "address": "", "area": "", "bedrooms": 1, "max_guests": 2},
+        {
+            "name": "Sneaky Villa", "address": "", "area": "", "max_guests": 2,
+            "room_type_name": ["Deluxe"], "room_type_count": [1],
+        },
     )
     assert Villa.objects.count() == count_before
 
@@ -172,6 +176,49 @@ def test_amenities_are_required(owner_client, org):
     assert response.status_code == 200  # re-rendered with an error, not redirected
     assert not Villa.objects.filter(name="New Villa").exists()
     assert "amenities" in response.context["form"].errors
+
+
+def test_add_villa_creates_the_room_types_and_their_rooms(owner_client, org):
+    owner_client.post(reverse("villas:add"), _valid_payload(
+        room_type_name=["Deluxe", "Garden"], room_type_count=[2, 1],
+    ))
+    villa = Villa.objects.get(name="New Villa")
+    assert [c.name for c in villa.room_categories.all()] == ["Deluxe", "Garden"]
+    assert [r.name for r in villa.rooms.all()] == ["Deluxe", "Deluxe 2", "Garden"]
+    assert villa.bedrooms == 3  # the count follows the rooms, nobody types it
+
+
+def test_add_villa_needs_at_least_one_room_type(owner_client, org):
+    response = owner_client.post(reverse("villas:add"), _valid_payload(
+        room_type_name=[""], room_type_count=[""],
+    ))
+    assert response.status_code == 200
+    assert not Villa.objects.filter(name="New Villa").exists()
+    assert response.context["form"].non_field_errors()
+
+
+def test_add_villa_rejects_two_room_types_with_the_same_name(owner_client, org):
+    response = owner_client.post(reverse("villas:add"), _valid_payload(
+        room_type_name=["Deluxe", "deluxe"], room_type_count=[1, 1],
+    ))
+    assert response.status_code == 200
+    assert not Villa.objects.filter(name="New Villa").exists()
+
+
+def test_add_villa_rejects_a_room_type_with_no_number(owner_client, org):
+    response = owner_client.post(reverse("villas:add"), _valid_payload(
+        room_type_name=["Deluxe"], room_type_count=[""],
+    ))
+    assert response.status_code == 200
+    assert not Villa.objects.filter(name="New Villa").exists()
+
+
+def test_add_villa_keeps_the_room_types_typed_in_when_something_else_fails(owner_client, org):
+    """Nobody should have to retype their rooms because a photo was missing."""
+    payload = _valid_payload(room_type_name=["Deluxe"], room_type_count=[2])
+    del payload["cover_photo"]
+    response = owner_client.post(reverse("villas:add"), payload)
+    assert response.context["room_type_rows"] == [{"name": "Deluxe", "count": "2"}]
 
 
 def test_cover_photo_is_converted_to_webp_and_marked_as_cover(owner_client, org):

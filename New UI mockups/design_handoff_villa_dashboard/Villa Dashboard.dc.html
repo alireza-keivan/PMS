@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="_ds/organic-b3e6bbf7-e418-4cf7-a863-520e2dec0cf3/styles.css">
+  <script src="_ds/organic-b3e6bbf7-e418-4cf7-a863-520e2dec0cf3/_ds_bundle.js"></script>
+  <style>
+    a { color: var(--color-accent-700); }
+    a:hover { color: var(--color-accent-800); }
+  </style>
+</helmet>
+<div style="background:var(--color-bg);color:var(--color-text);font-family:var(--font-body);min-height:100vh;">
+
+  <div style="display:flex;align-items:center;gap:var(--space-4);padding:var(--space-3) var(--space-6);background:var(--color-surface);border-bottom:1px solid var(--color-divider);position:sticky;top:0;z-index:5;">
+    <span style="font-family:var(--font-heading);font-size:19px;">{{ t.brand }}</span>
+    <div class="seg">
+      <label class="seg-opt"><input type="radio" name="screen" checked="{{ isCalendar }}" onChange="{{ goCalendar }}"/>{{ t.nav_calendar }}</label>
+      <label class="seg-opt"><input type="radio" name="screen" checked="{{ isToday }}" onChange="{{ goToday }}"/>{{ t.nav_today }}</label>
+    </div>
+    <div style="margin-left:auto;display:flex;align-items:center;gap:8px;">
+      <div style="width:28px;height:28px;border-radius:50%;background:var(--color-accent-300);color:var(--color-accent-900);display:flex;align-items:center;justify-content:center;font-family:var(--font-heading);font-size:12px;flex:none;">{{ userInitial }}</div>
+      <span style="font-size:12.5px;opacity:.75;white-space:nowrap;">{{ userName }}</span>
+    </div>
+    <div class="seg">
+      <label class="seg-opt"><input type="radio" name="lang" checked="{{ isEn }}" onChange="{{ setEn }}"/>EN</label>
+      <label class="seg-opt"><input type="radio" name="lang" checked="{{ isId }}" onChange="{{ setId }}"/>ID</label>
+    </div>
+  </div>
+
+  <sc-if value="{{ isCalendar }}" hint-placeholder-val="{{ true }}">
+  <div>
+    <div style="padding:var(--space-6) var(--space-6) 0;">
+      <h2 style="margin-bottom:2px;">{{ t.calendarTitle }}</h2>
+      <p class="text-muted" style="margin:0;">{{ t.calendarSub }}</p>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:var(--space-4);padding:var(--space-4) var(--space-6);flex-wrap:wrap;">
+      <div class="seg" style="white-space:nowrap;">
+        <label class="seg-opt" style="white-space:nowrap;"><input type="radio" name="range" checked="{{ isR7 }}" onChange="{{ setR7 }}"/>{{ t.range7 }}</label>
+        <label class="seg-opt" style="white-space:nowrap;"><input type="radio" name="range" checked="{{ isR14 }}" onChange="{{ setR14 }}"/>{{ t.range14 }}</label>
+        <label class="seg-opt" style="white-space:nowrap;"><input type="radio" name="range" checked="{{ isR30 }}" onChange="{{ setR30 }}"/>{{ t.range30 }}</label>
+      </div>
+      <div style="display:flex;align-items:center;gap:2px;white-space:nowrap;flex:none;">
+        <button type="button" class="btn btn-icon btn-ghost" style="width:30px;height:30px;" title="{{ t.range2w }}" onClick="{{ jumpBigBack }}">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="11 17 6 12 11 7"/><polyline points="18 17 13 12 18 7"/></svg>
+        </button>
+        <button type="button" class="btn btn-icon btn-ghost" style="width:30px;height:30px;" onClick="{{ jumpBack }}">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <button type="button" class="btn btn-ghost" style="font-size:13.5px;padding:0 var(--space-2);min-width:150px;justify-content:center;" onClick="{{ jumpToday }}">{{ rangeLabel }}</button>
+        <button type="button" class="btn btn-icon btn-ghost" style="width:30px;height:30px;" onClick="{{ jumpFwd }}">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+        <button type="button" class="btn btn-icon btn-ghost" style="width:30px;height:30px;" onClick="{{ jumpBigFwd }}">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="13 17 18 12 13 7"/><polyline points="6 17 11 12 6 7"/></svg>
+        </button>
+      </div>
+      <div style="position:relative;flex:1;max-width:300px;min-width:200px;">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--color-neutral-600)" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);pointer-events:none;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input class="input" style="padding-left:34px;" placeholder="{{ t.search }}"/>
+      </div>
+      <button type="button" class="btn btn-primary" style="margin-left:auto;white-space:nowrap;flex:none;">{{ t.newBooking }}</button>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:var(--space-4);padding:0 var(--space-6) var(--space-4);flex-wrap:wrap;">
+      <sc-for list="{{ legend }}" as="item" hint-placeholder-count="5">
+        <div style="display:flex;align-items:center;gap:6px;font-size:12px;opacity:.85;white-space:nowrap;flex:none;">
+          <span style="{{ item.dotStyle }}"></span>
+          <span>{{ item.label }}</span>
+        </div>
+      </sc-for>
+    </div>
+
+    <div style="margin:0 var(--space-6) var(--space-8);border-radius:var(--radius-lg);background:var(--color-surface);box-shadow:var(--shadow-sm);">
+
+      <div style="display:flex;background:var(--color-surface);position:sticky;top:64px;z-index:4;border-radius:var(--radius-lg) var(--radius-lg) 0 0;">
+        <div style="width:220px;flex:none;border-radius:var(--radius-lg) 0 0 0;"></div>
+        <div style="flex:1;display:grid;grid-template-columns:repeat({{ dayCount }}, 1fr);border-radius:0 var(--radius-lg) 0 0;overflow:hidden;">
+          <sc-for list="{{ days }}" as="day" hint-placeholder-count="14">
+            <div style="text-align:center;padding:var(--space-2) 0;background:{{ day.headerBg }};">
+              <div style="font-size:10px;text-transform:uppercase;letter-spacing:.06em;opacity:.55;">{{ day.weekday }}</div>
+              <div style="font-family:var(--font-heading);font-size:15px;">{{ day.date }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+
+      <div style="border-radius:0 0 var(--radius-lg) var(--radius-lg);overflow:hidden;">
+
+      <sc-for list="{{ rows }}" as="row" hint-placeholder-count="6">
+        <sc-if value="{{ row.isGroup }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;border-top:1px solid var(--color-divider);background:var(--color-neutral-100);">
+            <div style="width:220px;flex:none;padding:5px var(--space-4);font-size:10.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;opacity:.6;">{{ row.groupLabel }}</div>
+            <div style="flex:1;"></div>
+          </div>
+        </sc-if>
+        <sc-if value="{{ row.isVilla }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;border-top:1px solid var(--color-divider);">
+          <div style="width:220px;flex:none;display:flex;align-items:center;gap:6px;padding:0 var(--space-2) 0 var(--space-3);overflow:hidden;">
+            <button type="button" class="btn btn-icon btn-ghost" style="width:22px;height:22px;flex:none;font-size:11px;" title="{{ row.roomCount }} rooms" onClick="{{ row.toggleExpand }}">{{ row.chevron }}</button>
+            <div style="width:30px;height:30px;border-radius:50%;background:{{ row.swatch }};flex:none;"></div>
+            <input type="text" value="{{ row.name }}" onChange="{{ row.renameVilla }}" style="font-family:var(--font-body);color:var(--color-text);font-size:13.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0;border:none;background:transparent;padding:3px 5px;border-radius:6px;" style-hover="background:var(--color-neutral-200);" style-focus="background:var(--color-accent-100);outline:2px solid var(--color-accent);outline-offset:0;"/>
+            <button type="button" class="btn btn-icon btn-ghost" style="width:26px;height:26px;flex:none;opacity:.55;" title="{{ t.removeVilla }}" onClick="{{ row.removeVilla }}">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+            </button>
+          </div>
+          <div style="flex:1;height:38px;"></div>
+        </div>
+        </sc-if>
+        <sc-if value="{{ row.isRoom }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;border-top:1px solid var(--color-divider);background:var(--color-neutral-50);" data-room-row="{{ row.rowKey }}">
+            <div style="width:220px;flex:none;display:flex;align-items:center;gap:8px;padding:0 var(--space-2) 0 44px;overflow:hidden;">
+              <input type="text" value="{{ row.name }}" onChange="{{ row.renameRoom }}" style="font-family:var(--font-body);color:var(--color-text);font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0;border:none;background:transparent;padding:2px 5px;border-radius:6px;" style-hover="background:var(--color-neutral-200);" style-focus="background:var(--color-accent-100);outline:2px solid var(--color-accent);outline-offset:0;"/>
+              <span class="tag {{ row.tagClass }}" style="font-size:10px;padding:2px 8px;">{{ row.category }}</span>
+              <button type="button" class="btn btn-icon btn-ghost" style="width:22px;height:22px;flex:none;opacity:.5;" onClick="{{ row.removeRoom }}">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+              </button>
+            </div>
+            <div data-timeline style="flex:1;position:relative;height:52px;cursor:copy;" onMouseDown="{{ row.addBookingAt }}" title="{{ t.newBookingPrompt }}">
+              <div style="position:absolute;inset:0;display:grid;grid-template-columns:repeat({{ dayCount }}, 1fr);">
+                <sc-for list="{{ days }}" as="day" hint-placeholder-count="14">
+                  <div style="border-left:1px solid var(--color-divider);background:{{ day.bg }};"></div>
+                </sc-for>
+              </div>
+              <sc-for list="{{ row.bars }}" as="bar" hint-placeholder-count="1">
+                <div style="{{ bar.style }}" title="{{ bar.title }}" onMouseDown="{{ bar.startMove }}">
+                  <div style="position:absolute;left:0;top:0;bottom:0;width:7px;cursor:ew-resize;" onMouseDown="{{ bar.startResizeLeft }}"></div>
+                  <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ bar.label }}</span>
+                  <div style="position:absolute;right:0;top:0;bottom:0;width:7px;cursor:ew-resize;" onMouseDown="{{ bar.startResizeRight }}"></div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </sc-if>
+        <sc-if value="{{ row.isAddRoom }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;border-top:1px solid var(--color-divider);">
+            <div style="width:220px;flex:none;padding:5px var(--space-2) 8px 44px;">
+              <button type="button" class="btn btn-ghost" style="font-size:12px;padding:4px 10px;white-space:nowrap;" onClick="{{ row.addRoom }}">+ {{ t.addRoom }}</button>
+            </div>
+            <div style="flex:1;"></div>
+          </div>
+        </sc-if>
+      </sc-for>
+      </div>
+
+      <div style="border-top:1px solid var(--color-divider);padding:var(--space-3) var(--space-4);border-radius:0 0 var(--radius-lg) var(--radius-lg);">
+        <button type="button" class="btn btn-secondary" style="white-space:nowrap;" onClick="{{ addVilla }}">+ {{ t.addVilla }}</button>
+      </div>
+
+    </div>
+  </div>
+
+  <sc-if value="{{ hasPopover }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;inset:0;background:rgba(32,30,29,.4);z-index:50;display:flex;align-items:center;justify-content:center;" onClick="{{ popover.close }}">
+      <div class="card elev-lg" style="width:400px;padding:var(--space-6);border:1px solid var(--color-divider);" onClick="{{ stopClick }}">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:var(--space-2);">
+          <span style="{{ popover.statusDotStyle }}"></span>
+          <span style="font-size:11.5px;opacity:.65;">{{ popover.statusLabel }}</span>
+        </div>
+        <h4 style="margin:0 0 2px;">{{ popover.guestLabel }}</h4>
+        <div style="font-size:12.5px;opacity:.7;margin-bottom:2px;">{{ popover.villaRoomLabel }}</div>
+        <div style="font-size:12.5px;opacity:.7;margin-bottom:var(--space-3);">{{ popover.dateRangeLabel }}</div>
+        <sc-if value="{{ popover.hasOwing }}" hint-placeholder-val="{{ false }}">
+          <div class="tag tag-accent" style="margin-bottom:var(--space-3);white-space:nowrap;flex-shrink:0;">{{ popover.owingText }}</div>
+        </sc-if>
+        <div style="display:flex;gap:8px;justify-content:flex-end;">
+          <button type="button" class="btn btn-ghost" style="white-space:nowrap;flex-shrink:0;" onClick="{{ popover.removeBooking }}">{{ t.removeBookingLabel }}</button>
+          <button type="button" class="btn btn-secondary" style="white-space:nowrap;flex-shrink:0;" onClick="{{ popover.close }}">{{ t.closeLabel }}</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ hasConfirmDialog }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;inset:0;background:rgba(32,30,29,.4);z-index:60;display:flex;align-items:center;justify-content:center;" onClick="{{ confirmDialog.cancel }}">
+      <div class="card elev-lg" style="width:360px;padding:var(--space-6);border:1px solid var(--color-divider);" onClick="{{ stopClick }}">
+        <p style="margin:0 0 var(--space-4);font-size:14px;">{{ confirmDialog.message }}</p>
+        <div style="display:flex;gap:8px;justify-content:flex-end;">
+          <button type="button" class="btn btn-ghost" onClick="{{ confirmDialog.cancel }}">{{ t.cancelLabel }}</button>
+          <button type="button" class="btn btn-primary" onClick="{{ confirmDialog.confirm }}">{{ t.confirmRemove }}</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ hasAddBookingDraft }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;inset:0;background:rgba(32,30,29,.4);z-index:60;display:flex;align-items:center;justify-content:center;" onClick="{{ addBookingDraft.cancel }}">
+      <div class="card elev-lg" style="width:380px;padding:var(--space-6);border:1px solid var(--color-divider);" onClick="{{ stopClick }}">
+        <h4 style="margin:0 0 2px;">{{ t.newBooking }}</h4>
+        <p style="margin:0 0 var(--space-4);font-size:12.5px;opacity:.7;">{{ addBookingDraft.contextLabel }}</p>
+        <div class="field" style="margin-bottom:var(--space-4);">
+          <label>{{ t.guestNameLabel }}</label>
+          <input class="input" type="text" value="{{ addBookingDraft.guestName }}" onChange="{{ addBookingDraft.setGuestName }}" placeholder="{{ t.guestNamePlaceholder }}"/>
+        </div>
+        <div style="display:flex;gap:8px;justify-content:flex-end;">
+          <button type="button" class="btn btn-ghost" onClick="{{ addBookingDraft.cancel }}">{{ t.cancelLabel }}</button>
+          <button type="button" class="btn btn-primary" onClick="{{ addBookingDraft.confirm }}">{{ t.addLabel }}</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+  </sc-if>
+
+  <sc-if value="{{ isToday }}" hint-placeholder-val="{{ false }}">
+  <div style="padding:var(--space-6) var(--space-6) var(--space-8);">
+    <h2 style="margin-bottom:2px;">{{ t.todayTitle }}</h2>
+    <p class="text-muted" style="margin:0 0 var(--space-6);">{{ t.todayDate }}</p>
+
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:var(--space-6);align-items:start;">
+
+      <div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:var(--space-3);">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent-700)" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+          <h4 style="margin:0;">{{ t.arrivingTitle }}</h4>
+          <span class="tag tag-neutral" style="margin-left:auto;">{{ arrivals.length }}</span>
+        </div>
+        <div class="card elev-sm" style="padding:0;">
+          <sc-for list="{{ arrivals }}" as="item" hint-placeholder-count="2">
+            <div style="display:flex;align-items:center;gap:var(--space-3);padding:var(--space-3) var(--space-4);border-bottom:1px solid var(--color-divider);">
+              <div style="width:34px;height:34px;border-radius:50%;background:var(--color-accent-2-200);color:var(--color-accent-2-800);display:flex;align-items:center;justify-content:center;font-family:var(--font-heading);font-size:13px;flex:none;">{{ item.initial }}</div>
+              <div style="flex:1;min-width:0;">
+                <div style="font-weight:600;font-size:13.5px;">{{ item.guest }}</div>
+                <div style="font-size:12px;opacity:.65;">{{ item.villa }}</div>
+              </div>
+              <div style="font-size:11.5px;text-align:right;opacity:.65;flex:none;max-width:110px;">{{ t.checkInAt }}</div>
+            </div>
+          </sc-for>
+          <sc-if value="{{ noArrivals }}" hint-placeholder-val="{{ false }}">
+            <div style="padding:var(--space-4);font-size:13px;opacity:.6;">{{ t.noneArriving }}</div>
+          </sc-if>
+        </div>
+      </div>
+
+      <div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:var(--space-3);">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent-700)" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          <h4 style="margin:0;">{{ t.departingTitle }}</h4>
+          <span class="tag tag-neutral" style="margin-left:auto;">{{ departures.length }}</span>
+        </div>
+        <div class="card elev-sm" style="padding:0;">
+          <sc-for list="{{ departures }}" as="item" hint-placeholder-count="2">
+            <div style="display:flex;align-items:center;gap:var(--space-3);padding:var(--space-3) var(--space-4);border-bottom:1px solid var(--color-divider);">
+              <div style="width:34px;height:34px;border-radius:50%;background:var(--color-neutral-200);color:var(--color-neutral-700);display:flex;align-items:center;justify-content:center;font-family:var(--font-heading);font-size:13px;flex:none;">{{ item.initial }}</div>
+              <div style="flex:1;min-width:0;">
+                <div style="font-weight:600;font-size:13.5px;">{{ item.guest }}</div>
+                <div style="font-size:12px;opacity:.65;">{{ item.villa }}</div>
+              </div>
+              <div style="font-size:11.5px;text-align:right;opacity:.65;flex:none;max-width:110px;">{{ t.checkOutAt }}</div>
+            </div>
+          </sc-for>
+          <sc-if value="{{ noDepartures }}" hint-placeholder-val="{{ false }}">
+            <div style="padding:var(--space-4);font-size:13px;opacity:.6;">{{ t.noneDeparting }}</div>
+          </sc-if>
+        </div>
+      </div>
+
+      <div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:var(--space-3);">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent-700)" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>
+          <h4 style="margin:0;">{{ t.owingTitle }}</h4>
+          <span class="tag tag-accent" style="margin-left:auto;">{{ owing.length }}</span>
+        </div>
+        <div class="card elev-sm" style="padding:0;">
+          <sc-for list="{{ owing }}" as="item" hint-placeholder-count="2">
+            <div style="display:flex;align-items:center;gap:var(--space-3);padding:var(--space-3) var(--space-4);border-bottom:1px solid var(--color-divider);">
+              <div style="width:34px;height:34px;border-radius:50%;background:var(--color-accent-200);color:var(--color-accent-800);display:flex;align-items:center;justify-content:center;font-family:var(--font-heading);font-size:13px;flex:none;">{{ item.initial }}</div>
+              <div style="flex:1;min-width:0;">
+                <div style="font-weight:600;font-size:13.5px;">{{ item.guest }}</div>
+                <div style="font-size:12px;opacity:.65;">{{ item.villa }}</div>
+              </div>
+              <div style="font-size:12.5px;text-align:right;font-weight:600;color:var(--color-accent-700);flex:none;">{{ item.amountLabel }}</div>
+            </div>
+          </sc-for>
+          <sc-if value="{{ noOwing }}" hint-placeholder-val="{{ false }}">
+            <div style="padding:var(--space-4);font-size:13px;opacity:.6;">{{ t.noneOwing }}</div>
+          </sc-if>
+        </div>
+      </div>
+
+    </div>
+  </div>
+  </sc-if>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+/* Mirrors apps/villas/models.py (Villa.area groups the calendar) and
+   apps/bookings/models.py (Booking.status is confirmed/cancelled/blocked only;
+   checked_in/checked_out/payment_incomplete are derived, see calendar_status()).
+   NOTE: apps/villas/models.py has no Room model yet — the `rooms` field below is a
+   forward-looking mockup for a Room/RoomCategory addition Alireza asked for; it isn't
+   backed by the current schema. */
+const VILLAS_DATA = [
+  { name: 'Villa Kenanga', area: 'Canggu', swatch: 'var(--color-accent-300)', rooms: [
+    { name: 'Kenanga 1', category: 'Deluxe', bookings: [
+      { guest: 'Sarah Mitchell', start: 0, span: 4, status: 'confirmed', owing: 640000 },
+    ]},
+    { name: 'Kenanga 2', category: 'Deluxe', bookings: [
+      { guest: 'Made Sujana', start: 3, span: 3, status: 'confirmed', owing: null },
+    ]},
+    { name: 'Kenanga 3', category: 'Standard', bookings: [] },
+  ]},
+  { name: 'Villa Damai', area: 'Ubud', swatch: 'var(--color-accent-2-300)', rooms: [
+    { name: 'Damai 1', category: 'Suite', bookings: [
+      { guest: 'Liam Chen', start: 1, span: 3, status: 'checkedin', owing: null },
+    ]},
+    { name: 'Damai 2', category: 'Standard', bookings: [
+      { guest: null, start: 7, span: 2, status: 'blocked', owing: null },
+    ]},
+  ]},
+  { name: 'Villa Laut', area: 'Canggu', swatch: 'var(--color-neutral-300)', rooms: [
+    { name: 'Laut 1', category: 'Standard', bookings: [
+      { guest: 'Ayu Kusuma', start: 2, span: 1, status: 'paymentincomplete', owing: 1850000 },
+      { guest: 'Tom Becker', start: 10, span: 3, status: 'confirmed', owing: null },
+    ]},
+  ]},
+  { name: 'Villa Bambu', area: 'Seminyak', swatch: 'var(--color-accent-300)', rooms: [
+    { name: 'Bambu 1', category: 'Deluxe', bookings: [
+      { guest: 'Kadek Wirawan', start: 0, span: 3, status: 'checkedout', owing: null },
+    ]},
+    { name: 'Bambu 2', category: 'Deluxe', bookings: [
+      { guest: 'Emma Rossi', start: 5, span: 4, status: 'confirmed', owing: null },
+    ]},
+  ]},
+  { name: 'Villa Matahari', area: 'Uluwatu', swatch: 'var(--color-accent-2-300)', rooms: [
+    { name: 'Matahari 1', category: 'Suite', bookings: [
+      { guest: null, start: 0, span: 2, status: 'blocked', owing: null },
+    ]},
+    { name: 'Matahari 2', category: 'Standard', bookings: [
+      { guest: 'Nina Kovac', start: 3, span: 4, status: 'confirmed', owing: null },
+    ]},
+    { name: 'Matahari 3', category: 'Standard', bookings: [
+      { guest: 'Wayan Putra', start: 9, span: 4, status: 'confirmed', owing: null },
+    ]},
+  ]},
+];
+const ROOM_CATEGORY_TAG = { Deluxe: 'tag-accent', Suite: 'tag-accent-2', Standard: 'tag-neutral' };
+
+const STATUS_STYLE = {
+  confirmed: { bg: 'var(--color-accent-2-200)', color: 'var(--color-accent-2-800)', border: 'none' },
+  checkedin: { bg: 'var(--color-accent-2-500)', color: 'var(--color-bg)', border: 'none' },
+  checkedout: { bg: 'var(--color-neutral-200)', color: 'var(--color-neutral-600)', border: 'none' },
+  blocked: { bg: 'repeating-linear-gradient(135deg, var(--color-neutral-300) 0 6px, var(--color-neutral-200) 6px 12px)', color: 'var(--color-neutral-700)', border: '1px dashed var(--color-neutral-500)' },
+  paymentincomplete: { bg: 'var(--color-accent-200)', color: 'var(--color-accent-800)', border: '1px solid var(--color-accent-500)' },
+};
+
+const TODAY_INDEX = 3;
+
+const T = {
+  en: {
+    brand: 'Rumah', nav_calendar: 'Calendar', nav_today: 'Today',
+    newBooking: 'New booking', search: 'Search bookings or guests',
+    range7: '7 days', range14: '14 days', range30: '30 days',
+    legendConfirmed: 'Confirmed', legendCheckedIn: 'Checked in', legendCheckedOut: 'Checked out', legendBlocked: 'Not available', legendPaymentIncomplete: 'Payment incomplete',
+    calendarTitle: 'Booking calendar', calendarSub: 'All villas, one view.',
+    todayTitle: 'Today', todayDate: 'Thursday, 28 August',
+    arrivingTitle: 'Arriving today', departingTitle: 'Leaving today', owingTitle: 'Still owe money',
+    checkInAt: 'Check-in 2:00 PM', checkOutAt: 'Check-out 11:00 AM',
+    noneArriving: 'No one arriving today', noneDeparting: 'No one leaving today', noneOwing: 'Everyone is paid up',
+    bookedLabel: 'Booked', otherArea: 'Other',
+    roomOccupied: 'Occupied', roomVacant: 'Vacant', addRoom: 'Add room',
+    addVilla: 'Add villa', removeVilla: 'Remove villa',
+    removeConfirm: name => `Remove ${name}? This can't be undone.`,
+    newBookingPrompt: 'Guest name (leave blank to block these dates):',
+    removeBookingLabel: 'Remove booking', closeLabel: 'Close',
+    removeConfirmVilla: name => `Remove ${name}? This can't be undone.`,
+    removeConfirmRoom: name => `Remove room ${name}? This can't be undone.`,
+    confirmRemove: 'Remove', cancelLabel: 'Cancel',
+    guestNameLabel: 'Guest name', guestNamePlaceholder: 'e.g. Sarah Mitchell', addLabel: 'Add',
+  },
+  id: {
+    brand: 'Rumah', nav_calendar: 'Kalender', nav_today: 'Hari ini',
+    newBooking: 'Booking baru', search: 'Cari booking atau tamu',
+    range7: '7 hari', range14: '14 hari', range30: '30 hari',
+    legendConfirmed: 'Dikonfirmasi', legendCheckedIn: 'Sudah check-in', legendCheckedOut: 'Sudah check-out', legendBlocked: 'Tidak tersedia', legendPaymentIncomplete: 'Belum lunas',
+    calendarTitle: 'Kalender booking', calendarSub: 'Semua vila, dalam satu tampilan.',
+    todayTitle: 'Hari ini', todayDate: 'Kamis, 28 Agustus',
+    arrivingTitle: 'Datang hari ini', departingTitle: 'Pulang hari ini', owingTitle: 'Belum bayar lunas',
+    checkInAt: 'Check-in 14:00', checkOutAt: 'Check-out 11:00',
+    noneArriving: 'Tidak ada yang datang hari ini', noneDeparting: 'Tidak ada yang pulang hari ini', noneOwing: 'Semua sudah lunas',
+    bookedLabel: 'Dipesan', otherArea: 'Lainnya',
+    roomOccupied: 'Terisi', roomVacant: 'Kosong', addRoom: 'Tambah kamar',
+    addVilla: 'Tambah vila', removeVilla: 'Hapus vila',
+    removeConfirm: name => `Hapus ${name}? Tindakan ini tidak bisa dibatalkan.`,
+    newBookingPrompt: 'Nama tamu (kosongkan untuk blokir tanggal ini):',
+    removeBookingLabel: 'Hapus booking', closeLabel: 'Tutup',
+    removeConfirmVilla: name => `Hapus ${name}? Tindakan ini tidak bisa dibatalkan.`,
+    removeConfirmRoom: name => `Hapus kamar ${name}? Tindakan ini tidak bisa dibatalkan.`,
+    confirmRemove: 'Hapus', cancelLabel: 'Batal',
+    guestNameLabel: 'Nama tamu', guestNamePlaceholder: 'cth. Sarah Mitchell', addLabel: 'Tambah',
+  },
+};
+
+const SWATCHES = ['var(--color-accent-300)', 'var(--color-accent-2-300)', 'var(--color-neutral-300)'];
+
+class Component extends DCLogic {
+  state = {
+    screen: 'calendar', lang: 'en', range: 14,
+    villas: VILLAS_DATA.map(v => ({ ...v, rooms: v.rooms.map(r => ({ ...r, bookings: r.bookings.map(b => ({ ...b })) })) })),
+    nextVillaNum: 1,
+    dayOffset: 0,
+    expanded: new Set(),
+    popover: null,
+    confirmDialog: null,
+    addBookingDraft: null,
+  };
+
+  shiftDays(delta) { this.setState(s => ({ dayOffset: s.dayOffset + delta })); }
+
+  addVilla() {
+    this.setState(s => ({
+      villas: [...s.villas, { name: `New villa ${s.nextVillaNum}`, area: '', swatch: SWATCHES[s.villas.length % SWATCHES.length], rooms: [] }],
+      nextVillaNum: s.nextVillaNum + 1,
+    }));
+  }
+
+  toggleExpand(idx) {
+    this.setState(s => {
+      const expanded = new Set(s.expanded);
+      expanded.has(idx) ? expanded.delete(idx) : expanded.add(idx);
+      return { expanded };
+    });
+  }
+
+  addRoom(idx) {
+    this.setState(s => {
+      const villas = s.villas.slice();
+      const v = villas[idx];
+      const n = v.rooms.length + 1;
+      villas[idx] = { ...v, rooms: [...v.rooms, { name: `${v.name.split(' ').pop()} ${n}`, category: 'Standard', bookings: [] }] };
+      const expanded = new Set(s.expanded); expanded.add(idx);
+      return { villas, expanded };
+    });
+  }
+
+  removeRoom(idx, roomIdx) {
+    const t = T[this.state.lang];
+    const room = this.state.villas[idx].rooms[roomIdx];
+    this.setState({
+      confirmDialog: {
+        message: t.removeConfirmRoom(room.name),
+        onConfirm: () => this.setState(s => {
+          const villas = s.villas.slice();
+          const v = villas[idx];
+          villas[idx] = { ...v, rooms: v.rooms.filter((_, i) => i !== roomIdx) };
+          return { villas, confirmDialog: null };
+        }),
+      },
+    });
+  }
+
+  removeVilla(idx) {
+    const t = T[this.state.lang];
+    const villa = this.state.villas[idx];
+    this.setState({
+      confirmDialog: {
+        message: t.removeConfirmVilla(villa.name),
+        onConfirm: () => this.setState(s => ({ villas: s.villas.filter((_, i) => i !== idx), confirmDialog: null })),
+      },
+    });
+  }
+
+  cancelConfirmDialog() { this.setState({ confirmDialog: null }); }
+
+  setAddBookingGuestName(e) {
+    this.setState(s => ({ addBookingDraft: { ...s.addBookingDraft, guestName: e.target.value } }));
+  }
+
+  confirmAddBookingDraft() {
+    const draft = this.state.addBookingDraft;
+    if (!draft) return;
+    const trimmed = draft.guestName.trim();
+    this.setState(s => {
+      const villas = s.villas.slice();
+      const v = { ...villas[draft.idx] };
+      const rooms = v.rooms.slice();
+      const r = { ...rooms[draft.ri] };
+      r.bookings = [...r.bookings, { guest: trimmed || null, start: draft.day, span: 1, status: trimmed ? 'confirmed' : 'blocked', owing: null }];
+      rooms[draft.ri] = r; v.rooms = rooms; villas[draft.idx] = v;
+      return { villas, addBookingDraft: null };
+    });
+  }
+
+  cancelAddBookingDraft() { this.setState({ addBookingDraft: null }); }
+
+  moveBookingToRoom(idx, fromRi, bi, toRi) {
+    this.setState(s => {
+      const villas = s.villas.slice();
+      const v = { ...villas[idx] };
+      const rooms = v.rooms.slice();
+      const fromRoom = { ...rooms[fromRi] };
+      const booking = fromRoom.bookings[bi];
+      fromRoom.bookings = fromRoom.bookings.filter((_, i) => i !== bi);
+      const toRoom = { ...rooms[toRi] };
+      toRoom.bookings = [...toRoom.bookings, booking];
+      rooms[fromRi] = fromRoom; rooms[toRi] = toRoom;
+      v.rooms = rooms; villas[idx] = v;
+      return { villas };
+    });
+  }
+
+  renameVilla(idx, e) {
+    const name = e.target.value;
+    this.setState(s => {
+      const villas = s.villas.slice();
+      villas[idx] = { ...villas[idx], name };
+      return { villas };
+    });
+  }
+
+  renameRoom(idx, ri, e) {
+    const name = e.target.value;
+    this.setState(s => {
+      const villas = s.villas.slice();
+      const v = { ...villas[idx] };
+      const rooms = v.rooms.slice();
+      rooms[ri] = { ...rooms[ri], name };
+      v.rooms = rooms; villas[idx] = v;
+      return { villas };
+    });
+  }
+
+  dateAt(dayIndex) {
+    const base = new Date(2026, 7, 25);
+    base.setDate(base.getDate() + this.state.dayOffset + dayIndex);
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return `${base.getDate()} ${months[base.getMonth()]}`;
+  }
+
+  updateBooking(idx, ri, bi, patch) {
+    this.setState(s => {
+      const villas = s.villas.slice();
+      const v = { ...villas[idx] };
+      const rooms = v.rooms.slice();
+      const r = { ...rooms[ri] };
+      const bookings = r.bookings.slice();
+      bookings[bi] = { ...bookings[bi], ...patch };
+      r.bookings = bookings; rooms[ri] = r; v.rooms = rooms; villas[idx] = v;
+      return { villas };
+    });
+  }
+
+  beginBookingDrag(idx, ri, bi, mode, e) {
+    e.preventDefault();
+    e.stopPropagation();
+    const container = e.currentTarget.closest('[data-room-row]').querySelector('[data-timeline]');
+    const rect = container.getBoundingClientRect();
+    const dayCount = this.state.range;
+    const cellWidth = rect.width / dayCount;
+    const room = this.state.villas[idx].rooms[ri];
+    const orig = { ...room.bookings[bi] };
+    const startX = e.clientX;
+    let curRi = ri, curBi = bi, moved = false;
+
+    const neighborBounds = (targetRi, excludeBi) => {
+      const bookings = this.state.villas[idx].rooms[targetRi].bookings;
+      let lowerBound = 0, upperBound = dayCount;
+      bookings.forEach((b, i) => {
+        if (i === excludeBi) return;
+        if (b.start + b.span <= orig.start) lowerBound = Math.max(lowerBound, b.start + b.span);
+        if (b.start >= orig.start) upperBound = Math.min(upperBound, b.start);
+      });
+      return { lowerBound, upperBound };
+    };
+
+    const onMove = ev => {
+      const dx = ev.clientX - startX;
+      if (Math.abs(dx) > 3) moved = true;
+      const deltaDays = Math.round(dx / cellWidth);
+      if (mode === 'move') {
+        const el = document.elementFromPoint(ev.clientX, ev.clientY);
+        const rowEl = el && el.closest('[data-room-row]');
+        if (rowEl) {
+          const [rvIdx, rri] = rowEl.dataset.roomRow.split('-').map(Number);
+          if (rvIdx === idx && rri !== curRi) {
+            const newIndex = this.state.villas[idx].rooms[rri].bookings.length;
+            this.moveBookingToRoom(idx, curRi, curBi, rri);
+            curRi = rri; curBi = newIndex; moved = true;
+          }
+        }
+        const { lowerBound, upperBound } = neighborBounds(curRi, curBi);
+        const start = Math.max(lowerBound, Math.min(upperBound - orig.span, Math.max(0, Math.min(dayCount - orig.span, orig.start + deltaDays))));
+        this.updateBooking(idx, curRi, curBi, { start });
+      } else if (mode === 'resize-right') {
+        const { upperBound } = neighborBounds(curRi, curBi);
+        const span = Math.max(1, Math.min(upperBound - orig.start, orig.span + deltaDays));
+        this.updateBooking(idx, curRi, curBi, { span });
+      } else if (mode === 'resize-left') {
+        const { lowerBound } = neighborBounds(curRi, curBi);
+        const newStart = Math.max(lowerBound, Math.min(orig.start + orig.span - 1, orig.start + deltaDays));
+        this.updateBooking(idx, curRi, curBi, { start: newStart, span: orig.start + orig.span - newStart });
+      }
+    };
+    const onUp = () => {
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
+      if (!moved) this.openPopover(idx, curRi, curBi);
+    };
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+  }
+
+  addBookingAt(idx, ri, e) {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const dayCount = this.state.range;
+    const day = Math.max(0, Math.min(dayCount - 1, Math.floor((e.clientX - rect.left) / rect.width * dayCount)));
+    this.setState({ addBookingDraft: { idx, ri, day, guestName: '' } });
+  }
+
+  openPopover(idx, ri, bi) { this.setState({ popover: { idx, ri, bi } }); }
+  closePopover() { this.setState({ popover: null }); }
+
+  removeBooking(idx, ri, bi) {
+    this.setState(s => {
+      const villas = s.villas.slice();
+      const v = { ...villas[idx] };
+      const rooms = v.rooms.slice();
+      const r = { ...rooms[ri] };
+      r.bookings = r.bookings.filter((_, i) => i !== bi);
+      rooms[ri] = r; v.rooms = rooms; villas[idx] = v;
+      return { villas, popover: null };
+    });
+  }
+
+  buildDays(count, offset) {
+    const base = new Date(2026, 7, 25);
+    base.setDate(base.getDate() + offset);
+    const todayStr = new Date(2026, 7, 28).toDateString();
+    const wd = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const out = [];
+    for (let i = 0; i < count; i++) {
+      const d = new Date(base);
+      d.setDate(base.getDate() + i);
+      const isToday = d.toDateString() === todayStr;
+      out.push({
+        weekday: wd[d.getDay()], date: d.getDate(), isToday,
+        bg: isToday ? 'var(--color-accent-100)' : 'transparent',
+        headerBg: isToday ? 'var(--color-accent-200)' : 'transparent',
+      });
+    }
+    return out;
+  }
+
+  fmtRp(n) { return 'Rp ' + n.toLocaleString('id-ID'); }
+
+  renderVals() {
+    const lang = this.state.lang;
+    const t = T[lang];
+    const dayCount = this.state.range;
+    const days = this.buildDays(dayCount, this.state.dayOffset);
+    const months = { en: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'], id: ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'] }[lang];
+    const firstD = new Date(2026, 7, 25 + this.state.dayOffset);
+    const lastD = new Date(2026, 7, 25 + this.state.dayOffset + dayCount - 1);
+    const rangeLabel = `${firstD.getDate()} ${months[firstD.getMonth()]} – ${lastD.getDate()} ${months[lastD.getMonth()]}`;
+
+    const makeBars = (bookings, idx, ri) => bookings
+      .filter(b => b.start < dayCount)
+      .map((b, bi) => {
+        const span = Math.min(b.span, dayCount - b.start);
+        const left = (b.start / dayCount) * 100;
+        const width = (span / dayCount) * 100;
+        const s = STATUS_STYLE[b.status];
+        const label = b.guest || t.bookedLabel;
+        return {
+          label, title: label,
+          style: `position:absolute;top:9px;bottom:9px;left:calc(${left}% + 3px);width:calc(${width}% - 6px);min-width:44px;background:${s.bg};color:${s.color};border:${s.border};border-radius:var(--radius-sm);display:flex;align-items:center;padding:0 8px;font-size:12px;font-weight:600;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;box-shadow:var(--shadow-sm);z-index:2;cursor:grab;`,
+          startMove: e => this.beginBookingDrag(idx, ri, bi, 'move', e),
+          startResizeLeft: e => this.beginBookingDrag(idx, ri, bi, 'resize-left', e),
+          startResizeRight: e => this.beginBookingDrag(idx, ri, bi, 'resize-right', e),
+        };
+      });
+
+    const villas = this.state.villas.map((v, idx) => {
+      const isExpanded = this.state.expanded.has(idx);
+      const roomRows = isExpanded ? v.rooms.map((r, ri) => ({
+        name: r.name, category: r.category,
+        villaIdx: idx, riIndex: ri, rowKey: idx + '-' + ri,
+        renameRoom: e => this.renameRoom(idx, ri, e),
+        tagClass: ROOM_CATEGORY_TAG[r.category] || 'tag-neutral',
+        bars: makeBars(r.bookings, idx, ri),
+        addBookingAt: e => this.addBookingAt(idx, ri, e),
+        removeRoom: () => this.removeRoom(idx, ri),
+      })) : [];
+      return {
+        name: v.name, area: v.area, swatch: v.swatch,
+        renameVilla: e => this.renameVilla(idx, e),
+        isVilla: true, isGroup: false, isRoom: false,
+        removeVilla: () => this.removeVilla(idx),
+        toggleExpand: () => this.toggleExpand(idx),
+        isExpanded, roomCount: v.rooms.length,
+        chevron: isExpanded ? '▾' : '▸',
+        roomRows, addRoom: () => this.addRoom(idx),
+      };
+    });
+
+    const areaOf = v => v.area || t.otherArea;
+    const areaOrder = [...new Set(villas.map(areaOf))].sort((a, b) => {
+      if (a === t.otherArea) return 1;
+      if (b === t.otherArea) return -1;
+      return a.localeCompare(b);
+    });
+    const rows = [];
+    areaOrder.forEach(area => {
+      rows.push({ isGroup: true, isVilla: false, isRoom: false, groupLabel: area });
+      villas.filter(v => areaOf(v) === area).forEach(v => {
+        rows.push(v);
+        v.roomRows.forEach(r => rows.push({ isGroup: false, isVilla: false, isRoom: true, ...r }));
+        if (v.isExpanded) rows.push({ isGroup: false, isVilla: false, isRoom: false, isAddRoom: true, addRoom: v.addRoom });
+      });
+    });
+
+    const flat = [];
+    this.state.villas.forEach(v => v.rooms.forEach(r => r.bookings.forEach(b => flat.push({ ...b, villa: v.name, room: r.name }))));
+
+    const initial = name => (name ? name.charAt(0).toUpperCase() : '?');
+
+    const arrivals = flat.filter(b => b.start === TODAY_INDEX && b.guest).map(b => ({
+      guest: b.guest, villa: b.villa, initial: initial(b.guest),
+    }));
+    const departures = flat.filter(b => b.start + b.span === TODAY_INDEX && b.guest).map(b => ({
+      guest: b.guest, villa: b.villa, initial: initial(b.guest),
+    }));
+    const owing = flat.filter(b => b.owing).map(b => ({
+      guest: b.guest, villa: b.villa, initial: initial(b.guest), amountLabel: this.fmtRp(b.owing),
+    }));
+
+    let addBookingDraft = null;
+    if (this.state.addBookingDraft) {
+      const d = this.state.addBookingDraft;
+      const v = this.state.villas[d.idx];
+      const r = v && v.rooms[d.ri];
+      if (v && r) {
+        addBookingDraft = {
+          guestName: d.guestName,
+          contextLabel: `${v.name} · ${r.name} · ${this.dateAt(d.day)}`,
+          setGuestName: e => this.setAddBookingGuestName(e),
+          confirm: () => this.confirmAddBookingDraft(),
+          cancel: () => this.cancelAddBookingDraft(),
+        };
+      }
+    }
+
+    const confirmDialog = this.state.confirmDialog ? {
+      message: this.state.confirmDialog.message,
+      confirm: this.state.confirmDialog.onConfirm,
+      cancel: () => this.cancelConfirmDialog(),
+    } : null;
+
+    let popover = null;
+    if (this.state.popover) {
+      const { idx, ri, bi } = this.state.popover;
+      const v = this.state.villas[idx];
+      const r = v && v.rooms[ri];
+      const b = r && r.bookings[bi];
+      if (v && r && b) {
+        const s = STATUS_STYLE[b.status];
+        const statusLabelMap = { confirmed: t.legendConfirmed, checkedin: t.legendCheckedIn, checkedout: t.legendCheckedOut, blocked: t.legendBlocked, paymentincomplete: t.legendPaymentIncomplete };
+        popover = {
+          guestLabel: b.guest || t.bookedLabel,
+          villaRoomLabel: `${v.name} · ${r.name}`,
+          dateRangeLabel: `${this.dateAt(b.start)} – ${this.dateAt(b.start + b.span)}`,
+          statusLabel: statusLabelMap[b.status],
+          statusDotStyle: `display:inline-block;width:9px;height:9px;border-radius:50%;background:${s.bg};border:${s.border};`,
+          owingText: b.owing ? `${t.owingTitle}: ${this.fmtRp(b.owing)}` : null,
+          hasOwing: !!b.owing,
+          removeBooking: () => this.removeBooking(idx, ri, bi),
+          close: () => this.closePopover(),
+        };
+      }
+    }
+
+    const legend = [
+      { label: t.legendConfirmed, dotStyle: `display:inline-block;width:11px;height:11px;border-radius:50%;background:${STATUS_STYLE.confirmed.bg};` },
+      { label: t.legendCheckedIn, dotStyle: `display:inline-block;width:11px;height:11px;border-radius:50%;background:${STATUS_STYLE.checkedin.bg};` },
+      { label: t.legendCheckedOut, dotStyle: `display:inline-block;width:11px;height:11px;border-radius:50%;background:${STATUS_STYLE.checkedout.bg};` },
+      { label: t.legendBlocked, dotStyle: `display:inline-block;width:11px;height:11px;border-radius:50%;background:${STATUS_STYLE.blocked.bg};border:1px dashed var(--color-neutral-500);` },
+      { label: t.legendPaymentIncomplete, dotStyle: `display:inline-block;width:11px;height:11px;border-radius:50%;background:${STATUS_STYLE.paymentincomplete.bg};border:1px solid var(--color-accent-500);` },
+    ];
+
+    return {
+      t, isCalendar: this.state.screen === 'calendar', isToday: this.state.screen === 'today',
+      isEn: lang === 'en', isId: lang === 'id',
+      isR7: this.state.range === 7, isR14: this.state.range === 14, isR30: this.state.range === 30,
+      dayCount, days, rows, legend,
+      arrivals, departures, owing,
+      noArrivals: arrivals.length === 0, noDepartures: departures.length === 0, noOwing: owing.length === 0,
+      goCalendar: () => this.setState({ screen: 'calendar' }),
+      goToday: () => this.setState({ screen: 'today' }),
+      setEn: () => this.setState({ lang: 'en' }),
+      setId: () => this.setState({ lang: 'id' }),
+      setR7: () => this.setState({ range: 7 }),
+      setR14: () => this.setState({ range: 14 }),
+      setR30: () => this.setState({ range: 30 }),
+      addVilla: () => this.addVilla(),
+      userName: 'Alireza', userInitial: 'A',
+      rangeLabel,
+      jumpBigBack: () => this.shiftDays(-dayCount),
+      jumpBack: () => this.shiftDays(-1),
+      jumpFwd: () => this.shiftDays(1),
+      jumpBigFwd: () => this.shiftDays(dayCount),
+      jumpToday: () => this.setState({ dayOffset: 0 }),
+      hasPopover: !!popover, popover,
+      hasAddBookingDraft: !!addBookingDraft, addBookingDraft,
+      hasConfirmDialog: !!confirmDialog, confirmDialog,
+      stopClick: e => e.stopPropagation(),
+    };
+  }
+}
+</script>
+</body>
+</html>

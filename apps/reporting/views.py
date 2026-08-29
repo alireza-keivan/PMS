@@ -1,8 +1,9 @@
 """Owner reporting dashboard (feature #5).
 
-One screen: today's occupancy, this month's revenue, who's arriving, who's
-leaving, and who still owes money. Everything here is a read of data other
-apps already own - reporting has no booking logic of its own, only the
+One screen: today's occupancy, this month's revenue, and who's arriving,
+leaving, and still owes money - the last three now laid out to match the
+design handoff's "Today" screen (New UI mockups/design_handoff_villa_
+dashboard/README.md). Reporting has no booking logic of its own, only the
 aggregation and the currency conversion for display.
 """
 

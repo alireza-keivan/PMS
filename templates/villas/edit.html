@@ -7,7 +7,7 @@
 <div class="mx-auto max-w-2xl rounded-lg border border-sand-200 bg-white p-4 shadow-sm sm:p-6" x-data="{ showMore: false }">
   <h1 class="mb-1 text-lg font-semibold text-ink-900">{{ villa.name }}</h1>
   <p class="mb-4 text-sm text-ink-600">
-    {% translate "Name, property type, bedrooms, and at least one amenity are required." %}
+    {% translate "Name, property type, and at least one amenity are required. Rooms are further down the page." %}
   </p>
 
   {% if form.non_field_errors %}
@@ -26,5 +26,100 @@
       <a href="{% url 'villas:delete' villa.slug %}" class="ml-auto text-sm text-red-700 underline">{% translate "Delete villa" %}</a>
     </div>
   </form>
+</div>
+
+<div class="card mx-auto mt-4 max-w-2xl">
+  <h2 class="mb-1 text-base font-semibold text-ink-900">{% translate "Rooms" %}</h2>
+  <p class="mb-4 text-sm text-ink-600">
+    {% translate "Each kind of room, and how many of them there are. Change a number to add or remove rooms, and rename any room you like." %}
+  </p>
+
+  {% for group in room_groups %}
+    <form
+      method="post" action="{% url 'villas:save_room_category' villa.slug group.category.pk %}"
+      class="mb-4 rounded border border-sand-200 p-3"
+    >
+      {% csrf_token %}
+      <div class="flex flex-wrap items-end gap-2">
+        <div class="min-w-[10rem] flex-1">
+          <label class="mb-1 block text-xs text-ink-600" for="type_name_{{ group.category.pk }}">
+            {% translate "Room type" %}
+          </label>
+          <input
+            type="text" name="name" id="type_name_{{ group.category.pk }}" value="{{ group.category.name }}"
+            class="w-full rounded border border-sand-200 px-3 py-2 focus:border-teal-500 focus:outline-none"
+          >
+        </div>
+        <div class="w-28">
+          <label class="mb-1 block text-xs text-ink-600" for="type_count_{{ group.category.pk }}">
+            {% translate "How many" %}
+          </label>
+          <input
+            type="number" name="count" id="type_count_{{ group.category.pk }}" value="{{ group.rooms|length }}"
+            min="0" max="{{ max_rooms_per_type }}"
+            class="w-full rounded border border-sand-200 px-3 py-2 focus:border-teal-500 focus:outline-none"
+          >
+        </div>
+        <button type="submit" class="btn btn-secondary mb-[1px]">{% translate "Save" %}</button>
+      </div>
+
+      <ul class="mt-3 space-y-2">
+        {% for room in group.rooms %}
+          <li class="flex items-center gap-2">
+            <input
+              type="text" name="room_name_{{ room.pk }}" value="{{ room.name }}"
+              aria-label="{% translate 'Room name' %}"
+              class="flex-1 rounded border border-sand-200 px-3 py-1.5 text-sm focus:border-teal-500 focus:outline-none"
+            >
+          </li>
+        {% endfor %}
+      </ul>
+    </form>
+
+    <form method="post" action="{% url 'villas:remove_room_category' villa.slug group.category.pk %}" class="-mt-3 mb-4">
+      {% csrf_token %}
+      <button type="submit" class="text-xs text-red-700 underline">
+        {% blocktranslate with name=group.category.name %}Remove the {{ name }} room type{% endblocktranslate %}
+      </button>
+    </form>
+  {% endfor %}
+
+  {% if untyped_rooms %}
+    <div class="mb-4 rounded border border-sand-200 p-3">
+      <p class="mb-2 text-sm text-ink-900">{% translate "Rooms with no type yet" %}</p>
+      <ul class="space-y-2">
+        {% for room in untyped_rooms %}
+          <li class="flex items-center justify-between gap-2">
+            <span class="text-sm text-ink-900">{{ room.name }}</span>
+            <form method="post" action="{% url 'villas:remove_room' villa.slug room.pk %}">
+              {% csrf_token %}
+              <button type="submit" class="text-sm text-red-700 underline">{% translate "Remove" %}</button>
+            </form>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+  {% endif %}
+
+  <form method="post" action="{% url 'villas:add_room_category' villa.slug %}" class="flex flex-wrap items-end gap-2 border-t border-sand-100 pt-4">
+    {% csrf_token %}
+    <div class="min-w-[10rem] flex-1">
+      <label class="mb-1 block text-xs text-ink-600" for="{{ room_category_form.name.id_for_label }}">
+        {% translate "Add a room type" %}
+      </label>
+      {{ room_category_form.name }}
+    </div>
+    <div class="w-28">
+      <label class="mb-1 block text-xs text-ink-600" for="{{ room_category_form.count.id_for_label }}">
+        {% translate "How many" %}
+      </label>
+      {{ room_category_form.count }}
+    </div>
+    <button type="submit" class="btn btn-secondary mb-[1px]">{% translate "Add" %}</button>
+  </form>
+
+  <p class="mt-3 text-xs text-ink-600">
+    {% translate "A room with bookings on it is always kept, even if you lower the number - move those bookings first." %}
+  </p>
 </div>
 {% endblock %}

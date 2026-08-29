@@ -4,22 +4,50 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}{% translate "Villa dashboard" %}{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caprasimo&family=Figtree:wght@400;600;700&display=swap">
   <link rel="stylesheet" href="{% static 'css/tailwind.css' %}">
   <script src="{% static 'js/htmx.min.js' %}" defer></script>
+  {% comment %}
+  Any page-specific script that defines an Alpine component (window.X, or an
+  alpine:init listener) MUST run before alpine.min.js's own <script> tag, not
+  after - both are deferred, so they run in document order once parsing
+  finishes, and Alpine starts itself synchronously the instant its own script
+  runs (the whole document is already parsed by then). A component script
+  loaded later - e.g. via `extra_js` at the end of body - would still be
+  undefined at that exact moment, so x-data="thatComponent()" fails silently
+  and the whole component never becomes interactive on first load.
+  {% endcomment %}
+  {% block pre_alpine_js %}{% endblock %}
   <script src="{% static 'js/alpine.min.js' %}" defer></script>
 </head>
-<body class="bg-sand-50 text-ink-900 antialiased" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
-  <div class="flex h-screen overflow-hidden" x-data="{ sidebarOpen: false }">
-    {% include "partials/_sidebar.html" %}
-    <div class="flex flex-1 flex-col overflow-hidden">
-      {% include "partials/_topbar.html" %}
-      <main class="flex-1 overflow-y-auto">
-        <div class="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
-          {% block content %}{% endblock %}
-        </div>
-      </main>
+<body class="min-h-screen bg-sand-50 text-ink-900 antialiased" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+  {% include "partials/_topnav.html" %}
+
+  {% if messages %}
+    <div class="mx-auto max-w-6xl px-4 pt-4 sm:px-6 lg:px-8">
+      {% for message in messages %}
+        <div class="mb-4 rounded-md border border-teal-200 bg-teal-50 p-3 text-sm text-teal-800">{{ message }}</div>
+      {% endfor %}
     </div>
-  </div>
+  {% endif %}
+
+  <main>
+    {% comment %}
+    Pages that want the full page width (the booking calendar) override
+    `main` instead of `content`; everything else gets the usual centred
+    container without having to know this block exists. Messages render
+    above unconditionally (see above), so overriding `main` can never
+    silently swallow them the way it did once already.
+    {% endcomment %}
+    {% block main %}
+      <div class="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
+        {% block content %}{% endblock %}
+      </div>
+    {% endblock %}
+  </main>
+
   {% block extra_js %}{% endblock %}
 </body>
 </html>

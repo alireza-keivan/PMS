@@ -7,3 +7,50 @@
 [x-cloak] {
   display: none;
 }
+
+@layer base {
+  body {
+    font-size: 15px;
+    line-height: 1.55;
+  }
+  /* Global heading font (Caprasimo, see tailwind.config.js) - one rule, so
+     every heading picks it up without touching a single template. */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: theme("fontFamily.display");
+    font-weight: 400;
+    line-height: 1.12;
+    letter-spacing: -0.015em;
+  }
+}
+
+@layer components {
+  /* Shared components, per the design handoff: everything is fully
+     pill-shaped, no sharp corners, no gradients. */
+  .btn {
+    @apply inline-flex items-center justify-center gap-1.5 rounded-full px-4 py-2 text-sm transition-colors disabled:cursor-not-allowed disabled:opacity-45;
+    font-family: theme("fontFamily.display");
+  }
+  .btn-primary { @apply bg-teal-600 text-sand-50 hover:bg-teal-700 active:bg-teal-800; }
+  .btn-secondary { @apply border border-sand-300 text-ink-900 hover:bg-sand-200; }
+  .btn-ghost { @apply text-teal-700 hover:bg-teal-50; }
+  .btn-icon { @apply h-9 w-9 px-0 py-0; }
+
+  .input {
+    @apply w-full rounded-full border border-sand-300 bg-sand-100 px-4 py-1.5 text-sm text-ink-900 placeholder:text-ink-600 focus:border-teal-600 focus:outline-none;
+  }
+
+  .tag {
+    @apply inline-flex items-center whitespace-nowrap rounded-full px-2.5 py-0.5 text-xs;
+  }
+  .tag-accent { @apply bg-teal-50 text-teal-800; }
+  .tag-accent-2 { @apply bg-accent2-100 text-accent2-800; }
+  .tag-neutral { @apply bg-sand-200 text-ink-800; }
+
+  .seg { @apply inline-flex overflow-hidden rounded-full border border-sand-300; }
+  .seg-opt { @apply flex cursor-pointer items-center gap-1.5 px-3 py-1.5 text-sm text-ink-900 transition-colors; }
+  .seg-opt + .seg-opt { @apply border-l border-sand-300; }
+  .seg-opt-active { @apply bg-teal-600 text-sand-50; }
+  .seg-opt:not(.seg-opt-active):hover { @apply bg-sand-200; }
+
+  .card { @apply rounded-card border border-sand-300 bg-sand-100 p-4 shadow-sm; }
+}

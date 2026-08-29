@@ -32,15 +32,17 @@ def test_no_organization_shows_the_placeholder_state(client, user):
 def test_full_page_load_includes_the_page_shell(owner_client):
     response = owner_client.get(reverse("bookings:calendar"))
     assert response.status_code == 200
-    assert b"calendar-timeline" in response.content
-    assert b"calendar-data" in response.content
+    assert b"<!doctype html>" in response.content  # full document, not a fragment
+    assert b"calendarGrid()" in response.content   # Alpine scope wrapping the panel
+    assert b'id="calendar-panel"' in response.content
 
 
 def test_htmx_request_returns_only_the_panel_fragment(owner_client):
     response = owner_client.get(reverse("bookings:calendar"), HTTP_HX_REQUEST="true")
     assert response.status_code == 200
-    assert b"calendar-timeline" not in response.content
-    assert b"calendar-data" in response.content
+    assert b"<!doctype html>" not in response.content
+    assert b"calendarGrid()" not in response.content  # the scope lives outside the swap
+    assert b"New booking" in response.content        # but the toolbar came back
 
 
 def test_default_range_is_fourteen_days(owner_client):
