@@ -19,7 +19,9 @@ from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.decorators import method_decorator
 from django.utils.translation import gettext as _
+from django.views.decorators.cache import never_cache
 from django.views.generic import TemplateView, View
 
 from apps.bookings.forms import ReservationForm
@@ -44,6 +46,7 @@ DEFAULT_RANGE_SIZE = 14
 class CalendarView(LoginRequiredMixin, TemplateView):
     template_name = "bookings/calendar.html"
 
+    @method_decorator(never_cache)
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(**kwargs)
         template = "bookings/_calendar_panel.html" if request.htmx else self.template_name
@@ -236,15 +239,14 @@ def _reservation_preview(villas, room_type_id, check_in, check_out):
 
     context = {"nights": (check_out - check_in).days if valid_range else None, "availability": None}
     if room_type and valid_range:
-        room, conflict = find_available_room(room_type, check_in, check_out)
+        room, next_free_date = find_available_room(room_type, check_in, check_out)
         if room is not None:
             context["availability"] = {"free": True}
         else:
             context["availability"] = {
                 "free": False,
-                "guest": conflict.guest.full_name if conflict.guest else _("a guest"),
-                "check_in": conflict.check_in,
-                "check_out": conflict.check_out,
+                "room_type": room_type.name,
+                "next_free_date": next_free_date,
             }
     return context
 

@@ -1,0 +1,44 @@
+{% load i18n %}
+<div class="flex flex-none flex-col gap-2 border-b border-sand-300 p-4">
+  <h3 class="m-0 text-[20px]">{% translate "Messages" %}</h3>
+  <div class="relative">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#82796a" stroke-width="2.75"
+         stroke-linecap="round" stroke-linejoin="round"
+         class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2">
+      <circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+    </svg>
+    <input
+      type="search" name="q" value="{{ q }}" placeholder="{% translate 'Search guests or messages…' %}"
+      hx-get="{% url 'messaging:inbox' %}" hx-trigger="input changed delay:300ms" hx-include="[name=filter]"
+      hx-target="#msg-left" hx-push-url="true"
+      class="input pl-[34px]"
+    >
+  </div>
+  <select
+    name="filter" class="input text-[13px]"
+    hx-get="{% url 'messaging:inbox' %}" hx-trigger="change" hx-include="[name=q]"
+    hx-target="#msg-left" hx-push-url="true"
+  >
+    <option value="all" {% if filter_value == "all" %}selected{% endif %}>{% translate "All" %}</option>
+    <optgroup label="{% translate 'Status' %}">
+      {% for o in status_options %}
+        <option value="{{ o.value }}" {% if filter_value == o.value %}selected{% endif %}>{{ o.label }}</option>
+      {% endfor %}
+    </optgroup>
+    <optgroup label="{% translate 'Villas' %}">
+      {% for o in villa_options %}
+        <option value="{{ o.value }}" {% if filter_value == o.value %}selected{% endif %}>{{ o.label }}</option>
+      {% endfor %}
+    </optgroup>
+  </select>
+</div>
+
+<div class="flex-1 overflow-y-auto">
+  {% for c in conversations %}
+    {% include "messaging/_conversation_row.html" with c=c %}
+  {% empty %}
+    <p class="p-6 text-center text-sm opacity-55">
+      {% translate "No conversations match your search." %}
+    </p>
+  {% endfor %}
+</div>

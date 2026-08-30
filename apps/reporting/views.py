@@ -39,7 +39,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         bookings_today = Booking.objects.filter(
             organization=org, check_in__lte=today, check_out__gt=today,
             status__in=OCCUPYING_STATUSES,
-        ).select_related("villa", "guest")
+        ).select_related("villa", "room", "guest").order_by("villa__name")
 
         arriving_today = (
             Booking.objects.filter(organization=org, check_in=today, status=Booking.Status.CONFIRMED)
@@ -54,9 +54,37 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             .select_related("booking", "booking__villa", "booking__guest").order_by("booking__check_in")
         )
 
-        total_villas = Villa.objects.filter(organization=org).live().count()
-        occupied_villas = bookings_today.values("villa_id").distinct().count()
+        villas = Villa.objects.filter(organization=org).live().order_by("name")
+        total_villas = villas.count()
+        occupied_villa_ids = set(bookings_today.values_list("villa_id", flat=True))
+        occupied_villas = len(occupied_villa_ids)
         occupancy_percent = round(occupied_villas / total_villas * 100) if total_villas else 0
+
+        # Room-level split per villa - a villa with 10 rooms and 6 booked
+        # today shows "60% - 6/10", not just an occupied/vacant flag.
+        room_counts = {villa.id: villa.rooms.count() for villa in villas}
+        occupied_room_counts = {villa.id: 0 for villa in villas}
+        for booking in bookings_today:
+            # "Night 1 of 3" etc. - the Occupied-today card's per-row meta.
+            booking.night_of_stay = (today - booking.check_in).days + 1
+            booking.room_label = (
+                f"{booking.villa.name} · {booking.room.name}" if booking.room_id else booking.villa.name
+            )
+            if booking.room_id:
+                occupied_room_counts[booking.villa_id] += 1
+
+        villa_occupancy = []
+        for villa in villas:
+            total_rooms = room_counts[villa.id]
+            occupied_rooms = min(occupied_room_counts[villa.id], total_rooms) if total_rooms else 0
+            villa_percent = round(occupied_rooms / total_rooms * 100) if total_rooms else 0
+            villa_occupancy.append({
+                "villa": villa,
+                "occupied": villa.id in occupied_villa_ids,
+                "occupied_rooms": occupied_rooms,
+                "total_rooms": total_rooms,
+                "occupancy_percent": villa_percent,
+            })
 
         revenue_this_month, unconverted_count = self._revenue_this_month(org, month_start, today)
 
@@ -73,6 +101,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             occupancy_percent=occupancy_percent,
             occupied_villas=occupied_villas,
             total_villas=total_villas,
+            villa_occupancy=villa_occupancy,
             revenue_this_month=revenue_this_month,
             revenue_unconverted_count=unconverted_count,
             bookings_today=bookings_today,

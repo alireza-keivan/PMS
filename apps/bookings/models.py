@@ -110,7 +110,10 @@ class Booking(TenantOwnedModel):
     @property
     def has_guest_details(self) -> bool:
         """False for calendar-only rows. Gate guest-dependent features on this."""
-        return self.source_detail == self.SourceDetail.FULL and self.guest_id is not None
+        return (
+            self.source_detail in (self.SourceDetail.FULL, self.SourceDetail.MANUAL)
+            and self.guest_id is not None
+        )
 
 
 class BookingPayment(TenantOwnedModel, Money):

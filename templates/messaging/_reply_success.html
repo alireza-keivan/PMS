@@ -1,3 +1,4 @@
 {% load i18n %}
 <div id="reply-error" hx-swap-oob="true"></div>
-{% include "messaging/_message.html" %}
+{% include "messaging/_message_group.html" with group=group %}
+{% include "messaging/_conversation_row.html" with c=row oob=True %}

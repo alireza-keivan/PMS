@@ -3,90 +3,47 @@
 
 {% block title %}{% translate "Messages" %}{% endblock %}
 
-{% block content %}
+{% block main %}
 {% if no_organization %}
-  <div class="rounded-lg border border-sand-200 bg-white p-4 shadow-sm sm:p-6">
-    <p class="text-ink-900">
-      {% translate "Your account isn't linked to a property yet." %}
-    </p>
-    <p class="mt-2 text-sm text-ink-600">
-      {% translate "Ask an owner to add you, or use the admin panel to set this up." %}
-    </p>
+  <div class="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
+    <div class="card">
+      <p class="text-ink-900">{% translate "Your account isn't linked to a property yet." %}</p>
+      <p class="mt-2 text-sm opacity-70">
+        {% translate "Ask an owner to add you, or use the admin panel to set this up." %}
+      </p>
+    </div>
   </div>
 {% else %}
 
-  <div class="mb-4 flex items-center justify-between">
-    <h1 class="text-xl font-semibold text-ink-900">{% translate "Messages" %}</h1>
-    <p class="text-sm text-ink-600">
-      {% blocktranslate count n=conversations|length %}
-        {{ n }} conversation
-      {% plural %}
-        {{ n }} conversations
-      {% endblocktranslate %}
-    </p>
+{% comment %}
+Two panes, one page - there's no separate thread page. Selecting a
+conversation loads it into the right pane in place (see _thread_panel.html);
+this wrapper only tracks which guest is highlighted and, on narrow screens,
+which of the two panes is currently showing (msg-left/msg-right stack instead
+of sitting side by side below 880px - see design_handoff_messages/README.md).
+{% endcomment %}
+<div
+  x-data="{ activeId: {{ active_id|default:'null' }}, view: '{% if active_id %}thread{% else %}list{% endif %}' }"
+  class="flex h-[calc(100vh-4rem)] min-h-0"
+>
+  <div
+    id="msg-left" :class="view === 'thread' ? 'hidden min-[880px]:flex' : 'flex'"
+    class="w-full min-[880px]:w-[340px] min-[880px]:flex-none flex-col border-r border-sand-300 bg-sand-100"
+  >
+    {% include "messaging/_conversation_list.html" %}
   </div>
 
-  <div class="mb-3 flex flex-wrap items-center gap-2 text-sm">
-    {% for tab in status_tabs %}
-      <a href="{{ tab.href }}" class="rounded-full px-3 py-1 {% if tab.active %}bg-teal-600 text-white{% else %}bg-sand-100 text-ink-600 hover:bg-sand-200{% endif %}">
-        {{ tab.label }}
-      </a>
-    {% endfor %}
-    <span class="mx-1 h-4 w-px bg-sand-200"></span>
-    <a href="{{ recent_toggle.href }}" class="rounded-full px-3 py-1 {% if recent_toggle.active %}bg-teal-600 text-white{% else %}bg-sand-100 text-ink-600 hover:bg-sand-200{% endif %}">
-      {{ recent_toggle.label }}
-    </a>
+  <div
+    id="msg-right" :class="view === 'list' ? 'hidden min-[880px]:flex' : 'flex'"
+    class="w-full flex-1 flex-col"
+  >
+    {% if active_conversation %}
+      {% include "messaging/_thread_panel.html" with conversation=active_conversation %}
+    {% else %}
+      {% include "messaging/_empty_state.html" %}
+    {% endif %}
   </div>
-
-  <div class="mb-6 flex flex-wrap gap-2 text-sm">
-    {% for tab in villa_tabs %}
-      <a href="{{ tab.href }}" class="rounded-full px-3 py-1 {% if tab.active %}bg-teal-600 text-white{% else %}bg-sand-100 text-ink-600 hover:bg-sand-200{% endif %}">
-        {{ tab.label }}
-      </a>
-    {% endfor %}
-  </div>
-
-  {% if conversations %}
-    <div class="divide-y divide-sand-100 overflow-hidden rounded-lg border border-sand-200 bg-white shadow-sm">
-      {% for convo in conversations %}
-        <a href="{% url 'messaging:thread' convo.pk %}" class="flex items-center justify-between gap-4 px-4 py-3 hover:bg-sand-50">
-          <div class="min-w-0">
-            <p class="truncate font-medium text-ink-900">
-              {{ convo.guest.full_name }}
-              {% if convo.villa %}
-                <span class="ml-1 text-xs font-normal text-ink-500">· {{ convo.villa.name }}</span>
-              {% endif %}
-            </p>
-            <p class="truncate text-sm text-ink-600">
-              {% if convo.last_message %}
-                {% if convo.last_message.direction == "out" %}<span class="text-ink-500">{% translate "You:" %}</span> {% endif %}
-                {{ convo.last_message.body|truncatechars:80 }}
-              {% else %}
-                {% translate "No messages yet" %}
-              {% endif %}
-            </p>
-          </div>
-          <span class="flex-shrink-0 whitespace-nowrap text-xs text-ink-500">
-            {% if convo.last_message %}{{ convo.last_message.when|date:"j M, H:i" }}{% endif %}
-          </span>
-        </a>
-      {% endfor %}
-    </div>
-  {% elif is_filtered %}
-    <div class="rounded-lg border border-sand-200 bg-white p-6 text-center shadow-sm">
-      <p class="text-ink-900">{% translate "No conversations match these filters." %}</p>
-      <p class="mt-1 text-sm text-ink-600">
-        <a href="?status=all" class="text-teal-700 underline">{% translate "Show all conversations" %}</a>
-      </p>
-    </div>
-  {% else %}
-    <div class="rounded-lg border border-sand-200 bg-white p-6 text-center shadow-sm">
-      <p class="text-ink-900">{% translate "No conversations yet." %}</p>
-      <p class="mt-1 text-sm text-ink-600">
-        {% translate "Conversations show up here once a guest messages you on WhatsApp." %}
-      </p>
-    </div>
-  {% endif %}
+</div>
 
 {% endif %}
 {% endblock %}

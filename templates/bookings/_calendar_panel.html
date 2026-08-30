@@ -197,6 +197,7 @@ so both languages go through the normal .po catalog like everywhere else.
               data-channel="{{ bar.channel_display }}"
               data-status="{{ bar.status_display }}"
               data-detail="{{ bar.has_guest_details|yesno:'1,' }}"
+              data-guest-url="{{ bar.guest_url }}"
               data-money="{{ bar.can_see_money|yesno:'1,' }}"
               data-owed="{{ bar.amount_owed|default:'' }}"
               data-currency="{{ bar.currency|default:'' }}"

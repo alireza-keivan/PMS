@@ -1,14 +1,19 @@
 {% extends "base.html" %}
-{% load i18n %}
+{% load i18n static %}
 
-{% block title %}{% translate "Add a villa" %}{% endblock %}
+{% block title %}{% if villa and not villa.is_draft %}{{ villa.name }}{% else %}{% translate "Add a villa" %}{% endif %}{% endblock %}
 
 {% block content %}
 <div class="mx-auto max-w-2xl">
-  <h2 class="mb-0.5 text-[32px]">{% translate "Add a villa" %}</h2>
-  <p class="m-0 mb-6 text-ink-600">{% translate "General details, then room types." %}</p>
+  {% if villa and not villa.is_draft %}
+    <h2 class="mb-0.5 text-[32px]">{{ villa.name }}</h2>
+    <p class="m-0 mb-6 text-ink-600">{% translate "Details for this villa." %}</p>
+  {% else %}
+    <h2 class="mb-0.5 text-[32px]">{% translate "Add a villa" %}</h2>
+    <p class="m-0 mb-6 text-ink-600">{% translate "General details, then room types." %}</p>
+  {% endif %}
 
-  {% include "villas/_step_indicator.html" %}
+  {% include "villas/_step_indicator.html" with step=1 villa=villa %}
 
   <div class="card">
     <form method="post" enctype="multipart/form-data" novalidate>
@@ -16,13 +21,30 @@
       {% include "villas/_villa_fields.html" %}
 
       <div class="mt-8 flex items-center justify-between">
-        <a href="{% url 'villas:list' %}" class="btn btn-ghost">{% translate "Cancel" %}</a>
-        <button type="submit" class="btn btn-primary">{% translate "Continue to rooms" %} &rarr;</button>
+        <a href="{% url 'villas:list' %}" class="btn btn-ghost">
+          {% if villa and not villa.is_draft %}{% translate "Back to villas" %}{% else %}{% translate "Cancel" %}{% endif %}
+        </a>
+        <div class="flex items-center gap-3">
+          {% if villa and not villa.is_draft %}
+            <a href="{% url 'villas:rooms' villa.slug %}" class="btn btn-ghost">
+              {% translate "Edit rooms" %} &rarr;
+            </a>
+          {% endif %}
+          <button type="submit" class="btn btn-primary">
+            {% if villa and not villa.is_draft %}{% translate "Save" %}{% else %}{% translate "Continue to rooms" %} &rarr;{% endif %}
+          </button>
+        </div>
       </div>
     </form>
   </div>
 
-  {% if villa %}
+  {% if villa and not villa.is_draft %}
+    <p class="mt-4 text-center text-sm">
+      <a href="{% url 'villas:delete' villa.slug %}" class="text-sm text-ink-600 underline hover:text-teal-700">
+        {% translate "Remove this villa" %}
+      </a>
+    </p>
+  {% elif villa %}
     <p class="mt-4 text-center text-sm text-ink-600">
       {% translate "Everything here is already saved. You can close this and come back to it." %}
     </p>
@@ -34,4 +56,8 @@
     </p>
   {% endif %}
 </div>
+{% endblock %}
+
+{% block pre_alpine_js %}
+  <script src="{% static 'js/villa_form.js' %}" defer></script>
 {% endblock %}

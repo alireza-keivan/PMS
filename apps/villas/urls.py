@@ -36,8 +36,8 @@ urlpatterns = [
     path("<slug:slug>/photos/add/", VillaPhotoUploadView.as_view(), name="add_villa_photos"),
     path("<slug:slug>/photos/<int:pk>/remove/", VillaPhotoDeleteView.as_view(), name="remove_villa_photo"),
 
-    # The room blocks: step 2 while the villa is a draft, and the lower half
-    # of the edit page once it is real.
+    # The room blocks: step 2 while the villa is a draft, and step 2 of
+    # editing once it is real.
     path("<slug:slug>/rooms/", VillaRoomsView.as_view(), name="rooms"),
     path("<slug:slug>/rooms/quick-add/", RoomQuickAddView.as_view(), name="quick_add_room"),
     # The calendar's "+ Add room": adds straight away when the villa only has

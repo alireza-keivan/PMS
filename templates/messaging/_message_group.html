@@ -1,0 +1,15 @@
+{% load i18n %}
+<div class="flex flex-col {% if group.direction == 'out' %}items-end{% else %}items-start{% endif %}">
+  {% for message in group.messages %}
+    <div class="max-w-[70%] rounded-lg px-4 py-2.5 {% if not forloop.first %}mt-1{% endif %} {% if group.direction == 'out' %}bg-teal-600 text-sand-50{% else %}bg-sand-200 text-ink-900{% endif %}">
+      <p class="m-0 whitespace-pre-wrap text-[13.5px]">{{ message.body }}</p>
+      {% if forloop.last %}
+        <p class="m-0 mt-1 text-[11px] {% if group.direction == 'out' %}text-sand-50/70{% else %}text-ink-900/50{% endif %}">
+          {{ group.time|date:"j M, H:i" }}
+          {% if group.delivery_status %}· {{ group.delivery_status }}{% endif %}
+          {% if group.error %}- {{ group.error }}{% endif %}
+        </p>
+      {% endif %}
+    </div>
+  {% endfor %}
+</div>

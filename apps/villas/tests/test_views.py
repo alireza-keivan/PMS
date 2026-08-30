@@ -641,10 +641,15 @@ def test_adding_an_amenity_that_already_exists_says_so(owner_client, org, pool):
 
 # ---- editing and removing -------------------------------------------------
 
-def test_edit_page_shows_the_villa_and_its_room_blocks(owner_client, villa):
+def test_edit_page_shows_the_villa(owner_client, villa):
     response = owner_client.get(reverse("villas:edit", args=[villa.slug]))
     assert response.status_code == 200
     assert response.context["form"].instance == villa
+
+
+def test_the_rooms_step_of_editing_shows_the_room_blocks(owner_client, villa):
+    response = owner_client.get(reverse("villas:rooms", args=[villa.slug]))
+    assert response.status_code == 200
     assert len(response.context["formset"].forms) == villa.room_categories.count()
 
 

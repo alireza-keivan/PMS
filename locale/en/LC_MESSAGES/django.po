@@ -1515,8 +1515,17 @@ msgstr ""
 msgid "This part of the dashboard isn't built yet."
 msgstr ""
 
-#: templates/dashboard/dashboard.html:25
+#: templates/dashboard/dashboard.html:63
 msgid "Occupied today"
+msgstr ""
+
+#: templates/dashboard/dashboard.html:70
+#, python-format
+msgid "Night %(n)s of %(total)s"
+msgstr ""
+
+#: templates/dashboard/dashboard.html:73
+msgid "No one in-house tonight"
 msgstr ""
 
 #: templates/dashboard/dashboard.html:27
@@ -1543,6 +1552,13 @@ msgstr[1] ""
 #: templates/dashboard/dashboard.html:45
 msgid "Needs doing"
 msgstr ""
+
+#: templates/dashboard/dashboard.html:49
+#, python-format
+msgid "%(n)s task"
+msgid_plural "%(n)s tasks"
+msgstr[0] ""
+msgstr[1] ""
 
 #: templates/dashboard/dashboard.html:59
 msgid "Arriving today"

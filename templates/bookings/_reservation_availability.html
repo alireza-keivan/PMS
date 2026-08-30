@@ -26,12 +26,15 @@ doesn't require the listening element to be the one that changed.
       <span>{% translate "This room is free for these dates." %}</span>
     </div>
   {% elif availability %}
+    {% url 'bookings:calendar' as calendar_url %}
     <div class="flex items-start gap-2 rounded-sm border border-teal-400 bg-teal-100 px-3 py-2.5 text-sm text-teal-800">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round" class="mt-0.5 flex-none"><path d="M12 9v4m0 4h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg>
       <span>
-        {% blocktranslate with name=availability.guest check_in=availability.check_in check_out=availability.check_out %}
-          Already booked by {{ name }}, {{ check_in }} to {{ check_out }}. Check before saving.
+        {% blocktranslate trimmed with room_type=availability.room_type date=availability.next_free_date|date:"d M Y" %}
+          All {{ room_type }} rooms in this period are booked. The next free time starts at {{ date }}.
         {% endblocktranslate %}
+        {% blocktranslate trimmed %}Please check the{% endblocktranslate %}
+        <a href="{{ calendar_url }}" class="font-semibold underline">{% translate "calendar" %}</a>.
       </span>
     </div>
   {% endif %}

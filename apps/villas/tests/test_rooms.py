@@ -177,7 +177,7 @@ def _index_of(villa, category):
 
 def test_the_rooms_page_shows_a_block_for_every_room_type(owner_client, villa):
     create_room_type(villa, "Deluxe", how_many=2)
-    response = owner_client.get(reverse("villas:edit", args=[villa.slug]))
+    response = owner_client.get(reverse("villas:rooms", args=[villa.slug]))
 
     assert response.status_code == 200
     names = [f.instance.name for f in response.context["formset"].forms]

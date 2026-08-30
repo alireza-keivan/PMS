@@ -3,16 +3,30 @@
 Where you are, and where you're going. Two steps only, so it is written out
 rather than drawn as a progress bar - a bar with two segments tells you less
 than the words do. Include with `step` set to 1 or 2.
+
+Pass `villa` too when it's a real, finished villa (editing, not adding) - both
+steps are already saved at that point, so there's nothing linear left to
+enforce, and each step's name becomes a link straight to the other one.
 {% endcomment %}
+{% if villa and not villa.is_draft %}
+  {% url 'villas:edit' villa.slug as details_url %}
+  {% url 'villas:rooms' villa.slug as rooms_url %}
+{% endif %}
 <div class="mb-6 flex items-center gap-3">
   <div class="flex items-center gap-2">
     <span class="flex h-[26px] w-[26px] flex-none items-center justify-center rounded-full text-xs font-bold
       {% if step == 1 %}bg-teal-600 text-sand-50{% else %}bg-accent2-600 text-sand-50{% endif %}">
       {% if step == 2 %}&#10003;{% else %}1{% endif %}
     </span>
-    <span class="text-sm {% if step == 1 %}font-bold text-ink-900{% else %}font-medium text-ink-900/70{% endif %}">
-      {% translate "About the villa" %}
-    </span>
+    {% if details_url and step != 1 %}
+      <a href="{{ details_url }}" class="text-sm font-medium text-ink-900/70 hover:underline">
+        {% translate "About the villa" %}
+      </a>
+    {% else %}
+      <span class="text-sm {% if step == 1 %}font-bold text-ink-900{% else %}font-medium text-ink-900/70{% endif %}">
+        {% translate "About the villa" %}
+      </span>
+    {% endif %}
   </div>
 
   <div class="h-px w-10 {% if step == 2 %}bg-accent2-600{% else %}bg-sand-300{% endif %}" aria-hidden="true"></div>
@@ -20,8 +34,14 @@ than the words do. Include with `step` set to 1 or 2.
   <div class="flex items-center gap-2">
     <span class="flex h-[26px] w-[26px] flex-none items-center justify-center rounded-full text-xs font-bold
       {% if step == 2 %}bg-teal-600 text-sand-50{% else %}bg-sand-200 text-ink-600{% endif %}">2</span>
-    <span class="text-sm {% if step == 2 %}font-bold text-ink-900{% else %}font-medium text-ink-900/55{% endif %}">
-      {% translate "Rooms" %}
-    </span>
+    {% if rooms_url and step != 2 %}
+      <a href="{{ rooms_url }}" class="text-sm font-medium text-ink-900/55 hover:underline">
+        {% translate "Rooms" %}
+      </a>
+    {% else %}
+      <span class="text-sm {% if step == 2 %}font-bold text-ink-900{% else %}font-medium text-ink-900/55{% endif %}">
+        {% translate "Rooms" %}
+      </span>
+    {% endif %}
   </div>
 </div>

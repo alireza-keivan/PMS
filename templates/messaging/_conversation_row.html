@@ -1,0 +1,36 @@
+{% load i18n %}
+<div
+  id="conv-row-{{ c.pk }}"
+  {% if oob %}hx-swap-oob="true"{% endif %}
+  hx-get="{% url 'messaging:thread' c.pk %}" hx-target="#msg-right" hx-push-url="true"
+  @click="activeId = {{ c.pk }}; view = 'thread'"
+  :class="activeId === {{ c.pk }} ? 'bg-teal-50' : ''"
+  class="flex cursor-pointer items-center gap-2.5 border-b border-sand-300/60 px-4 py-3 hover:bg-sand-200/60"
+>
+  <div class="flex h-[38px] w-[38px] flex-none items-center justify-center rounded-full bg-accent2-200 text-[14px] text-accent2-800">
+    {{ c.guest.full_name|slice:":1"|upper }}
+  </div>
+  <div class="min-w-0 flex-1">
+    <div class="flex items-center gap-1.5">
+      <span class="truncate text-[14px] {% if c.unread %}font-semibold{% else %}font-normal{% endif %}">
+        {{ c.guest.full_name }}
+      </span>
+      {% if c.unread %}
+        <span class="h-[7px] w-[7px] flex-none rounded-full bg-teal-600"></span>
+      {% endif %}
+    </div>
+    {% if c.villa %}
+      <div class="truncate text-[11.5px] opacity-55">{{ c.villa.name }}</div>
+    {% endif %}
+    <div class="truncate text-[12.5px] opacity-65">
+      {% if c.last_message %}
+        {% if c.last_message.direction == "out" %}{% translate "You:" %} {% endif %}{{ c.last_message.body }}
+      {% else %}
+        {% translate "No messages yet" %}
+      {% endif %}
+    </div>
+  </div>
+  <div class="flex-none self-start whitespace-nowrap text-[11px] opacity-50">
+    {% if c.last_message %}{{ c.last_message.when|date:"j M, H:i" }}{% endif %}
+  </div>
+</div>

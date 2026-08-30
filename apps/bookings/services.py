@@ -11,6 +11,7 @@ from datetime import timedelta
 from decimal import Decimal
 
 from django.db.models import Max, Q, Sum
+from django.urls import reverse
 from django.utils import formats, timezone
 from django.utils.text import slugify
 from django.utils.translation import gettext, ngettext
@@ -279,6 +280,7 @@ def _build_bar(booking, today, payment, can_see_money, start, days) -> dict:
         "guest_count": booking.guest_count,
         "channel_display": booking.get_channel_display(),
         "has_guest_details": booking.has_guest_details,
+        "guest_url": reverse("guests:detail", args=[booking.guest_id]) if booking.has_guest_details else "",
         "can_see_money": can_see_money,
         "amount_owed": None,
         "currency": None,
@@ -292,7 +294,7 @@ def _build_bar(booking, today, payment, can_see_money, start, days) -> dict:
 
 def find_available_room(room_category: RoomCategory, check_in, check_out):
     """The first of this room type's rooms that's free for the given dates,
-    and the conflicting booking if none are.
+    and, if none are, the soonest date one of them frees up.
 
     Used by the Add Reservation form both for the live availability check
     (apps.bookings.views.ReservationAvailabilityView) and to actually assign a
@@ -300,24 +302,25 @@ def find_available_room(room_category: RoomCategory, check_in, check_out):
     whatever the live check last showed the client, same principle as
     BookingRescheduleView's overlap check.
 
-    Returns (room, None) if a room is free, or (None, conflicting_booking) if
-    every room of this type is booked - conflicting_booking is whichever one
-    overlaps first, purely so the clash message can name a guest and dates.
+    Returns (room, None) if a room is free, or (None, next_free_date) if every
+    room of this type is booked - next_free_date is the earliest check-out
+    among the bookings in the way, i.e. the soonest any of them opens up (not
+    a guarantee it stays open past that date - just where to look next).
     """
     rooms = list(room_category.rooms.filter(is_active=True).order_by("id"))
-    overlapping = {
-        b.room_id: b
-        for b in Booking.objects.filter(
+    overlapping = list(
+        Booking.objects.filter(
             organization=room_category.organization_id,
             room_id__in=[r.id for r in rooms],
             check_in__lt=check_out, check_out__gt=check_in,
-        ).exclude(status=Booking.Status.CANCELLED).select_related("guest").order_by("check_in")
-    }
+        ).exclude(status=Booking.Status.CANCELLED).only("room_id", "check_out")
+    )
+    booked_room_ids = {b.room_id for b in overlapping}
     for room in rooms:
-        if room.id not in overlapping:
+        if room.id not in booked_room_ids:
             return room, None
-    conflict = next(iter(overlapping.values()), None)
-    return None, conflict
+    next_free_date = min((b.check_out for b in overlapping), default=None)
+    return None, next_free_date
 
 
 def _rooms_by_villa(villa_ids: list) -> dict:

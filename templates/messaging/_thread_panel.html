@@ -1,0 +1,86 @@
+{% load i18n %}
+{% comment %}
+Right pane content for one conversation - returned as a bare fragment for an
+HTMX row click (swapped into #msg-right) and included inline when a
+conversation's URL is opened directly (see ConversationDetailView.get()).
+{% endcomment %}
+<div class="flex items-center gap-3 border-b border-sand-300 bg-sand-100 px-6 py-4">
+  <button
+    type="button" @click="view = 'list'"
+    class="btn btn-icon btn-ghost min-[880px]:hidden flex-none"
+    aria-label="{% translate 'Back to conversations' %}"
+  >
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="15 18 9 12 15 6"></polyline>
+    </svg>
+  </button>
+  <div class="min-w-0 flex-1">
+    <div class="flex flex-wrap items-baseline gap-2">
+      <h4 class="m-0">{{ conversation.guest.full_name }}</h4>
+      {% if status_label %}<span class="tag {{ status_tag_class }}">{{ status_label }}</span>{% endif %}
+    </div>
+    <div class="mt-0.5 text-[12.5px] opacity-65">
+      {% if booking %}
+        {{ booking.villa.name }}{% if booking.room %} · {{ booking.room.name }}{% endif %}
+        · {{ booking.check_in|date:"j M" }} – {{ booking.check_out|date:"j M" }}
+      {% else %}
+        {{ conversation.phone }}
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<div id="thread-messages" class="flex-1 overflow-y-auto px-6 pt-8 pb-5">
+  <div class="mx-auto flex max-w-[640px] flex-col gap-4">
+    {% for group in groups %}
+      {% include "messaging/_message_group.html" %}
+    {% empty %}
+      <p class="text-sm opacity-55">{% translate "No messages yet." %}</p>
+    {% endfor %}
+  </div>
+</div>
+
+<div class="flex-none border-t border-sand-300 bg-sand-100 px-6 py-4">
+  <div class="mx-auto max-w-[640px]" x-data="{ draft: '' }" @reply-sent.window="draft = ''">
+    <div id="reply-error"></div>
+
+    {% if conversation.window_is_open %}
+      <form
+        hx-post="{% url 'messaging:reply' conversation.pk %}" hx-target="#thread-messages" hx-swap="beforeend"
+        class="flex items-center gap-2 rounded-full bg-sand-200 py-1.5 pl-4 pr-1.5"
+        @submit="setTimeout(() => draft = '', 0)"
+      >
+        <input
+          name="body" x-model="draft" required
+          placeholder="{% translate 'Write a message…' %}"
+          class="min-w-0 flex-1 border-none bg-transparent px-0 py-1.5 text-sm text-ink-900 placeholder:text-ink-600 focus:outline-none"
+        >
+        <button type="submit" class="btn btn-primary btn-icon flex-none" aria-label="{% translate 'Send' %}">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+          </svg>
+        </button>
+      </form>
+    {% elif templates %}
+      <p class="mb-3 text-[13px] opacity-75">
+        {% blocktranslate with name=conversation.guest.full_name %}It's been more than 24 hours since {{ name }} messaged, so WhatsApp only allows approved templates. Pick one to send.{% endblocktranslate %}
+      </p>
+      <div class="grid gap-2 [grid-template-columns:repeat(auto-fill,minmax(220px,1fr))]">
+        {% for tpl in templates %}
+          <button
+            type="button" class="card elev-sm cursor-pointer text-left hover:bg-sand-200"
+            hx-post="{% url 'messaging:reply' conversation.pk %}" hx-target="#thread-messages" hx-swap="beforeend"
+            hx-vals='{{ tpl.vals_json }}'
+          >
+            <div class="card-kicker">{{ tpl.name }}</div>
+            <div class="card-body">{{ tpl.body }}</div>
+          </button>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="text-sm opacity-70">
+        {% translate "No approved template on file yet - nothing can be sent until one is approved, or they message you again." %}
+      </p>
+    {% endif %}
+  </div>
+</div>

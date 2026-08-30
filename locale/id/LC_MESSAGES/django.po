@@ -1614,9 +1614,18 @@ msgstr "Belum ada dokumen yang tercatat."
 msgid "This part of the dashboard isn't built yet."
 msgstr "Bagian dasbor ini belum tersedia."
 
-#: templates/dashboard/dashboard.html:25
+#: templates/dashboard/dashboard.html:63
 msgid "Occupied today"
 msgstr "Terisi hari ini"
+
+#: templates/dashboard/dashboard.html:70
+#, python-format
+msgid "Night %(n)s of %(total)s"
+msgstr "Malam %(n)s dari %(total)s"
+
+#: templates/dashboard/dashboard.html:73
+msgid "No one in-house tonight"
+msgstr "Tidak ada tamu menginap malam ini"
 
 #: templates/dashboard/dashboard.html:27
 msgid "of"
@@ -1642,6 +1651,13 @@ msgstr[1] "%(n)s pembayaran tidak dihitung - tidak ada kurs yang tercatat"
 #: templates/dashboard/dashboard.html:45
 msgid "Needs doing"
 msgstr "Perlu dikerjakan"
+
+#: templates/dashboard/dashboard.html:49
+#, python-format
+msgid "%(n)s task"
+msgid_plural "%(n)s tasks"
+msgstr[0] "%(n)s tugas"
+msgstr[1] "%(n)s tugas"
 
 #: templates/dashboard/dashboard.html:59
 msgid "Arriving today"

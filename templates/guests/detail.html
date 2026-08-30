@@ -32,7 +32,7 @@
 
 <div class="grid gap-6 lg:grid-cols-2">
 
-  <section class="rounded-lg border border-sand-200 bg-white p-4 shadow-sm sm:p-6">
+  <section class="rounded-lg border border-sand-200 bg-sand-100 p-4 shadow-sm sm:p-6">
     <h2 class="mb-3 font-semibold text-ink-900">{% translate "Bookings" %}</h2>
     {% if bookings %}
       <ul class="divide-y divide-sand-100">
@@ -54,7 +54,7 @@
     {% endif %}
   </section>
 
-  <section class="rounded-lg border border-sand-200 bg-white p-4 shadow-sm sm:p-6">
+  <section class="rounded-lg border border-sand-200 bg-sand-100 p-4 shadow-sm sm:p-6">
     <h2 class="mb-3 font-semibold text-ink-900">{% translate "Requests" %}</h2>
     {% if requests %}
       <ul class="divide-y divide-sand-100">
@@ -74,7 +74,7 @@
     {% endif %}
   </section>
 
-  <section class="rounded-lg border border-sand-200 bg-white p-4 shadow-sm sm:p-6">
+  <section class="rounded-lg border border-sand-200 bg-sand-100 p-4 shadow-sm sm:p-6">
     <h2 class="mb-3 font-semibold text-ink-900">{% translate "Private feedback" %}</h2>
     {% if feedback_entries %}
       <ul class="divide-y divide-sand-100">
@@ -96,7 +96,7 @@
     {% endif %}
   </section>
 
-  <section class="rounded-lg border border-sand-200 bg-white p-4 shadow-sm sm:p-6">
+  <section class="rounded-lg border border-sand-200 bg-sand-100 p-4 shadow-sm sm:p-6">
     <h2 class="mb-3 font-semibold text-ink-900">{% translate "Police report reminders" %}</h2>
     {% if police_reports %}
       <ul class="divide-y divide-sand-100">
@@ -119,7 +119,7 @@
     {% endif %}
   </section>
 
-  <section class="rounded-lg border border-sand-200 bg-white p-4 shadow-sm sm:p-6 lg:col-span-2">
+  <section class="rounded-lg border border-sand-200 bg-sand-100 p-4 shadow-sm sm:p-6 lg:col-span-2">
     <h2 class="mb-3 font-semibold text-ink-900">{% translate "Recent activity" %}</h2>
     {% if recent_activity %}
       <ul class="divide-y divide-sand-100">
@@ -139,7 +139,7 @@
   </section>
 
   {% if guest.notes %}
-    <section class="rounded-lg border border-sand-200 bg-white p-4 shadow-sm sm:p-6 lg:col-span-2">
+    <section class="rounded-lg border border-sand-200 bg-sand-100 p-4 shadow-sm sm:p-6 lg:col-span-2">
       <h2 class="mb-3 font-semibold text-ink-900">{% translate "Internal notes" %}</h2>
       <p class="text-sm text-ink-600">{% translate "Staff only - never shown to the guest." %}</p>
       <p class="mt-2 text-sm text-ink-900">{{ guest.notes|linebreaksbr }}</p>

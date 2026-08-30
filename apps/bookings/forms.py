@@ -9,6 +9,7 @@ import logging
 
 from django import forms
 from django.conf import settings
+from django.utils import formats
 from django.utils.translation import gettext_lazy as _
 
 from apps.bookings.models import Booking
@@ -130,7 +131,7 @@ class ReservationForm(forms.Form):
         self.villas = villas
         self.hide_money = hide_money
         self.available_room = None
-        self.conflicting_booking = None
+        self.next_free_date = None
 
         villa_ids = [v.id for v in villas]
         self.fields["villa"].queryset = Villa.objects.filter(id__in=villa_ids)
@@ -165,15 +166,15 @@ class ReservationForm(forms.Form):
             check_out = None
 
         if room_type and check_in and check_out:
-            room, conflict = find_available_room(room_type, check_in, check_out)
+            room, next_free_date = find_available_room(room_type, check_in, check_out)
             if room is None:
-                self.conflicting_booking = conflict
+                self.next_free_date = next_free_date
                 message = _(
-                    "Already booked by %(name)s, %(check_in)s to %(check_out)s. "
-                    "Check before saving."
+                    "All %(room_type)s rooms in this period are booked. The next free "
+                    "time starts at %(date)s. Please check the calendar."
                 ) % {
-                    "name": conflict.guest.full_name if conflict.guest else _("a guest"),
-                    "check_in": conflict.check_in, "check_out": conflict.check_out,
+                    "room_type": room_type.name,
+                    "date": formats.date_format(next_free_date, "d M Y") if next_free_date else "?",
                 }
                 self.add_error(None, message)
             else:

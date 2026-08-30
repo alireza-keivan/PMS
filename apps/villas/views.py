@@ -80,10 +80,11 @@ class VillaListView(LoginRequiredMixin, TemplateView):
             .order_by("name")
         )
 
-        # A villa currently occupied is "available" again the day its current
-        # booking checks out - not some vague "occupied" flag. Picking the
-        # latest check-out per villa covers the (should-never-happen, but
-        # possible via manual admin edits) case of overlapping bookings.
+        # A villa has several rooms, so it's "available" again as soon as its
+        # earliest-checking-out current booking frees up a room - not when
+        # every room is empty. Picking the earliest check-out per villa also
+        # covers the (should-never-happen, but possible via manual admin
+        # edits) case of overlapping bookings.
         available_from = {}
         current_bookings = Booking.objects.filter(
             organization=org,
@@ -92,7 +93,7 @@ class VillaListView(LoginRequiredMixin, TemplateView):
             status__in=OCCUPYING_STATUSES,
         ).values_list("villa_id", "check_out")
         for villa_id, check_out in current_bookings:
-            if villa_id not in available_from or check_out > available_from[villa_id]:
+            if villa_id not in available_from or check_out < available_from[villa_id]:
                 available_from[villa_id] = check_out
 
         for villa in villas:
@@ -328,8 +329,8 @@ class VillaDetailsView(LoginRequiredMixin, View):
 
 
 class VillaRoomsView(LoginRequiredMixin, View):
-    """The room blocks - step 2 when adding, the lower half of the edit page
-    once the villa is real. One view either way, because it is the same work.
+    """The room blocks - step 2 when adding, and step 2 of editing too once
+    the villa is real. One view either way, because it is the same work.
     """
 
     def dispatch(self, request, *args, **kwargs):
@@ -342,10 +343,6 @@ class VillaRoomsView(LoginRequiredMixin, View):
         return super().dispatch(request, *args, **kwargs)
 
     def get(self, request, slug):
-        if not self.villa.is_draft:
-            # A finished villa has no step 2 of its own - its rooms are edited
-            # on the villa's own page, alongside everything else.
-            return redirect("villas:edit", slug=self.villa.slug)
         return self._render(_room_formset(self.villa, self.organization))
 
     def post(self, request, slug):
@@ -664,24 +661,11 @@ class AmenityCreateView(LoginRequiredMixin, View):
 
 
 class VillaUpdateView(VillaDetailsView):
-    """The edit page - both halves of the add form on one page.
-
-    The villa's own details and its room blocks are the same partials used
-    when adding, so a villa is described the same way whichever door it came
-    in by. They are two separate forms though: the details post here, the room
-    blocks post to VillaRoomsView, which is the one place that knows how to
-    turn "how many rooms" into real rooms.
+    """Editing a villa's own details - step 1 of the same two-step form used
+    to add one, since a villa is described the same way whichever door it
+    came in by. Its rooms are step 2, at VillaRoomsView; the step indicator on
+    each page links to the other one.
     """
-
-    template_name = "villas/edit.html"
-
-    def _render(self, form):
-        context = _rooms_context(
-            self.villa, self.organization,
-            _room_formset(self.villa, self.organization),
-        )
-        context.update(form=form, areas=BALI_AREAS)
-        return render(self.request, self.template_name, context)
 
 
 class VillaDeleteView(LoginRequiredMixin, DetailView):

@@ -89,6 +89,8 @@ def test_nights_property(org, villa):
         (Booking.SourceDetail.FULL, False, False),
         (Booking.SourceDetail.DATES_ONLY, True, False),
         (Booking.SourceDetail.DATES_ONLY, False, False),
+        (Booking.SourceDetail.MANUAL, True, True),
+        (Booking.SourceDetail.MANUAL, False, False),
     ],
 )
 def test_has_guest_details_requires_both_full_detail_and_a_guest(

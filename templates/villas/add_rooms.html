@@ -5,13 +5,22 @@
 
 {% block content %}
 <div class="mx-auto max-w-2xl">
-  <h2 class="mb-0.5 text-[32px]">{% translate "Add a villa" %}</h2>
-  <p class="m-0 mb-6 text-ink-600">{% translate "General details, then room types." %}</p>
+  {% if villa.is_draft %}
+    <h2 class="mb-0.5 text-[32px]">{% translate "Add a villa" %}</h2>
+    <p class="m-0 mb-6 text-ink-600">{% translate "General details, then room types." %}</p>
+  {% else %}
+    <h2 class="mb-0.5 text-[32px]">{{ villa.name }}</h2>
+    <p class="m-0 mb-6 text-ink-600">{% translate "Each kind of room, and how many there are." %}</p>
+  {% endif %}
 
-  {% include "villas/_step_indicator.html" %}
+  {% include "villas/_step_indicator.html" with step=2 %}
 
   <p class="mb-4 text-sm text-ink-600">
-    {% translate "Add one kind of room for every kind this villa has. Renting the whole place out as one is fine - that's a single kind of room with one room in it." %}
+    {% if villa.is_draft %}
+      {% translate "Add one kind of room for every kind this villa has. Renting the whole place out as one is fine - that's a single kind of room with one room in it." %}
+    {% else %}
+      {% translate "Change a number to add or take away rooms. A room with bookings on it is always kept, even if you lower the number - move those bookings first." %}
+    {% endif %}
   </p>
 
   <form method="post" action="{% url 'villas:rooms' villa.slug %}" id="room-form" novalidate>
@@ -21,16 +30,20 @@
     </div>
 
     <div class="mt-6 flex items-center justify-between">
-      <a href="{% url 'villas:add_details' villa.slug %}" class="btn btn-ghost">
+      <a href="{% if villa.is_draft %}{% url 'villas:add_details' villa.slug %}{% else %}{% url 'villas:edit' villa.slug %}{% endif %}" class="btn btn-ghost">
         &larr; {% translate "Back to villa details" %}
       </a>
-      <button type="submit" class="btn btn-primary">{% translate "Save villa" %}</button>
+      <button type="submit" class="btn btn-primary">
+        {% if villa.is_draft %}{% translate "Save villa" %}{% else %}{% translate "Save the rooms" %}{% endif %}
+      </button>
     </div>
   </form>
 
-  <p class="mt-4 text-center text-sm text-ink-600">
-    {% translate "Everything you've typed is already saved. You can close this and come back to it." %}
-  </p>
+  {% if villa.is_draft %}
+    <p class="mt-4 text-center text-sm text-ink-600">
+      {% translate "Everything you've typed is already saved. You can close this and come back to it." %}
+    </p>
+  {% endif %}
 </div>
 {% endblock %}
 

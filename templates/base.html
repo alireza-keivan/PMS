@@ -26,9 +26,25 @@
   {% include "partials/_topnav.html" %}
 
   {% if messages %}
-    <div class="mx-auto max-w-6xl px-4 pt-4 sm:px-6 lg:px-8">
+    <div class="mx-auto flex max-w-6xl flex-col items-center gap-2 px-4 pt-4 sm:px-6 lg:px-8">
       {% for message in messages %}
-        <div class="mb-4 rounded-md border border-teal-200 bg-teal-50 p-3 text-sm text-teal-800">{{ message }}</div>
+        {% comment %}
+        A flash message: shown right away, then fades itself out - so a
+        success/error banner never has to be dismissed by hand or left
+        sitting on screen after the next click. Sized to its own text and
+        centered, like a toast, rather than a full-width bar. Colored by
+        Django's own message level (message.tags) rather than one fixed look
+        for every kind of message - success reads as sage/green, an error as
+        red, anything else (e.g. a warning) keeps the neutral terracotta tone.
+        {% endcomment %}
+        <div
+          x-data="{ show: true }" x-init="setTimeout(() => show = false, 4000)"
+          x-show="show" x-transition x-cloak
+          class="w-fit rounded-full border px-4 py-2 text-center text-sm
+            {% if message.tags == 'error' %}border-red-300 bg-red-50 text-red-800
+            {% elif message.tags == 'success' %}border-accent2-300 bg-accent2-100 text-accent2-800
+            {% else %}border-teal-200 bg-teal-50 text-teal-800{% endif %}"
+        >{{ message }}</div>
       {% endfor %}
     </div>
   {% endif %}
