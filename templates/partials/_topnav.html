@@ -1,13 +1,16 @@
 {% load i18n i18n_extras %}
 {% comment %}
 Top bar, per the design handoff: brand wordmark, a Calendar/Today segmented
-control, everything else behind "More", then the user and the language switch
-pushed right. Replaces the old left sidebar - see CLAUDE.md's note about
-progressive disclosure: two everyday destinations stay visible, the rest are
-one click away rather than crowding the bar.
+control, and the rest of the destinations laid out directly in the center of
+the bar, then the user and the language switch pushed right.
 {% endcomment %}
 {% url 'reporting:dashboard' as today_url %}
 {% url 'bookings:calendar' as calendar_url %}
+{% url 'villas:list' as villas_url %}
+{% url 'guests:list' as guests_url %}
+{% url 'compliance:action_needed' as compliance_url %}
+{% url 'messaging:inbox' as messages_url %}
+{% url 'marketing_admin:overview' as marketing_url %}
 
 <header class="sticky top-0 z-30 flex h-16 flex-shrink-0 items-center gap-s4 border-b border-sand-300 bg-sand-100 px-s6">
   <a href="{{ calendar_url }}" class="font-display text-[19px] text-ink-900">{% translate "Rumah" %}</a>
@@ -21,31 +24,15 @@ one click away rather than crowding the bar.
     </a>
   </div>
 
-  <div class="relative" x-data="{ open: false }" @keydown.escape.window="open = false">
-    <button type="button" class="btn btn-ghost" @click="open = !open" :aria-expanded="open">
-      {% translate "More" %}
-      <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round">
-        <polyline points="6 9 12 15 18 9" />
-      </svg>
-    </button>
-    <div
-      x-show="open" x-cloak @click.outside="open = false"
-      class="absolute left-0 top-full z-40 mt-1 w-56 overflow-hidden rounded-md border border-sand-300 bg-sand-100 py-1 shadow-md"
-    >
-      {% url 'villas:list' as villas_url %}
-      {% url 'guests:list' as guests_url %}
-      {% url 'compliance:action_needed' as compliance_url %}
-      {% url 'messaging:inbox' as messages_url %}
-      {% url 'marketing_admin:overview' as marketing_url %}
-      <a href="{{ villas_url }}" class="block px-s4 py-s2 text-sm text-ink-900 hover:bg-sand-200">{% translate "Villas" %}</a>
-      <a href="{{ guests_url }}" class="block px-s4 py-s2 text-sm text-ink-900 hover:bg-sand-200">{% translate "Guests" %}</a>
-      <a href="{{ compliance_url }}" class="block px-s4 py-s2 text-sm text-ink-900 hover:bg-sand-200">{% translate "Compliance" %}</a>
-      <a href="{{ messages_url }}" class="block px-s4 py-s2 text-sm text-ink-900 hover:bg-sand-200">{% translate "Messages" %}</a>
-      <a href="{{ marketing_url }}" class="block px-s4 py-s2 text-sm text-ink-900 hover:bg-sand-200">{% translate "Marketing" %}</a>
-    </div>
-  </div>
+  <nav class="flex flex-1 items-center justify-center gap-s4">
+    <a href="{{ villas_url }}" class="text-sm text-ink-900/75 hover:text-ink-900 {% if request.path == villas_url %}text-ink-900 font-medium{% endif %}">{% translate "Villas" %}</a>
+    <a href="{{ guests_url }}" class="text-sm text-ink-900/75 hover:text-ink-900 {% if request.path == guests_url %}text-ink-900 font-medium{% endif %}">{% translate "Guests" %}</a>
+    <a href="{{ compliance_url }}" class="text-sm text-ink-900/75 hover:text-ink-900 {% if request.path == compliance_url %}text-ink-900 font-medium{% endif %}">{% translate "Compliance" %}</a>
+    <a href="{{ messages_url }}" class="text-sm text-ink-900/75 hover:text-ink-900 {% if request.path == messages_url %}text-ink-900 font-medium{% endif %}">{% translate "Messages" %}</a>
+    <a href="{{ marketing_url }}" class="text-sm text-ink-900/75 hover:text-ink-900 {% if request.path == marketing_url %}text-ink-900 font-medium{% endif %}">{% translate "Marketing" %}</a>
+  </nav>
 
-  <div class="ml-auto flex items-center gap-2">
+  <div class="flex items-center gap-2">
     <span class="flex h-7 w-7 flex-none items-center justify-center rounded-full bg-teal-200 font-display text-xs text-teal-900">
       {% if user.full_name %}{{ user.full_name|slice:":1"|upper }}{% else %}{{ user.email|slice:":1"|upper }}{% endif %}
     </span>
