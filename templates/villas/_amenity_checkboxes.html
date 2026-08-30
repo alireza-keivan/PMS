@@ -1,0 +1,49 @@
+{% load i18n %}
+{% comment %}
+What a room comes with, as toggleable pills - outlined when off, solid when
+on. Include with `field` (the block's amenities field) and `category` (the
+room type it belongs to).
+
+Toggling itself needs no JavaScript or Alpine - each pill is a label wrapping
+a visually-hidden checkbox, and the fill comes from a plain CSS :has() rule in
+src.css. The list is the shared one plus anything this operator has added
+before; the row underneath adds a new one, kept against their account so it
+turns up ready to pick on every villa they add afterwards.
+{% endcomment %}
+<div>
+  <p class="mb-2 text-sm text-ink-800">{{ field.label }}</p>
+
+  <div id="amenities-{{ category.pk }}" class="flex flex-wrap gap-2">
+    {% for choice in field %}
+      <label>
+        {{ choice.tag }}
+        <span class="tag tag-toggle">{{ choice.choice_label }}</span>
+      </label>
+    {% endfor %}
+  </div>
+
+  {% if field.errors and not hide_errors %}
+    <p class="mt-1 text-sm text-teal-700">{{ field.errors|join:" " }}</p>
+  {% endif %}
+
+  <div class="mt-2 flex flex-wrap items-center gap-1.5">
+    {# Names the box the new tickbox has to join, so it lands on this room #}
+    {# type rather than one of the others. #}
+    <input type="hidden" name="field_name" value="{{ field.html_name }}">
+    <input type="hidden" name="category_pk" value="{{ category.pk }}">
+    <input
+      type="text" name="name_en" maxlength="80"
+      placeholder="{% translate 'Add your own' %}"
+      class="input max-w-[13rem]"
+    >
+    <button
+      type="button" class="btn btn-ghost px-2.5"
+      aria-label="{% translate 'Add' %}"
+      hx-post="{% url 'villas:add_amenity' %}"
+      hx-include="closest div"
+      hx-target="#amenity-note-{{ category.pk }}"
+      hx-swap="innerHTML"
+    >+</button>
+  </div>
+  <div id="amenity-note-{{ category.pk }}"></div>
+</div>

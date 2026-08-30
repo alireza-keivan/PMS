@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block title %}{% translate "Rooms" %}{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-2xl">
+  <h2 class="mb-0.5 text-[32px]">{% translate "Add a villa" %}</h2>
+  <p class="m-0 mb-6 text-ink-600">{% translate "General details, then room types." %}</p>
+
+  {% include "villas/_step_indicator.html" %}
+
+  <p class="mb-4 text-sm text-ink-600">
+    {% translate "Add one kind of room for every kind this villa has. Renting the whole place out as one is fine - that's a single kind of room with one room in it." %}
+  </p>
+
+  <form method="post" action="{% url 'villas:rooms' villa.slug %}" id="room-form" novalidate>
+    {% csrf_token %}
+    <div id="room-blocks">
+      {% include "villas/_room_blocks.html" %}
+    </div>
+
+    <div class="mt-6 flex items-center justify-between">
+      <a href="{% url 'villas:add_details' villa.slug %}" class="btn btn-ghost">
+        &larr; {% translate "Back to villa details" %}
+      </a>
+      <button type="submit" class="btn btn-primary">{% translate "Save villa" %}</button>
+    </div>
+  </form>
+
+  <p class="mt-4 text-center text-sm text-ink-600">
+    {% translate "Everything you've typed is already saved. You can close this and come back to it." %}
+  </p>
+</div>
+{% endblock %}
+
+{% block pre_alpine_js %}
+  <script src="{% static 'js/villa_form.js' %}" defer></script>
+{% endblock %}

@@ -54,7 +54,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             .select_related("booking", "booking__villa", "booking__guest").order_by("booking__check_in")
         )
 
-        total_villas = Villa.objects.filter(organization=org, is_active=True).count()
+        total_villas = Villa.objects.filter(organization=org).live().count()
         occupied_villas = bookings_today.values("villa_id").distinct().count()
         occupancy_percent = round(occupied_villas / total_villas * 100) if total_villas else 0
 

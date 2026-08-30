@@ -1,0 +1,192 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block title %}{% translate "New reservation" %}{% endblock %}
+
+{% block pre_alpine_js %}
+  <script src="{% static 'js/villa_form.js' %}" defer></script>
+  <script src="{% static 'js/reservation_form.js' %}" defer></script>
+{% endblock %}
+
+{% block content %}
+{{ villas_json|json_script:"villas-data" }}
+{{ reservation_config|json_script:"reservation-config" }}
+
+<div class="mx-auto max-w-2xl"
+     x-data="reservationForm(Object.assign(
+       {villas: JSON.parse(document.getElementById('villas-data').textContent)},
+       JSON.parse(document.getElementById('reservation-config').textContent)
+     ))">
+
+  <h2 class="mb-0.5 text-[32px]">{% translate "New reservation" %}</h2>
+  <p class="m-0 mb-6 text-ink-600">{% translate "Enter what you have — the rest can wait." %}</p>
+
+  {% if nationality_pending %}
+    <div x-data="{ show: true }" x-show="show" x-cloak
+         class="mb-6 flex items-start gap-2.5 rounded-card border border-accent2-400 bg-accent2-100 p-4">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round" class="mt-0.5 flex-none text-accent2-800"><path d="M12 2 2 20h20L12 2z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12" y2="17.01"/></svg>
+      <div class="flex-1">
+        <div class="text-sm font-bold text-accent2-900">{% translate "Still needs attention" %}</div>
+        <div class="mt-0.5 text-sm text-accent2-800">{% translate "Nationality wasn't entered — add it soon for the police report." %}</div>
+      </div>
+      <button type="button" class="btn btn-ghost flex-none" @click="show = false">{% translate "Got it" %}</button>
+    </div>
+  {% endif %}
+
+  <form method="post" novalidate class="flex flex-col gap-6">
+    {% csrf_token %}
+
+    {% if form.non_field_errors %}
+      <p class="rounded-md bg-red-50 p-3 text-sm text-teal-700">{{ form.non_field_errors|join:" " }}</p>
+    {% endif %}
+
+    {# ---- 1. The stay ------------------------------------------------- #}
+    <div class="card">
+      <div class="mb-4">
+        <h3>{% translate "The stay" %}</h3>
+      </div>
+
+      <div class="flex flex-col gap-4">
+        <div class="grid gap-4 sm:grid-cols-2">
+          {% include "villas/_field.html" with field=form.villa %}
+
+          <div class="field">
+            <label class="mb-1 flex items-baseline gap-1 text-sm text-ink-800" for="id_room_type">
+              <span>{{ form.room_type.label }}</span>
+              <span class="text-teal-700">*</span>
+            </label>
+            <select id="id_room_type" name="room_type" class="input" x-model="roomTypeId" :disabled="!villaId">
+              <option value="" x-text="roomTypePlaceholder"></option>
+              <template x-for="rt in roomTypeOptions" :key="rt.id">
+                <option :value="rt.id" x-text="rt.name"></option>
+              </template>
+            </select>
+            {% if form.room_type.errors %}
+              <p class="mt-1 text-sm text-teal-700">{{ form.room_type.errors|join:" " }}</p>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="grid gap-4 sm:grid-cols-3">
+          {% include "villas/_field.html" with field=form.check_in %}
+          {% include "villas/_field.html" with field=form.check_out %}
+          {% include "villas/_field.html" with field=form.guest_count %}
+        </div>
+
+        {% include "bookings/_reservation_availability.html" %}
+      </div>
+    </div>
+
+    {# ---- 2. The guest -------------------------------------------------- #}
+    <div class="card">
+      <div class="mb-4">
+        <h3>{% translate "The guest" %}</h3>
+      </div>
+
+      <div class="flex flex-col gap-4">
+        {% include "villas/_field.html" with field=form.full_name %}
+
+        <div class="grid gap-4 sm:grid-cols-2">
+          {% include "villas/_field.html" with field=form.phone %}
+          {% include "villas/_field.html" with field=form.email %}
+        </div>
+
+        <div class="grid gap-4 sm:grid-cols-2">
+          <div class="field">
+            <label class="mb-1 flex items-baseline gap-1 text-sm text-ink-800" for="{{ form.nationality.id_for_label }}">
+              <span>{{ form.nationality.label }}</span>
+              <span class="text-xs text-ink-500">({% translate "optional" %})</span>
+            </label>
+            <select id="{{ form.nationality.id_for_label }}" name="nationality" class="input" x-model="nationality">
+              {% for value, label in form.nationality.field.choices %}
+                <option value="{{ value }}" {% if value == form.nationality.value %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          {% include "villas/_field.html" with field=form.language %}
+        </div>
+
+        <div x-show="isForeign" x-cloak
+             class="flex items-start gap-2 rounded-sm bg-sand-200 px-3 py-2.5 text-sm text-ink-700">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round" class="mt-0.5 flex-none text-ink-600"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12" y2="16.01"/></svg>
+          <span>{% translate "This guest is foreign — a police report will be needed within 24 hours of check-in." %}</span>
+        </div>
+      </div>
+    </div>
+
+    {# ---- 3. Booking details --------------------------------------------- #}
+    <div class="card">
+      <div class="mb-4">
+        <h3>{% translate "Booking details" %}</h3>
+      </div>
+
+      <div class="flex flex-col gap-4">
+        <div class="grid gap-4 sm:grid-cols-2">
+          {% include "villas/_field.html" with field=form.booked_through %}
+          {% include "villas/_field.html" with field=form.status %}
+        </div>
+
+        {% if can_see_money %}
+          <div class="grid gap-4 sm:grid-cols-3">
+            <div class="field">
+              <label class="mb-1 flex items-baseline gap-1 text-sm text-ink-800" for="{{ form.nightly_rate.id_for_label }}">
+                <span>{{ form.nightly_rate.label }}</span>
+                <span class="text-xs text-ink-500">({% translate "optional" %})</span>
+              </label>
+              {{ form.nightly_rate }}
+              <span class="text-xs text-ink-600" data-idr-preview></span>
+              {% if form.nightly_rate.errors %}
+                <p class="mt-1 text-sm text-teal-700">{{ form.nightly_rate.errors|join:" " }}</p>
+              {% endif %}
+            </div>
+            <div class="field">
+              <label class="mb-1 flex items-baseline gap-1 text-sm text-ink-800" for="{{ form.total_amount.id_for_label }}">
+                <span>{{ form.total_amount.label }}</span>
+                <span class="text-xs text-ink-500">({% translate "optional" %})</span>
+              </label>
+              {{ form.total_amount }}
+              <span class="text-xs text-ink-600" data-idr-preview></span>
+              {% if form.total_amount.errors %}
+                <p class="mt-1 text-sm text-teal-700">{{ form.total_amount.errors|join:" " }}</p>
+              {% endif %}
+            </div>
+            <div class="field">
+              <label class="mb-1 flex items-baseline gap-1 text-sm text-ink-800" for="{{ form.amount_paid.id_for_label }}">
+                <span>{{ form.amount_paid.label }}</span>
+                <span class="text-xs text-ink-500">({% translate "optional" %})</span>
+              </label>
+              {{ form.amount_paid }}
+              <span class="text-xs text-ink-600" data-idr-preview></span>
+              {% if form.amount_paid.errors %}
+                <p class="mt-1 text-sm text-teal-700">{{ form.amount_paid.errors|join:" " }}</p>
+              {% endif %}
+            </div>
+          </div>
+
+          {% get_current_language as LANGUAGE_CODE %}
+          {% blocktranslate asvar rp_owed_template with amount="__AMOUNT__" %}Rp {{ amount }} still owed{% endblocktranslate %}
+          <template x-if="balance !== null">
+            <p class="text-sm font-semibold" :class="balance > 0 ? 'text-teal-700' : 'text-accent2-700'">
+              <template x-if="balance > 0">
+                <span x-text="'{{ rp_owed_template|escapejs }}'.replace('__AMOUNT__', balance.toLocaleString('{{ LANGUAGE_CODE }}'))"></span>
+              </template>
+              <template x-if="balance <= 0">
+                <span>{% translate "Paid in full" %}</span>
+              </template>
+            </p>
+          </template>
+        {% else %}
+          <p class="text-sm text-ink-600">{% translate "Pricing is only visible to owners and managers." %}</p>
+        {% endif %}
+
+        {% include "villas/_field.html" with field=form.notes %}
+      </div>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <button type="submit" class="btn btn-primary">{% translate "Save reservation" %}</button>
+      <a href="{% url 'bookings:calendar' %}" class="btn btn-ghost">{% translate "Cancel" %}</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

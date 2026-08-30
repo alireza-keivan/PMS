@@ -13,6 +13,8 @@ venv/
 
 # Django
 *.log
+*.log.[0-9]
+/logs/
 db.sqlite3
 /media/
 /staticfiles/

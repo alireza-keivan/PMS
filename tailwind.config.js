@@ -18,8 +18,8 @@ module.exports = {
   // templates have adopted them yet.
   safelist: [
     "btn", "btn-primary", "btn-secondary", "btn-ghost", "btn-icon",
-    "input", "tag", "tag-accent", "tag-accent-2", "tag-neutral",
-    "seg", "seg-opt", "seg-opt-active", "card",
+    "input", "tag", "tag-accent", "tag-accent-2", "tag-neutral", "tag-toggle",
+    "seg", "seg-opt", "seg-opt-active", "card", "field", "title-input",
   ],
   theme: {
     extend: {

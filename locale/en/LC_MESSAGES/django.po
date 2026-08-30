@@ -1,0 +1,2114 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-08-30 14:58+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: apps/accounts/admin.py:15
+msgid "Profile"
+msgstr ""
+
+#: apps/accounts/admin.py:16
+msgid "Permissions"
+msgstr ""
+
+#: apps/accounts/admin.py:17
+msgid "Dates"
+msgstr ""
+
+#: apps/accounts/models.py:44
+msgid "email address"
+msgstr ""
+
+#: apps/accounts/models.py:45
+msgid "full name"
+msgstr ""
+
+#: apps/accounts/models.py:47
+msgid "WhatsApp number"
+msgstr ""
+
+#: apps/accounts/models.py:50
+msgid "Full international format, e.g. +6281234567890."
+msgstr ""
+
+#: apps/accounts/models.py:53
+msgid "language"
+msgstr ""
+
+#: apps/bookings/forms.py:25 apps/bookings/models.py:28
+#: apps/bookings/services.py:24
+msgid "Confirmed"
+msgstr ""
+
+#: apps/bookings/forms.py:26 apps/bookings/models.py:29
+#: apps/guests/models.py:149
+msgid "Cancelled"
+msgstr ""
+
+#: apps/bookings/forms.py:40 apps/villas/models.py:66
+#: templates/compliance/document_form.html:42
+#: templates/compliance/documents.html:31 templates/guests/list.html:43
+#: templates/guests/list.html:111
+msgid "Villa"
+msgstr ""
+
+#: apps/bookings/forms.py:41
+msgid "Choose a villa"
+msgstr ""
+
+#: apps/bookings/forms.py:43
+msgid "Choose which villa this booking is for."
+msgstr ""
+
+#: apps/bookings/forms.py:51
+msgid "Room type"
+msgstr ""
+
+#: apps/bookings/forms.py:52 apps/bookings/views.py:208
+msgid "Choose a room type"
+msgstr ""
+
+#: apps/bookings/forms.py:53
+msgid "Choose which room type this booking is for."
+msgstr ""
+
+#: apps/bookings/forms.py:56
+msgid "Check-in date"
+msgstr ""
+
+#: apps/bookings/forms.py:58
+msgid "Say when the guest checks in."
+msgstr ""
+
+#: apps/bookings/forms.py:61
+msgid "Check-out date"
+msgstr ""
+
+#: apps/bookings/forms.py:63
+msgid "Say when the guest checks out."
+msgstr ""
+
+#: apps/bookings/forms.py:66
+msgid "Number of guests"
+msgstr ""
+
+#: apps/bookings/forms.py:68
+msgid "Say how many guests are staying."
+msgstr ""
+
+#: apps/bookings/forms.py:72
+msgid "Guest full name"
+msgstr ""
+
+#: apps/bookings/forms.py:73
+msgid "e.g. Sarah Mitchell"
+msgstr ""
+
+#: apps/bookings/forms.py:74
+msgid "Give the guest's name."
+msgstr ""
+
+#: apps/bookings/forms.py:77
+msgid "Phone number"
+msgstr ""
+
+#: apps/bookings/forms.py:81 templates/registration/login.html:18
+msgid "Email"
+msgstr ""
+
+#: apps/bookings/forms.py:85
+msgid "Nationality"
+msgstr ""
+
+#: apps/bookings/forms.py:86
+msgid "Choose a nationality"
+msgstr ""
+
+#: apps/bookings/forms.py:90
+msgid "Preferred language"
+msgstr ""
+
+#: apps/bookings/forms.py:91
+msgid "Choose a language"
+msgstr ""
+
+#: apps/bookings/forms.py:96 templates/guests/list.html:78
+msgid "Booked through"
+msgstr ""
+
+#: apps/bookings/forms.py:97
+msgid "Choose one"
+msgstr ""
+
+#: apps/bookings/forms.py:99
+msgid "Say how this booking came in."
+msgstr ""
+
+#: apps/bookings/forms.py:102 templates/compliance/documents.html:34
+#: templates/guests/list.html:59
+msgid "Status"
+msgstr ""
+
+#: apps/bookings/forms.py:107 apps/villas/forms.py:199 apps/villas/forms.py:220
+msgid "Nightly rate (IDR)"
+msgstr ""
+
+#: apps/bookings/forms.py:112
+msgid "Total amount (IDR)"
+msgstr ""
+
+#: apps/bookings/forms.py:116
+msgid "Amount paid (IDR)"
+msgstr ""
+
+#: apps/bookings/forms.py:121 templates/compliance/document_form.html:72
+msgid "Notes"
+msgstr ""
+
+#: apps/bookings/forms.py:124
+msgid "Anything else worth knowing about this booking"
+msgstr ""
+
+#: apps/bookings/forms.py:158
+msgid "Choose a room type that belongs to the selected villa."
+msgstr ""
+
+#: apps/bookings/forms.py:164
+msgid "Check-out has to be after check-in."
+msgstr ""
+
+#: apps/bookings/forms.py:172
+#, python-format
+msgid ""
+"Already booked by %(name)s, %(check_in)s to %(check_out)s. Check before "
+"saving."
+msgstr ""
+
+#: apps/bookings/forms.py:175 apps/bookings/views.py:245
+msgid "a guest"
+msgstr ""
+
+#: apps/bookings/forms.py:183
+msgid "Add a phone number or email so staff can reach the guest."
+msgstr ""
+
+#: apps/bookings/models.py:22
+msgid "Direct"
+msgstr ""
+
+#: apps/bookings/models.py:24
+msgid "Walk-in"
+msgstr ""
+
+#: apps/bookings/models.py:25 apps/bookings/services.py:200
+#: apps/bookings/services.py:369
+msgid "Other"
+msgstr ""
+
+#: apps/bookings/models.py:30 apps/bookings/models.py:98
+#: apps/bookings/services.py:27 templates/dashboard/dashboard.html:70
+#: templates/dashboard/dashboard.html:100
+#: templates/dashboard/dashboard.html:130
+msgid "Not available"
+msgstr ""
+
+#: apps/bookings/models.py:35
+msgid "Full details"
+msgstr ""
+
+#: apps/bookings/models.py:36
+msgid "Dates only"
+msgstr ""
+
+#: apps/bookings/models.py:37
+msgid "Entered by staff"
+msgstr ""
+
+#: apps/bookings/models.py:46
+msgid ""
+"Optional - only set once a villa's rooms are defined individually. PROTECT "
+"(not SET_NULL) on purpose: the calendar only draws bookings on room rows, so "
+"a booking silently losing its room would silently disappear from view - see "
+"apps/bookings/services.py's build_calendar_rows()."
+msgstr ""
+
+#: apps/bookings/models.py:55
+msgid "Absent on calendar-only bookings - the feed carries no name."
+msgstr ""
+
+#: apps/bookings/models.py:77
+msgid "Price for one night, in rupiah, agreed for this stay."
+msgstr ""
+
+#: apps/bookings/models.py:104
+msgid "That room doesn't belong to this booking's villa."
+msgstr ""
+
+#: apps/bookings/models.py:123
+msgid "Paid by the booking site"
+msgstr ""
+
+#: apps/bookings/models.py:124
+msgid "Paid directly"
+msgstr ""
+
+#: apps/bookings/models.py:125
+msgid "Deposit"
+msgstr ""
+
+#: apps/bookings/models.py:126
+msgid "Refund"
+msgstr ""
+
+#: apps/bookings/models.py:132
+msgid "Still owed - shows on the daily staff view."
+msgstr ""
+
+#: apps/bookings/services.py:25 apps/messaging/views.py:110
+msgid "Checked in"
+msgstr ""
+
+#: apps/bookings/services.py:26 apps/messaging/views.py:112
+msgid "Checked out"
+msgstr ""
+
+#: apps/bookings/services.py:28
+msgid "Payment incomplete"
+msgstr ""
+
+#: apps/bookings/services.py:251 apps/bookings/services.py:407
+#: templates/guests/list.html:133
+msgid "Booked"
+msgstr ""
+
+#: apps/bookings/services.py:400
+msgid "Unassigned"
+msgstr ""
+
+#: apps/bookings/services.py:413
+#, python-format
+msgid "%(start)s – %(end)s"
+msgstr ""
+
+#: apps/bookings/services.py:417
+#: templates/bookings/_reservation_availability.html:19
+#, python-format
+msgid "%(n)s night"
+msgid_plural "%(n)s nights"
+msgstr[0] ""
+msgstr[1] ""
+
+#: apps/bookings/views.py:149
+msgid "Reservation saved."
+msgstr ""
+
+#: apps/bookings/views.py:207
+msgid "Choose a villa first"
+msgstr ""
+
+#: apps/bookings/views.py:296
+msgid "Booking removed."
+msgstr ""
+
+#: apps/bookings/views.py:315
+msgid "Invalid dates."
+msgstr ""
+
+#: apps/bookings/views.py:333
+msgid "That room is already booked for part of those dates."
+msgstr ""
+
+#: apps/compliance/forms.py:24
+msgid "Or add your own type"
+msgstr ""
+
+#: apps/compliance/forms.py:28 templates/compliance/document_form.html:67
+msgid "Remind us this many days before it expires"
+msgstr ""
+
+#: apps/compliance/forms.py:49 templates/compliance/document_form.html:44
+msgid "Leave blank if this covers the whole business."
+msgstr ""
+
+#: apps/compliance/forms.py:74
+msgid "Choose a document type, or add your own."
+msgstr ""
+
+#: apps/compliance/models.py:30
+msgid "Leave empty for a type available to every client."
+msgstr ""
+
+#: apps/compliance/models.py:35
+msgid "A blank template staff can download and fill in."
+msgstr ""
+
+#: apps/compliance/models.py:40
+msgid ""
+"How long this document is normally valid for, used to suggest an expiry "
+"date. Leave blank if it doesn't expire."
+msgstr ""
+
+#: apps/compliance/models.py:45 apps/compliance/models.py:74
+msgid "Start warning this many days before it runs out."
+msgstr ""
+
+#: apps/compliance/models.py:64
+msgid "Leave empty if it covers the whole business."
+msgstr ""
+
+#: apps/compliance/models.py:100
+msgid "Still to do"
+msgstr ""
+
+#: apps/compliance/models.py:101
+msgid "Marked as done by staff"
+msgstr ""
+
+#: apps/compliance/models.py:102
+msgid "Not needed"
+msgstr ""
+
+#: apps/compliance/models.py:111
+msgid "24 hours after arrival, Bali time."
+msgstr ""
+
+#: apps/compliance/models.py:124
+msgid "police report reminder"
+msgstr ""
+
+#: apps/compliance/views.py:112
+msgid "Document added."
+msgstr ""
+
+#: apps/compliance/views.py:132
+msgid "Marked as done."
+msgstr ""
+
+#: apps/core/calendar.py:26
+msgid "Island shutdown - nobody travels"
+msgstr ""
+
+#: apps/core/calendar.py:27
+msgid "Staff generally unavailable"
+msgstr ""
+
+#: apps/core/calendar.py:28
+msgid "Reduced staff availability"
+msgstr ""
+
+#: apps/core/calendar.py:29
+msgid "Worth knowing, no staffing impact"
+msgstr ""
+
+#: apps/core/calendar.py:39
+msgid "Bali holiday"
+msgstr ""
+
+#: apps/core/calendar.py:40
+msgid "Bali holidays"
+msgstr ""
+
+#: apps/core/models.py:43
+msgid "operator"
+msgstr ""
+
+#: apps/core/models.py:68
+msgid "ISO 4217 code, exactly as the source reported it."
+msgstr ""
+
+#: apps/guests/constants.py:19
+msgid "Indonesian"
+msgstr ""
+
+#: apps/guests/constants.py:20
+msgid "Australian"
+msgstr ""
+
+#: apps/guests/constants.py:21
+msgid "American"
+msgstr ""
+
+#: apps/guests/constants.py:22
+msgid "British"
+msgstr ""
+
+#: apps/guests/constants.py:23
+msgid "German"
+msgstr ""
+
+#: apps/guests/constants.py:24
+msgid "French"
+msgstr ""
+
+#: apps/guests/constants.py:25
+msgid "Dutch"
+msgstr ""
+
+#: apps/guests/constants.py:26
+msgid "Russian"
+msgstr ""
+
+#: apps/guests/constants.py:27
+msgid "Japanese"
+msgstr ""
+
+#: apps/guests/constants.py:28
+msgid "South Korean"
+msgstr ""
+
+#: apps/guests/constants.py:29
+msgid "Singaporean"
+msgstr ""
+
+#: apps/guests/constants.py:30
+msgid "Malaysian"
+msgstr ""
+
+#: apps/guests/constants.py:31
+msgid "Chinese"
+msgstr ""
+
+#: apps/guests/constants.py:32
+msgid "Hong Kong"
+msgstr ""
+
+#: apps/guests/constants.py:33
+msgid "Taiwanese"
+msgstr ""
+
+#: apps/guests/constants.py:34
+msgid "Indian"
+msgstr ""
+
+#: apps/guests/constants.py:35
+msgid "Filipino"
+msgstr ""
+
+#: apps/guests/constants.py:36
+msgid "Thai"
+msgstr ""
+
+#: apps/guests/constants.py:37
+msgid "Vietnamese"
+msgstr ""
+
+#: apps/guests/constants.py:38
+msgid "Canadian"
+msgstr ""
+
+#: apps/guests/constants.py:39
+msgid "Spanish"
+msgstr ""
+
+#: apps/guests/constants.py:40
+msgid "Italian"
+msgstr ""
+
+#: apps/guests/constants.py:41
+msgid "Portuguese"
+msgstr ""
+
+#: apps/guests/constants.py:42
+msgid "Swedish"
+msgstr ""
+
+#: apps/guests/constants.py:43
+msgid "Norwegian"
+msgstr ""
+
+#: apps/guests/constants.py:44
+msgid "Danish"
+msgstr ""
+
+#: apps/guests/constants.py:45
+msgid "Finnish"
+msgstr ""
+
+#: apps/guests/constants.py:46
+msgid "Swiss"
+msgstr ""
+
+#: apps/guests/constants.py:47
+msgid "Austrian"
+msgstr ""
+
+#: apps/guests/constants.py:48
+msgid "Belgian"
+msgstr ""
+
+#: apps/guests/constants.py:49
+msgid "Irish"
+msgstr ""
+
+#: apps/guests/constants.py:50
+msgid "Polish"
+msgstr ""
+
+#: apps/guests/constants.py:51
+msgid "Brazilian"
+msgstr ""
+
+#: apps/guests/constants.py:52
+msgid "Mexican"
+msgstr ""
+
+#: apps/guests/constants.py:53
+msgid "Argentinian"
+msgstr ""
+
+#: apps/guests/constants.py:54
+msgid "South African"
+msgstr ""
+
+#: apps/guests/constants.py:55
+msgid "New Zealander"
+msgstr ""
+
+#: apps/guests/constants.py:56
+msgid "Emirati"
+msgstr ""
+
+#: apps/guests/constants.py:57
+msgid "Saudi Arabian"
+msgstr ""
+
+#: apps/guests/constants.py:58
+msgid "Israeli"
+msgstr ""
+
+#: apps/guests/constants.py:59
+msgid "Turkish"
+msgstr ""
+
+#: apps/guests/constants.py:60
+msgid "Ukrainian"
+msgstr ""
+
+#: apps/guests/models.py:40
+msgid "WhatsApp number, international format."
+msgstr ""
+
+#: apps/guests/models.py:47
+msgid "ISO 3166-1 alpha-2. Required for the STM police report."
+msgstr ""
+
+#: apps/guests/models.py:56
+msgid "Internal. Never shown to the guest."
+msgstr ""
+
+#: apps/guests/models.py:60
+msgid "Delete or anonymise this record after this date."
+msgstr ""
+
+#: apps/guests/models.py:91
+msgid "Opened their page"
+msgstr ""
+
+#: apps/guests/models.py:92
+msgid "Asked for something"
+msgstr ""
+
+#: apps/guests/models.py:93
+msgid "Looked at a local activity"
+msgstr ""
+
+#: apps/guests/models.py:94
+msgid "Booked a local activity"
+msgstr ""
+
+#: apps/guests/models.py:95
+msgid "Left private feedback"
+msgstr ""
+
+#: apps/guests/models.py:96
+msgid "Sent a message"
+msgstr ""
+
+#: apps/guests/models.py:119
+msgid "guest activity"
+msgstr ""
+
+#: apps/guests/models.py:138
+msgid "Cleaning"
+msgstr ""
+
+#: apps/guests/models.py:139
+msgid "Something is broken"
+msgstr ""
+
+#: apps/guests/models.py:140
+msgid "Private chef"
+msgstr ""
+
+#: apps/guests/models.py:141
+msgid "Grocery stocking"
+msgstr ""
+
+#: apps/guests/models.py:142
+msgid "Airport transfer"
+msgstr ""
+
+#: apps/guests/models.py:143
+msgid "Something else"
+msgstr ""
+
+#: apps/guests/models.py:146
+msgid "New"
+msgstr ""
+
+#: apps/guests/models.py:147
+msgid "Seen by staff"
+msgstr ""
+
+#: apps/guests/models.py:148
+msgid "Done"
+msgstr ""
+
+#: apps/guests/models.py:163
+msgid "When staff were actually messaged."
+msgstr ""
+
+#: apps/guests/models.py:189
+msgid "1 to 5."
+msgstr ""
+
+#: apps/guests/models.py:196
+msgid "guest feedback"
+msgstr ""
+
+#: apps/marketing/models.py:50
+msgid "What the local operator pays the villa owner."
+msgstr ""
+
+#: apps/marketing/staff_urls.py:16 templates/partials/_sidebar.html:70
+#: templates/partials/_topnav.html:44
+msgid "Marketing"
+msgstr ""
+
+#: apps/messaging/models.py:31
+msgid "Name registered with WhatsApp."
+msgstr ""
+
+#: apps/messaging/models.py:99
+msgid "Waiting to send"
+msgstr ""
+
+#: apps/messaging/models.py:100
+msgid "Sent"
+msgstr ""
+
+#: apps/messaging/models.py:101
+msgid "Delivered"
+msgstr ""
+
+#: apps/messaging/models.py:102 apps/sync/models.py:70
+msgid "Failed"
+msgstr ""
+
+#: apps/messaging/views.py:99 templates/guests/list.html:45
+msgid "All villas"
+msgstr ""
+
+#: apps/messaging/views.py:115
+msgid "All guests"
+msgstr ""
+
+#: apps/messaging/views.py:118
+msgid "Last 24 hours"
+msgstr ""
+
+#: apps/messaging/views.py:173
+msgid ""
+"More than 24 hours since they last messaged - pick an approved template "
+"first."
+msgstr ""
+
+#: apps/messaging/views.py:175
+msgid "Write a message before sending."
+msgstr ""
+
+#: apps/organizations/models.py:17
+msgid "Connected accounts"
+msgstr ""
+
+#: apps/organizations/models.py:19
+msgid "Calendar links only"
+msgstr ""
+
+#: apps/organizations/models.py:22
+msgid "Starter"
+msgstr ""
+
+#: apps/organizations/models.py:23
+msgid "Growth"
+msgstr ""
+
+#: apps/organizations/models.py:24
+msgid "Pro"
+msgstr ""
+
+#: apps/organizations/models.py:45
+msgid "Currency the owner wants reports displayed in."
+msgstr ""
+
+#: apps/organizations/models.py:83
+msgid "Owner"
+msgstr ""
+
+#: apps/organizations/models.py:84
+msgid "Manager"
+msgstr ""
+
+#: apps/organizations/models.py:85
+msgid "Staff"
+msgstr ""
+
+#: apps/organizations/models.py:98
+msgid "Staff only. Leave empty for access to every villa."
+msgstr ""
+
+#: apps/sync/models.py:23
+msgid "Calendar link"
+msgstr ""
+
+#: apps/sync/models.py:29
+msgid "iCal feeds are per villa. A Beds24 account covers many."
+msgstr ""
+
+#: apps/sync/models.py:40
+msgid "Which site this feed comes from."
+msgstr ""
+
+#: apps/sync/models.py:63
+msgid "Pushed by the source"
+msgstr ""
+
+#: apps/sync/models.py:64
+msgid "Routine check"
+msgstr ""
+
+#: apps/sync/models.py:65
+msgid "Started by hand"
+msgstr ""
+
+#: apps/sync/models.py:68
+msgid "Worked"
+msgstr ""
+
+#: apps/sync/models.py:69
+msgid "Partly worked"
+msgstr ""
+
+#: apps/villas/admin.py:54
+msgid "rooms"
+msgstr ""
+
+#: apps/villas/forms.py:86
+msgid "Write the price in numbers only, like 1.500.000."
+msgstr ""
+
+#: apps/villas/forms.py:87
+msgid "A price can't be less than zero."
+msgstr ""
+
+#: apps/villas/forms.py:120
+msgid "Name"
+msgstr ""
+
+#: apps/villas/forms.py:121
+msgid "Property type"
+msgstr ""
+
+#: apps/villas/forms.py:122
+msgid "Area"
+msgstr ""
+
+#: apps/villas/forms.py:123
+msgid "Address"
+msgstr ""
+
+#: apps/villas/forms.py:124
+msgid "Google Maps link"
+msgstr ""
+
+#: apps/villas/forms.py:125
+msgid "Check-in time"
+msgstr ""
+
+#: apps/villas/forms.py:126
+msgid "Check-out time"
+msgstr ""
+
+#: apps/villas/forms.py:127
+msgid "Description (English)"
+msgstr ""
+
+#: apps/villas/forms.py:128
+msgid "Description (Indonesian)"
+msgstr ""
+
+#: apps/villas/forms.py:131
+msgid "e.g. Villa Kenanga"
+msgstr ""
+
+#: apps/villas/forms.py:135
+msgid "e.g. Canggu"
+msgstr ""
+
+#: apps/villas/forms.py:138
+msgid "Street address"
+msgstr ""
+
+#: apps/villas/forms.py:146 apps/villas/forms.py:149
+msgid "A few sentences guests will see"
+msgstr ""
+
+#: apps/villas/forms.py:153
+msgid "Give the villa a name."
+msgstr ""
+
+#: apps/villas/forms.py:154
+msgid "That doesn't look like a link. It should start with https://"
+msgstr ""
+
+#: apps/villas/forms.py:163
+msgid "Say which area it's in."
+msgstr ""
+
+#: apps/villas/forms.py:189
+msgid "Number of rooms"
+msgstr ""
+
+#: apps/villas/forms.py:193
+msgid "Say how many rooms of this kind there are."
+msgstr ""
+
+#: apps/villas/forms.py:194
+msgid "There has to be at least one room of this kind."
+msgstr ""
+
+#: apps/villas/forms.py:195
+msgid ""
+"That's more rooms than we can add at once. Split it into two room types."
+msgstr ""
+
+#: apps/villas/forms.py:203 apps/villas/forms.py:221
+msgid "Monthly rate (IDR)"
+msgstr ""
+
+#: apps/villas/forms.py:217
+msgid "Amenities"
+msgstr ""
+
+#: apps/villas/forms.py:218
+msgid "Size (m²)"
+msgstr ""
+
+#: apps/villas/forms.py:219
+msgid "Max guests"
+msgstr ""
+
+#: apps/villas/forms.py:222
+msgid "Minimum nights"
+msgstr ""
+
+#: apps/villas/forms.py:228
+msgid "Standard"
+msgstr ""
+
+#: apps/villas/forms.py:235
+msgid "Give this kind of room a name."
+msgstr ""
+
+#: apps/villas/forms.py:236
+msgid "Say the fewest nights someone can book."
+msgstr ""
+
+#: apps/villas/forms.py:297
+#, python-format
+msgid ""
+"You already have a room type called \"%(name)s\". Give this one a different "
+"name."
+msgstr ""
+
+#: apps/villas/forms.py:326
+msgid "e.g. Yoga deck"
+msgstr ""
+
+#: apps/villas/forms.py:329
+msgid "Type what it is first."
+msgstr ""
+
+#: apps/villas/forms.py:338
+msgid "That one is already on the list."
+msgstr ""
+
+#: apps/villas/models.py:67
+msgid "Guesthouse"
+msgstr ""
+
+#: apps/villas/models.py:68
+msgid "Apartment"
+msgstr ""
+
+#: apps/villas/models.py:69
+msgid "House"
+msgstr ""
+
+#: apps/villas/models.py:73
+msgid "Used in the villa's public web address."
+msgstr ""
+
+#: apps/villas/models.py:80
+msgid "Canggu, Ubud, Uluwatu, Seminyak."
+msgstr ""
+
+#: apps/villas/models.py:84
+msgid "Paste a Google Maps link so staff and guests can find it."
+msgstr ""
+
+#: apps/villas/models.py:111
+msgid "Show this villa's own web page and direct booking."
+msgstr ""
+
+#: apps/villas/models.py:170
+msgid "size (m²)"
+msgstr ""
+
+#: apps/villas/models.py:182
+msgid "Price for one night, in rupiah."
+msgstr ""
+
+#: apps/villas/models.py:185
+msgid "Price for a whole month, in rupiah."
+msgstr ""
+
+#: apps/villas/models.py:192
+msgid "room categories"
+msgstr ""
+
+#: apps/villas/models.py:217
+msgid "One of this villa's own room types."
+msgstr ""
+
+#: apps/villas/models.py:236
+msgid "Pick a room type that belongs to this villa."
+msgstr ""
+
+#: apps/villas/models.py:290
+msgid "Leave empty for an amenity every operator can pick."
+msgstr ""
+
+#: apps/villas/models.py:295
+msgid "amenities"
+msgstr ""
+
+#: apps/villas/views.py:263
+#, python-format
+msgid ""
+"You've reached your plan's limit of %(limit)s villas. Contact us to add more."
+msgstr ""
+
+#: apps/villas/views.py:284
+msgid ""
+"Those pictures couldn't be processed. Try different ones, or carry on "
+"without them and add them later."
+msgstr ""
+
+#: apps/villas/views.py:312 apps/villas/views.py:398
+msgid "Saved."
+msgstr ""
+
+#: apps/villas/views.py:387
+#, python-format
+msgid "%(count)s room(s) were kept because they still have bookings on them."
+msgstr ""
+
+#: apps/villas/views.py:396
+#, python-format
+msgid "%(name)s is ready."
+msgstr ""
+
+#: apps/villas/views.py:490
+msgid ""
+"A villa needs at least one room type - add another before removing this one."
+msgstr ""
+
+#: apps/villas/views.py:512
+#, python-format
+msgid "%(count)s room(s) moved to %(name)s."
+msgstr ""
+
+#: apps/villas/views.py:565 apps/villas/views.py:609
+msgid "Those pictures couldn't be processed. Try different ones."
+msgstr ""
+
+#: apps/villas/views.py:709
+#, python-format
+msgid "%(name)s was removed from your villas."
+msgstr ""
+
+#: apps/villas/views.py:754
+msgid "Pick a room type first."
+msgstr ""
+
+#: apps/villas/views.py:769
+msgid "A villa needs at least one room - add another before removing this one."
+msgstr ""
+
+#: apps/villas/views.py:775
+msgid "This room still has bookings - move or remove those first."
+msgstr ""
+
+#: templates/base.html:6 templates/base_auth.html:6
+#: templates/partials/_sidebar.html:12 templates/partials/_topnav.html:13
+msgid "Rumah"
+msgstr ""
+
+#: templates/bookings/_calendar_panel.html:4
+#: templates/bookings/calendar.html:10
+#: templates/compliance/action_needed.html:10
+#: templates/compliance/documents.html:10 templates/dashboard/dashboard.html:9
+#: templates/guests/list.html:10 templates/messaging/inbox.html:10
+#: templates/villas/list.html:10
+msgid "Your account isn't linked to a property yet."
+msgstr ""
+
+#: templates/bookings/_calendar_panel.html:14
+#, python-format
+msgid "%(n)s days"
+msgstr ""
+
+#: templates/bookings/_calendar_panel.html:22
+#: templates/dashboard/dashboard.html:4 templates/dashboard/dashboard.html:16
+#: templates/partials/_sidebar.html:28 templates/partials/_topnav.html:20
+msgid "Today"
+msgstr ""
+
+#: templates/bookings/_calendar_panel.html:25
+msgid "Back one range"
+msgstr ""
+
+#: templates/bookings/_calendar_panel.html:29
+msgid "Back one day"
+msgstr ""
+
+#: templates/bookings/_calendar_panel.html:37
+msgid "Forward one day"
+msgstr ""
+
+#: templates/bookings/_calendar_panel.html:41
+msgid "Forward one range"
+msgstr ""
+
+#: templates/bookings/_calendar_panel.html:50
+msgid "Search bookings or guests"
+msgstr ""
+
+#: templates/bookings/_calendar_panel.html:63
+msgid "Start a new booking?"
+msgstr ""
+
+#: templates/bookings/_calendar_panel.html:66
+msgid "New booking"
+msgstr ""
+
+#: templates/bookings/_calendar_panel.html:88
+#, python-format
+msgid "Move %%(guest)s's booking to %%(dates)s?"
+msgstr ""
+
+#: templates/bookings/_calendar_panel.html:89
+#, python-format
+msgid "Move %%(guest)s's booking to %%(room)s, %%(dates)s?"
+msgstr ""
+
+#: templates/bookings/_calendar_panel.html:90
+#, python-format
+msgid "Change %%(guest)s's stay to %%(dates)s?"
+msgstr ""
+
+#: templates/bookings/_calendar_panel.html:91
+#, python-format
+msgid ""
+"This booking is synced from %%(channel)s - changes here may be overwritten "
+"by the next sync."
+msgstr ""
+
+#: templates/bookings/_calendar_panel.html:92
+msgid "Couldn't save that change. Try again."
+msgstr ""
+
+#: templates/bookings/_calendar_panel.html:135
+#, python-format
+msgid "Show or hide rooms in %(name)s"
+msgstr ""
+
+#: templates/bookings/_calendar_panel.html:148
+#: templates/bookings/_calendar_panel.html:170
+#, python-format
+msgid "Remove %(name)s"
+msgstr ""
+
+#: templates/bookings/_calendar_panel.html:149
+#, python-format
+msgid "Remove %(name)s? This can't be undone."
+msgstr ""
+
+#: templates/bookings/_calendar_panel.html:171
+#, python-format
+msgid "Remove room %(name)s? This can't be undone."
+msgstr ""
+
+#: templates/bookings/_calendar_panel.html:194
+#, python-format
+msgid "Remove %(name)s's booking? This can't be undone."
+msgstr ""
+
+#: templates/bookings/_calendar_panel.html:226
+#: templates/bookings/_calendar_panel.html:233
+msgid "Add room"
+msgstr ""
+
+#: templates/bookings/_calendar_panel.html:255
+msgid "Which room type is the new room?"
+msgstr ""
+
+#: templates/bookings/_calendar_panel.html:272
+#, python-format
+msgid "%(n)s room of this type so far"
+msgid_plural "%(n)s rooms of this type so far"
+msgstr[0] ""
+msgstr[1] ""
+
+#: templates/bookings/_calendar_panel.html:274
+#, python-format
+msgid "Sleeps up to %(n)s"
+msgstr ""
+
+#: templates/bookings/_calendar_panel.html:277
+#, python-format
+msgid "Rp %(amount)s a night"
+msgstr ""
+
+#: templates/bookings/_calendar_panel.html:284
+#: templates/bookings/_calendar_panel.html:335 templates/bookings/add.html:191
+#: templates/compliance/document_form.html:81
+#: templates/villas/add_details.html:19 templates/villas/confirm_delete.html:20
+msgid "Cancel"
+msgstr ""
+
+#: templates/bookings/_calendar_panel.html:289
+#: templates/villas/_amenity_checkboxes.html:41
+msgid "Add"
+msgstr ""
+
+#: templates/bookings/_calendar_panel.html:299
+msgid "No villas match what you searched for."
+msgstr ""
+
+#: templates/bookings/_calendar_panel.html:307
+msgid "Add a new villa?"
+msgstr ""
+
+#: templates/bookings/_calendar_panel.html:310
+msgid "Add villa"
+msgstr ""
+
+#: templates/bookings/_calendar_panel.html:338
+msgid "Continue"
+msgstr ""
+
+#: templates/bookings/_calendar_panel.html:342
+msgid "Confirm"
+msgstr ""
+
+#: templates/bookings/_calendar_panel.html:349
+msgid "Remove"
+msgstr ""
+
+#: templates/bookings/_reservation_availability.html:26
+msgid "This room is free for these dates."
+msgstr ""
+
+#: templates/bookings/_reservation_availability.html:32
+#, python-format
+msgid ""
+"\n"
+"          Already booked by %(name)s, %(check_in)s to %(check_out)s. Check "
+"before saving.\n"
+"        "
+msgstr ""
+
+#: templates/bookings/_side_panel.html:29
+msgid "nights"
+msgstr ""
+
+#: templates/bookings/_side_panel.html:33
+msgid ""
+"This villa is on a basic calendar link - guest details aren't available, "
+"only the dates."
+msgstr ""
+
+#: templates/bookings/_side_panel.html:38 templates/guests/list.html:106
+#: templates/partials/_sidebar.html:49 templates/partials/_topnav.html:41
+msgid "Guests"
+msgstr ""
+
+#: templates/bookings/_side_panel.html:42 templates/guests/list.html:105
+msgid "Booked via"
+msgstr ""
+
+#: templates/bookings/_side_panel.html:47
+msgid "Still owed"
+msgstr ""
+
+#: templates/bookings/_side_panel.html:56
+msgid "Remove booking"
+msgstr ""
+
+#: templates/bookings/_side_panel.html:58
+msgid "Close"
+msgstr ""
+
+#: templates/bookings/add.html:4 templates/bookings/add.html:21
+msgid "New reservation"
+msgstr ""
+
+#: templates/bookings/add.html:22
+msgid "Enter what you have — the rest can wait."
+msgstr ""
+
+#: templates/bookings/add.html:29
+msgid "Still needs attention"
+msgstr ""
+
+#: templates/bookings/add.html:30
+msgid "Nationality wasn't entered — add it soon for the police report."
+msgstr ""
+
+#: templates/bookings/add.html:32
+msgid "Got it"
+msgstr ""
+
+#: templates/bookings/add.html:46
+msgid "1. The stay"
+msgstr ""
+
+#: templates/bookings/add.html:47
+msgid "The stay"
+msgstr ""
+
+#: templates/bookings/add.html:84
+msgid "2. The guest"
+msgstr ""
+
+#: templates/bookings/add.html:85
+msgid "The guest"
+msgstr ""
+
+#: templates/bookings/add.html:100 templates/bookings/add.html:137
+#: templates/bookings/add.html:148 templates/bookings/add.html:159
+#: templates/villas/_field.html:21 templates/villas/_room_block.html:70
+#: templates/villas/_room_block.html:81 templates/villas/_room_block.html:96
+#: templates/villas/_villa_fields.html:50
+msgid "optional"
+msgstr ""
+
+#: templates/bookings/add.html:114
+msgid ""
+"This guest is foreign — a police report will be needed within 24 hours of "
+"check-in."
+msgstr ""
+
+#: templates/bookings/add.html:122
+msgid "3. Booking details"
+msgstr ""
+
+#: templates/bookings/add.html:123
+msgid "Booking details"
+msgstr ""
+
+#: templates/bookings/add.html:170
+#, python-format
+msgid "Rp %(amount)s still owed"
+msgstr ""
+
+#: templates/bookings/add.html:177
+msgid "Paid in full"
+msgstr ""
+
+#: templates/bookings/add.html:182
+msgid "Pricing is only visible to owners and managers."
+msgstr ""
+
+#: templates/bookings/add.html:190
+msgid "Save reservation"
+msgstr ""
+
+#: templates/bookings/calendar.html:4 templates/bookings/calendar.html:26
+msgid "Booking calendar"
+msgstr ""
+
+#: templates/bookings/calendar.html:12
+#: templates/compliance/action_needed.html:13
+#: templates/dashboard/dashboard.html:11 templates/guests/list.html:13
+#: templates/messaging/inbox.html:13 templates/villas/list.html:13
+msgid "Ask an owner to add you, or use the admin panel to set this up."
+msgstr ""
+
+#: templates/bookings/calendar.html:27
+msgid "All villas, one view."
+msgstr ""
+
+#: templates/compliance/action_needed.html:4
+#: templates/compliance/action_needed.html:20
+#: templates/partials/_sidebar.html:56 templates/partials/_topnav.html:42
+msgid "Compliance"
+msgstr ""
+
+#: templates/compliance/action_needed.html:21
+msgid "What needs doing - not a verified-compliant checklist."
+msgstr ""
+
+#: templates/compliance/action_needed.html:23
+msgid "View all documents"
+msgstr ""
+
+#: templates/compliance/action_needed.html:27
+msgid "Items needing attention"
+msgstr ""
+
+#: templates/compliance/action_needed.html:36
+msgid "Documents expiring soon"
+msgstr ""
+
+#: templates/compliance/action_needed.html:43
+#: templates/compliance/documents.html:42
+msgid "Whole business"
+msgstr ""
+
+#: templates/compliance/action_needed.html:47
+#: templates/compliance/documents.html:33
+msgid "Expires"
+msgstr ""
+
+#: templates/compliance/action_needed.html:49
+msgid "No expiry date on file"
+msgstr ""
+
+#: templates/compliance/action_needed.html:56
+msgid "Nothing expiring soon."
+msgstr ""
+
+#: templates/compliance/action_needed.html:61
+msgid "Police report reminders (STM)"
+msgstr ""
+
+#: templates/compliance/action_needed.html:63
+msgid ""
+"A reminder only - the report itself is still filed in person at the police "
+"station."
+msgstr ""
+
+#: templates/compliance/action_needed.html:75 templates/guests/detail.html:108
+msgid "Overdue"
+msgstr ""
+
+#: templates/compliance/action_needed.html:76
+msgid "Due"
+msgstr ""
+
+#: templates/compliance/action_needed.html:84
+msgid "Mark as done"
+msgstr ""
+
+#: templates/compliance/action_needed.html:90
+msgid "Nothing due soon."
+msgstr ""
+
+#: templates/compliance/document_form.html:4
+#: templates/compliance/document_form.html:8
+#: templates/compliance/document_form.html:79
+#: templates/compliance/documents.html:21
+msgid "Add document"
+msgstr ""
+
+#: templates/compliance/document_form.html:18
+#: templates/compliance/documents.html:30
+msgid "Type"
+msgstr ""
+
+#: templates/compliance/document_form.html:22
+msgid "Download blank template"
+msgstr ""
+
+#: templates/compliance/document_form.html:25
+msgid "+ Add your own type"
+msgstr ""
+
+#: templates/compliance/document_form.html:30
+msgid "Choose from the list instead"
+msgstr ""
+
+#: templates/compliance/document_form.html:47
+msgid "Reference number"
+msgstr ""
+
+#: templates/compliance/document_form.html:51
+#: templates/compliance/documents.html:35
+msgid "File"
+msgstr ""
+
+#: templates/compliance/document_form.html:57
+msgid "Issued on"
+msgstr ""
+
+#: templates/compliance/document_form.html:61
+msgid "Expires on"
+msgstr ""
+
+#: templates/compliance/documents.html:4 templates/compliance/documents.html:17
+msgid "Documents"
+msgstr ""
+
+#: templates/compliance/documents.html:18
+msgid "Back to compliance"
+msgstr ""
+
+#: templates/compliance/documents.html:32 templates/guests/list.html:104
+msgid "Reference"
+msgstr ""
+
+#: templates/compliance/documents.html:47
+msgid "Needs attention"
+msgstr ""
+
+#: templates/compliance/documents.html:49
+msgid "On file"
+msgstr ""
+
+#: templates/compliance/documents.html:53
+msgid "View"
+msgstr ""
+
+#: templates/compliance/documents.html:62
+msgid "No documents on file yet."
+msgstr ""
+
+#: templates/dashboard/coming_soon.html:10
+msgid "This part of the dashboard isn't built yet."
+msgstr ""
+
+#: templates/dashboard/dashboard.html:25
+msgid "Occupied today"
+msgstr ""
+
+#: templates/dashboard/dashboard.html:27
+msgid "of"
+msgstr ""
+
+#: templates/dashboard/dashboard.html:30
+msgid "Revenue this month"
+msgstr ""
+
+#: templates/dashboard/dashboard.html:36
+#, python-format
+msgid ""
+"\n"
+"          %(n)s payment left out - no exchange rate on file\n"
+"        "
+msgid_plural ""
+"\n"
+"          %(n)s payments left out - no exchange rate on file\n"
+"        "
+msgstr[0] ""
+msgstr[1] ""
+
+#: templates/dashboard/dashboard.html:45
+msgid "Needs doing"
+msgstr ""
+
+#: templates/dashboard/dashboard.html:59
+msgid "Arriving today"
+msgstr ""
+
+#: templates/dashboard/dashboard.html:75
+#, python-format
+msgid "Check-in %(time)s"
+msgstr ""
+
+#: templates/dashboard/dashboard.html:79
+msgid "No one arriving today"
+msgstr ""
+
+#: templates/dashboard/dashboard.html:89
+msgid "Leaving today"
+msgstr ""
+
+#: templates/dashboard/dashboard.html:105
+#, python-format
+msgid "Check-out %(time)s"
+msgstr ""
+
+#: templates/dashboard/dashboard.html:109
+msgid "No one leaving today"
+msgstr ""
+
+#: templates/dashboard/dashboard.html:119
+msgid "Still owe money"
+msgstr ""
+
+#: templates/dashboard/dashboard.html:139
+msgid "Everyone is paid up"
+msgstr ""
+
+#: templates/guests/detail.html:8
+msgid "Back to guests"
+msgstr ""
+
+#: templates/guests/detail.html:18
+msgid "No contact details on file"
+msgstr ""
+
+#: templates/guests/detail.html:24
+#, python-format
+msgid "%(n)s stay"
+msgid_plural "%(n)s stays"
+msgstr[0] ""
+msgstr[1] ""
+
+#: templates/guests/detail.html:36 templates/partials/_sidebar.html:35
+msgid "Bookings"
+msgstr ""
+
+#: templates/guests/detail.html:43
+msgid "to"
+msgstr ""
+
+#: templates/guests/detail.html:47
+msgid "dates only, no further detail"
+msgstr ""
+
+#: templates/guests/detail.html:53
+msgid "No bookings on file."
+msgstr ""
+
+#: templates/guests/detail.html:58
+msgid "Requests"
+msgstr ""
+
+#: templates/guests/detail.html:73
+msgid "No requests yet."
+msgstr ""
+
+#: templates/guests/detail.html:78
+msgid "Private feedback"
+msgstr ""
+
+#: templates/guests/detail.html:86
+msgid "Sent to owner"
+msgstr ""
+
+#: templates/guests/detail.html:95
+msgid "No feedback yet."
+msgstr ""
+
+#: templates/guests/detail.html:100
+msgid "Police report reminders"
+msgstr ""
+
+#: templates/guests/detail.html:113
+msgid "Deadline"
+msgstr ""
+
+#: templates/guests/detail.html:118
+msgid "None on file."
+msgstr ""
+
+#: templates/guests/detail.html:123
+msgid "Recent activity"
+msgstr ""
+
+#: templates/guests/detail.html:137
+msgid "Nothing recorded yet."
+msgstr ""
+
+#: templates/guests/detail.html:143
+msgid "Internal notes"
+msgstr ""
+
+#: templates/guests/detail.html:144
+msgid "Staff only - never shown to the guest."
+msgstr ""
+
+#: templates/guests/list.html:4 templates/guests/list.html:19
+msgid "Reservations"
+msgstr ""
+
+#: templates/guests/list.html:21
+msgid "Create reservation"
+msgstr ""
+
+#: templates/guests/list.html:28
+msgid "Guest name"
+msgstr ""
+
+#: templates/guests/list.html:33
+msgid "Booking reference"
+msgstr ""
+
+#: templates/guests/list.html:34 templates/guests/list.html:39
+msgid "Not available yet"
+msgstr ""
+
+#: templates/guests/list.html:38
+msgid "Invoice number"
+msgstr ""
+
+#: templates/guests/list.html:52
+msgid "Date type"
+msgstr ""
+
+#: templates/guests/list.html:54 templates/guests/list.html:107
+msgid "Check-in"
+msgstr ""
+
+#: templates/guests/list.html:55 templates/guests/list.html:108
+msgid "Check-out"
+msgstr ""
+
+#: templates/guests/list.html:61
+msgid "All statuses"
+msgstr ""
+
+#: templates/guests/list.html:68
+msgid "Date from"
+msgstr ""
+
+#: templates/guests/list.html:73
+msgid "Date to"
+msgstr ""
+
+#: templates/guests/list.html:80
+msgid "All sources"
+msgstr ""
+
+#: templates/guests/list.html:89
+msgid "Search"
+msgstr ""
+
+#: templates/guests/list.html:95
+#, python-format
+msgid "%(n)s reservation found"
+msgid_plural "%(n)s reservations found"
+msgstr[0] ""
+msgstr[1] ""
+
+#: templates/guests/list.html:103
+msgid "Guest"
+msgstr ""
+
+#: templates/guests/list.html:109
+msgid "Booked on"
+msgstr ""
+
+#: templates/guests/list.html:110
+msgid "ETA"
+msgstr ""
+
+#: templates/guests/list.html:112
+msgid "Total"
+msgstr ""
+
+#: templates/guests/list.html:113
+msgid "Outstanding"
+msgstr ""
+
+#: templates/guests/list.html:114
+msgid "Invoice"
+msgstr ""
+
+#: templates/guests/list.html:160
+msgid "No reservations match this search."
+msgstr ""
+
+#: templates/messaging/inbox.html:4 templates/messaging/inbox.html:19
+#: templates/partials/_sidebar.html:63 templates/partials/_topnav.html:43
+msgid "Messages"
+msgstr ""
+
+#: templates/messaging/inbox.html:21
+#, python-format
+msgid ""
+"\n"
+"        %(n)s conversation\n"
+"      "
+msgid_plural ""
+"\n"
+"        %(n)s conversations\n"
+"      "
+msgstr[0] ""
+msgstr[1] ""
+
+#: templates/messaging/inbox.html:62
+msgid "You:"
+msgstr ""
+
+#: templates/messaging/inbox.html:65
+msgid "No messages yet"
+msgstr ""
+
+#: templates/messaging/inbox.html:77
+msgid "No conversations match these filters."
+msgstr ""
+
+#: templates/messaging/inbox.html:79
+msgid "Show all conversations"
+msgstr ""
+
+#: templates/messaging/inbox.html:84
+msgid "No conversations yet."
+msgstr ""
+
+#: templates/messaging/inbox.html:86
+msgid "Conversations show up here once a guest messages you on WhatsApp."
+msgstr ""
+
+#: templates/messaging/thread.html:8
+msgid "Back to messages"
+msgstr ""
+
+#: templates/messaging/thread.html:25
+msgid "No messages yet."
+msgstr ""
+
+#: templates/messaging/thread.html:46
+msgid "No template - write freely"
+msgstr ""
+
+#: templates/messaging/thread.html:54
+msgid ""
+"No approved template on file yet - nothing can be sent until one is "
+"approved, or they message you again."
+msgstr ""
+
+#: templates/messaging/thread.html:62
+msgid "Type a message"
+msgstr ""
+
+#: templates/messaging/thread.html:70
+msgid "Send"
+msgstr ""
+
+#: templates/partials/_sidebar.html:42 templates/partials/_topnav.html:40
+msgid "Villas"
+msgstr ""
+
+#: templates/partials/_sync_badge.html:5
+msgid "Updated just now"
+msgstr ""
+
+#: templates/partials/_sync_badge.html:9
+msgid "From calendar links. Dates only, and can be a few hours behind."
+msgstr ""
+
+#: templates/partials/_topbar.html:7
+msgid "Open menu"
+msgstr ""
+
+#: templates/partials/_topbar.html:20 templates/partials/_topnav.html:73
+msgid "Log out"
+msgstr ""
+
+#: templates/partials/_topnav.html:17
+msgid "Calendar"
+msgstr ""
+
+#: templates/partials/_topnav.html:26
+msgid "More"
+msgstr ""
+
+#: templates/registration/login.html:4 templates/registration/login.html:8
+#: templates/registration/login.html:30
+msgid "Log in"
+msgstr ""
+
+#: templates/registration/login.html:12
+msgid "That email or password isn't right. Try again."
+msgstr ""
+
+#: templates/registration/login.html:23
+msgid "Password"
+msgstr ""
+
+#: templates/villas/_amenity_checkboxes.html:36
+msgid "Add your own"
+msgstr ""
+
+#: templates/villas/_amenity_new.html:19
+#, python-format
+msgid "Added %(name)s. It'll be on the list next time too."
+msgstr ""
+
+#: templates/villas/_photo_grid.html:34 templates/villas/_photo_grid.html:35
+msgid "Remove this picture"
+msgstr ""
+
+#: templates/villas/_room_block.html:22
+msgid "Show or hide this room type"
+msgstr ""
+
+#: templates/villas/_room_block.html:31
+#, python-format
+msgid "%(n)s room"
+msgid_plural "%(n)s rooms"
+msgstr[0] ""
+msgstr[1] ""
+
+#: templates/villas/_room_block.html:33
+#, python-format
+msgid "%(n)s amenity"
+msgid_plural "%(n)s amenities"
+msgstr[0] ""
+msgstr[1] ""
+
+#: templates/villas/_room_block.html:42 templates/villas/_room_block.html:43
+msgid "Remove this room type"
+msgstr ""
+
+#: templates/villas/_room_block.html:48
+msgid "this room type"
+msgstr ""
+
+#: templates/villas/_room_block.html:48
+#, python-format
+msgid "Remove %(name)s?"
+msgstr ""
+
+#: templates/villas/_room_block.html:95 templates/villas/_villa_fields.html:49
+msgid "Photos"
+msgstr ""
+
+#: templates/villas/_room_blocks.html:36
+msgid "Add another kind of room"
+msgstr ""
+
+#: templates/villas/_room_blocks.html:39
+msgid ""
+"Only if this villa has rooms that differ - a bigger one, or one with its own "
+"price. Renting the whole villa out as one? One kind of room is all you need."
+msgstr ""
+
+#: templates/villas/_step_indicator.html:14 templates/villas/edit.html:20
+msgid "About the villa"
+msgstr ""
+
+#: templates/villas/_step_indicator.html:24 templates/villas/add_rooms.html:4
+#: templates/villas/edit.html:31
+msgid "Rooms"
+msgstr ""
+
+#: templates/villas/_villa_fields.html:43
+msgid "Left empty, this is 2:00 PM."
+msgstr ""
+
+#: templates/villas/_villa_fields.html:44
+msgid "Left empty, this is 11:00 AM."
+msgstr ""
+
+#: templates/villas/add_details.html:4 templates/villas/add_details.html:8
+#: templates/villas/add_rooms.html:8 templates/villas/list.html:100
+msgid "Add a villa"
+msgstr ""
+
+#: templates/villas/add_details.html:9 templates/villas/add_rooms.html:9
+msgid "General details, then room types."
+msgstr ""
+
+#: templates/villas/add_details.html:20
+msgid "Continue to rooms"
+msgstr ""
+
+#: templates/villas/add_details.html:27
+msgid ""
+"Everything here is already saved. You can close this and come back to it."
+msgstr ""
+
+#: templates/villas/add_details.html:31
+#, python-format
+msgid ""
+"\n"
+"        %(used)s of %(limit)s villas used on your plan.\n"
+"      "
+msgstr ""
+
+#: templates/villas/add_rooms.html:14
+msgid ""
+"Add one kind of room for every kind this villa has. Renting the whole place "
+"out as one is fine - that's a single kind of room with one room in it."
+msgstr ""
+
+#: templates/villas/add_rooms.html:25
+msgid "Back to villa details"
+msgstr ""
+
+#: templates/villas/add_rooms.html:27
+msgid "Save villa"
+msgstr ""
+
+#: templates/villas/add_rooms.html:32
+msgid ""
+"Everything you've typed is already saved. You can close this and come back "
+"to it."
+msgstr ""
+
+#: templates/villas/confirm_delete.html:4
+msgid "Delete villa"
+msgstr ""
+
+#: templates/villas/confirm_delete.html:9
+#, python-format
+msgid "Delete %(name)s?"
+msgstr ""
+
+#: templates/villas/confirm_delete.html:12
+msgid ""
+"This takes it off your villa list. Its bookings, guests, and documents are "
+"kept, not deleted."
+msgstr ""
+
+#: templates/villas/confirm_delete.html:18
+msgid "Yes, delete it"
+msgstr ""
+
+#: templates/villas/edit.html:9
+msgid "Everything on file about this villa."
+msgstr ""
+
+#: templates/villas/edit.html:25
+msgid "Save these details"
+msgstr ""
+
+#: templates/villas/edit.html:33
+msgid ""
+"Each kind of room, and how many there are. Change a number to add or take "
+"away rooms."
+msgstr ""
+
+#: templates/villas/edit.html:42
+msgid "Save the rooms"
+msgstr ""
+
+#: templates/villas/edit.html:47
+msgid ""
+"A room with bookings on it is always kept, even if you lower the number - "
+"move those bookings first."
+msgstr ""
+
+#: templates/villas/edit.html:52
+msgid "Back to villas"
+msgstr ""
+
+#: templates/villas/edit.html:54
+msgid "Remove this villa"
+msgstr ""
+
+#: templates/villas/list.html:4 templates/villas/list.html:19
+msgid "Your villas"
+msgstr ""
+
+#: templates/villas/list.html:21
+#, python-format
+msgid ""
+"\n"
+"        %(n)s of %(villa_limit)s villas used\n"
+"      "
+msgid_plural ""
+"\n"
+"        %(n)s of %(villa_limit)s villas used\n"
+"      "
+msgstr[0] ""
+msgstr[1] ""
+
+#: templates/villas/list.html:38
+msgid "Not finished yet"
+msgstr ""
+
+#: templates/villas/list.html:45
+msgid "Finish setting it up"
+msgstr ""
+
+#: templates/villas/list.html:48
+msgid "Discard"
+msgstr ""
+
+#: templates/villas/list.html:65
+#, python-format
+msgid "Available %(date)s"
+msgstr ""
+
+#: templates/villas/list.html:68
+msgid "Available now"
+msgstr ""
+
+#: templates/villas/list.html:73
+#, python-format
+msgid ""
+"\n"
+"              %(n)s room - sleeps %(guests)s\n"
+"            "
+msgid_plural ""
+"\n"
+"              %(n)s rooms - sleeps %(guests)s\n"
+"            "
+msgstr[0] ""
+msgstr[1] ""
+
+#: templates/villas/list.html:83
+msgid "Open dashboard"
+msgstr ""
+
+#: templates/villas/list.html:86
+msgid "Edit"
+msgstr ""
+
+#: templates/villas/list.html:87
+msgid "Delete"
+msgstr ""
+
+#: templates/villas/list.html:107
+#, python-format
+msgid ""
+"\n"
+"          You've reached your plan's limit of %(limit)s villas. Contact us "
+"to add more.\n"
+"        "
+msgstr ""
+
+#: templates/villas/list.html:115
+msgid "You haven't added a villa yet."
+msgstr ""
+
+#: templates/villas/list.html:116
+msgid "Add your first one to get started."
+msgstr ""
+
+#: templates/villas/list.html:121
+msgid "Add your first villa"
+msgstr ""

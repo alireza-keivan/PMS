@@ -26,6 +26,33 @@
     </p>
   </div>
 
+  {% comment %}
+  Villas somebody started adding and never finished. They are deliberately
+  invisible everywhere else in the app - they aren't ready to be booked, and
+  they don't use up a villa on the plan - so this is the one place they show
+  up, offering to pick up where it was left off.
+  {% endcomment %}
+  {% if drafts %}
+    <div class="mb-6 rounded-card border border-dashed border-sand-400 bg-sand-100 p-4">
+      <p class="mb-3 text-sm text-ink-800">{% translate "Not finished yet" %}</p>
+      <ul class="space-y-2">
+        {% for draft in drafts %}
+          <li class="flex flex-wrap items-center justify-between gap-2">
+            <span class="text-sm text-ink-900">{{ draft.name }}</span>
+            <span class="flex items-center gap-4 text-sm">
+              <a href="{% url 'villas:rooms' draft.slug %}" class="text-teal-700 underline">
+                {% translate "Finish setting it up" %}
+              </a>
+              <a href="{% url 'villas:delete' draft.slug %}" class="text-ink-600 underline hover:text-red-700">
+                {% translate "Discard" %}
+              </a>
+            </span>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+  {% endif %}
+
   {% if villas %}
     <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {% for villa in villas %}
@@ -42,7 +69,7 @@
           </div>
           <p class="text-sm text-ink-600">{{ villa.address|default:villa.area }}</p>
           <p class="mt-1 text-xs text-ink-600">
-            {% blocktranslate with guests=villa.max_guests count n=villa.room_count %}
+            {% blocktranslate with guests=villa.sleeps count n=villa.room_count %}
               {{ n }} room - sleeps {{ guests }}
             {% plural %}
               {{ n }} rooms - sleeps {{ guests }}

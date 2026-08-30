@@ -1,9 +1,9 @@
 {% load i18n %}
 {% comment %}
-Booking detail card. Read-only: it reports what the booking is, and offers no
-way to change or remove it - see CLAUDE.md rule 5. `detail` is set by a bar's
-click handler in _calendar_panel.html and is a plain dataset object, so every
-value below is already a rendered string.
+Booking detail card. `detail` is set by a bar's click handler in
+_calendar_panel.html and is a plain dataset object, so every value below is
+already a rendered string. Removing is the one write action here, and it goes
+through the shared confirmTarget dialog (mode "form") - see CLAUDE.md rule 5.
 {% endcomment %}
 <div
   x-show="detail" x-cloak
@@ -50,7 +50,11 @@ value below is already a rendered string.
           </template>
         </dl>
 
-        <div class="flex justify-end">
+        <div class="flex items-center justify-between">
+          <button type="button" class="btn btn-ghost text-red-700"
+                  @click="confirmTarget = { message: detail.removeMessage, url: detail.removeUrl, mode: 'form' }; detail = null">
+            {% translate "Remove booking" %}
+          </button>
           <button type="button" class="btn btn-secondary" @click="detail = null">{% translate "Close" %}</button>
         </div>
       </div>

@@ -1,0 +1,33 @@
+{% load i18n %}
+{% comment %}
+One labelled box. Include with `field`, and optionally `hint` to say something
+the form itself doesn't.
+
+Required and optional fields sit in the same flow, one after another - not
+split into separate sections - and are told apart only by what's next to the
+label: a plain asterisk for required, a quiet "(optional)" for everything
+else.
+
+Errors are hidden when `hide_errors` is set, which is how the room blocks come
+back after one is added or removed: that is work in progress, not a rejected
+submission.
+{% endcomment %}
+<div class="field">
+  <label class="mb-1 flex items-baseline gap-1 text-sm text-ink-800" for="{{ field.id_for_label }}">
+    <span>{{ field.label }}</span>
+    {% if field.field.required %}
+      <span class="text-teal-700">*</span>
+    {% else %}
+      <span class="text-xs text-ink-500">({% translate "optional" %})</span>
+    {% endif %}
+  </label>
+  {{ field }}
+  {% if hint %}
+    <p class="mt-1 text-xs text-ink-600">{{ hint }}</p>
+  {% elif field.help_text %}
+    <p class="mt-1 text-xs text-ink-600">{{ field.help_text }}</p>
+  {% endif %}
+  {% if field.errors and not hide_errors %}
+    <p class="mt-1 text-sm text-teal-700">{{ field.errors|join:" " }}</p>
+  {% endif %}
+</div>

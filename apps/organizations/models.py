@@ -70,7 +70,10 @@ class Organization(TimeStampedModel):
 
     @property
     def can_add_villa(self) -> bool:
-        return self.villas.filter(is_active=True).count() < self.villa_limit
+        """Half-finished villas don't count - somebody part-way through the
+        add form has not used up one of their paid slots yet.
+        """
+        return self.villas.live().count() < self.villa_limit
 
 
 class Membership(TimeStampedModel):

@@ -24,6 +24,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from apps.core.models import TenantOwnedModel
+from apps.guests.constants import NATIONALITY_CHOICES
 
 
 class Guest(TenantOwnedModel):
@@ -42,6 +43,7 @@ class Guest(TenantOwnedModel):
         max_length=2,
         blank=True,
         db_index=True,
+        choices=NATIONALITY_CHOICES,
         help_text=_("ISO 3166-1 alpha-2. Required for the STM police report."),
     )
     preferred_language = models.CharField(max_length=5, blank=True)

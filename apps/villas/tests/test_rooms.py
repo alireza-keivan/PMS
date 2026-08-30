@@ -151,156 +151,119 @@ def test_lowering_the_number_never_removes_a_villas_last_room(org):
     assert villa.rooms.count() == 1
 
 
-# ---- the villa's rooms panel ----------------------------------------------
+# ---- the room blocks on the add and edit pages ----------------------------
 
-def test_the_add_page_offers_a_room_type_row(owner_client):
-    response = owner_client.get(reverse("villas:add"))
-    assert response.status_code == 200
-    assert response.context["room_type_rows"] == [{"name": "", "count": 1}]
-    assert b'name="room_type_name"' in response.content
+def _blocks(villa, **overrides):
+    """A step-2 submission covering every one of a villa's room types."""
+    payload = {
+        "rooms-TOTAL_FORMS": str(villa.room_categories.count()),
+        "rooms-INITIAL_FORMS": str(villa.room_categories.count()),
+    }
+    for i, category in enumerate(villa.room_categories.all()):
+        payload.update({
+            f"rooms-{i}-id": str(category.pk),
+            f"rooms-{i}-name": category.name,
+            f"rooms-{i}-room_count": str(category.rooms.count()),
+            f"rooms-{i}-max_guests": str(category.max_guests),
+            f"rooms-{i}-minimum_nights": str(category.minimum_nights),
+        })
+    payload.update(overrides)
+    return payload
 
 
-def test_the_edit_page_lists_each_room_type_with_its_rooms(owner_client, villa):
+def _index_of(villa, category):
+    return list(villa.room_categories.all()).index(category)
+
+
+def test_the_rooms_page_shows_a_block_for_every_room_type(owner_client, villa):
     create_room_type(villa, "Deluxe", how_many=2)
     response = owner_client.get(reverse("villas:edit", args=[villa.slug]))
+
     assert response.status_code == 200
-    assert [g["category"].name for g in response.context["room_groups"]] == ["Standard", "Deluxe"]
-    assert [r.name for r in response.context["room_groups"][1]["rooms"]] == ["Deluxe", "Deluxe 2"]
+    names = [f.instance.name for f in response.context["formset"].forms]
+    assert names == ["Standard", "Deluxe"]
 
 
-def test_add_room_type_creates_it_with_that_many_rooms(owner_client, villa):
-    response = owner_client.post(
-        reverse("villas:add_room_category", args=[villa.slug]),
-        {"name": "Garden view", "count": 3},
-    )
-    assert response.status_code == 302
-    garden = villa.room_categories.get(name="Garden view")
-    assert [r.name for r in garden.rooms.order_by("id")] == [
-        "Garden view", "Garden view 2", "Garden view 3",
-    ]
-
-
-def test_add_room_type_rejects_a_duplicate_name(owner_client, villa):
-    before = villa.room_categories.count()
-    owner_client.post(
-        reverse("villas:add_room_category", args=[villa.slug]),
-        {"name": "standard", "count": 1}, follow=True,
-    )
-    assert villa.room_categories.count() == before
-
-
-def test_add_room_type_rejects_a_missing_number(owner_client, villa):
-    owner_client.post(
-        reverse("villas:add_room_category", args=[villa.slug]),
-        {"name": "Garden view", "count": ""}, follow=True,
-    )
-    assert not villa.room_categories.filter(name="Garden view").exists()
-
-
-def test_cannot_add_a_room_type_to_another_organizations_villa(owner_client, other_org):
-    other_villa = Villa.objects.create(organization=other_org, name="Other", slug="other")
-    response = owner_client.post(
-        reverse("villas:add_room_category", args=[other_villa.slug]),
-        {"name": "Sneaky", "count": 1},
-    )
-    assert response.status_code == 404
-    assert not other_villa.room_categories.filter(name="Sneaky").exists()
-
-
-def test_saving_a_room_type_renames_it_and_its_rooms_and_changes_the_number(owner_client, villa):
+def test_renaming_a_room_type_renames_its_rooms_too(owner_client, villa):
+    """A room is named after its type, so renaming the type has to bring the
+    rooms along - otherwise the villa ends up with a Kenanga room type whose
+    rooms are all still called Deluxe.
+    """
     deluxe = create_room_type(villa, "Deluxe", how_many=2)
-    first, second = deluxe.rooms.order_by("id")
+    i = _index_of(villa, deluxe)
 
     response = owner_client.post(
-        reverse("villas:save_room_category", args=[villa.slug, deluxe.pk]),
-        {
-            "name": "Kenanga",
-            "count": 3,
-            f"room_name_{first.pk}": "Kenanga suite",
-            f"room_name_{second.pk}": "Deluxe 2",
-        },
+        reverse("villas:rooms", args=[villa.slug]),
+        _blocks(villa, **{f"rooms-{i}-name": "Kenanga"}),
     )
+
     assert response.status_code == 302
     deluxe.refresh_from_db()
     assert deluxe.name == "Kenanga"
-    # Renames land before the new room is named, so it follows the new name.
-    assert [r.name for r in deluxe.rooms.order_by("id")] == [
-        "Kenanga suite", "Deluxe 2", "Kenanga suite 3",
-    ]
+    assert [r.name for r in deluxe.rooms.order_by("id")] == ["Kenanga", "Kenanga 2"]
 
 
-def test_saving_a_room_type_with_a_lower_number_removes_rooms(owner_client, villa):
-    deluxe = create_room_type(villa, "Deluxe", how_many=3)
-    owner_client.post(
-        reverse("villas:save_room_category", args=[villa.slug, deluxe.pk]),
-        {"name": "Deluxe", "count": 1},
-    )
-    assert deluxe.rooms.count() == 1
-
-
-def test_a_room_type_can_be_emptied_without_being_removed(owner_client, villa):
-    """Older villas carry room types with nothing filed under them, and an
-    operator can empty one on purpose - the panel has to accept zero.
+def test_a_room_renamed_by_hand_keeps_its_name_when_the_type_is_renamed(owner_client, villa):
+    """Their name for that one room was deliberate. Renaming the type is not
+    an invitation to overwrite it.
     """
     deluxe = create_room_type(villa, "Deluxe", how_many=2)
-    response = owner_client.post(
-        reverse("villas:save_room_category", args=[villa.slug, deluxe.pk]),
-        {"name": "Deluxe", "count": 0}, follow=True,
+    first = deluxe.rooms.order_by("id").first()
+    first.name = "Kenanga"
+    first.save(update_fields=["name"])
+    i = _index_of(villa, deluxe)
+
+    owner_client.post(
+        reverse("villas:rooms", args=[villa.slug]),
+        _blocks(villa, **{f"rooms-{i}-name": "Garden"}),
     )
+
+    assert [r.name for r in deluxe.rooms.order_by("id")] == ["Kenanga", "Garden 2"]
+
+
+def test_rooms_added_in_the_same_save_follow_the_new_name(owner_client, villa):
+    """The rename lands before the count changes, so a room added at the same
+    moment is called Garden 3 rather than Deluxe 3.
+    """
+    deluxe = create_room_type(villa, "Deluxe", how_many=2)
+    i = _index_of(villa, deluxe)
+
+    owner_client.post(
+        reverse("villas:rooms", args=[villa.slug]),
+        _blocks(villa, **{f"rooms-{i}-name": "Garden", f"rooms-{i}-room_count": "3"}),
+    )
+
+    assert [r.name for r in deluxe.rooms.order_by("id")] == ["Garden", "Garden 2", "Garden 3"]
+
+
+def test_a_room_type_has_to_have_at_least_one_room(owner_client, villa):
+    """Every room type stands for something bookable. A type with nothing
+    under it is a label, not a room - remove the type instead.
+    """
+    deluxe = create_room_type(villa, "Deluxe", how_many=2)
+    i = _index_of(villa, deluxe)
+
+    response = owner_client.post(
+        reverse("villas:rooms", args=[villa.slug]),
+        _blocks(villa, **{f"rooms-{i}-room_count": "0"}),
+    )
+
     assert response.status_code == 200
-    assert deluxe.rooms.count() == 0
-    assert villa.room_categories.filter(pk=deluxe.pk).exists()
-
-
-def test_saving_a_room_type_rejects_a_number_that_is_not_one(owner_client, villa):
-    deluxe = create_room_type(villa, "Deluxe", how_many=2)
-    owner_client.post(
-        reverse("villas:save_room_category", args=[villa.slug, deluxe.pk]),
-        {"name": "Deluxe", "count": "lots"}, follow=True,
-    )
     assert deluxe.rooms.count() == 2
+    assert "room_count" in response.context["formset"].forms[i].errors
 
 
-def test_saving_a_lower_number_says_so_when_a_booked_room_is_kept(owner_client, org, villa):
-    """Honest rather than silent: the number on screen can't quietly pretend
-    a room with bookings on it was removed.
-    """
+def test_a_number_of_rooms_that_is_not_a_number_is_refused(owner_client, villa):
     deluxe = create_room_type(villa, "Deluxe", how_many=2)
-    guest = find_or_create_guest(org, full_name="A Guest")
-    for room in deluxe.rooms.all():
-        Booking.objects.create(
-            organization=org, villa=villa, room=room, guest=guest,
-            check_in="2026-09-01", check_out="2026-09-05",
-        )
+    i = _index_of(villa, deluxe)
 
     response = owner_client.post(
-        reverse("villas:save_room_category", args=[villa.slug, deluxe.pk]),
-        {"name": "Deluxe", "count": 1}, follow=True,
+        reverse("villas:rooms", args=[villa.slug]),
+        _blocks(villa, **{f"rooms-{i}-room_count": "lots"}),
     )
+
+    assert response.status_code == 200
     assert deluxe.rooms.count() == 2
-    assert any("bookings" in str(m) for m in response.context["messages"])
-
-
-def test_saving_a_room_type_rejects_a_name_another_type_already_has(owner_client, villa):
-    deluxe = create_room_type(villa, "Deluxe", how_many=1)
-    owner_client.post(
-        reverse("villas:save_room_category", args=[villa.slug, deluxe.pk]),
-        {"name": "Standard", "count": 1}, follow=True,
-    )
-    deluxe.refresh_from_db()
-    assert deluxe.name == "Deluxe"
-
-
-def test_cannot_save_a_room_type_on_another_organizations_villa(owner_client, other_org):
-    other_villa = Villa.objects.create(organization=other_org, name="Other", slug="other")
-    category = other_villa.room_categories.first()
-    response = owner_client.post(
-        reverse("villas:save_room_category", args=[other_villa.slug, category.pk]),
-        {"name": "Hijacked", "count": 1},
-    )
-    assert response.status_code == 404
-    category.refresh_from_db()
-    assert category.name == "Standard"
 
 
 def test_removing_a_room_type_moves_its_rooms_to_another_one(owner_client, villa):
@@ -321,7 +284,7 @@ def test_cannot_remove_the_only_room_type_while_rooms_use_it(owner_client, villa
         reverse("villas:remove_room_category", args=[villa.slug, standard.pk]), follow=True
     )
     assert villa.room_categories.filter(pk=standard.pk).exists()
-    assert any("another room type" in str(m) for m in response.context["messages"])
+    assert any("at least one room type" in str(m) for m in response.context["messages"])
 
 
 def test_cannot_remove_a_room_type_from_another_organizations_villa(owner_client, other_org):

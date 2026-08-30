@@ -92,7 +92,7 @@ class ConversationListView(LoginRequiredMixin, ListView):
         recent_only = self.request.GET.get("recent") == "1"
 
         villas = (
-            Villa.objects.filter(organization=org, is_active=True).order_by("name")
+            Villa.objects.filter(organization=org).live().order_by("name")
             if org else Villa.objects.none()
         )
         context["villa_tabs"] = (

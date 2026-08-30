@@ -1,0 +1,2244 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Bali Villa Dashboard\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-08-30 14:58+0800\n"
+"PO-Revision-Date: 2026-08-30 12:00+0800\n"
+"Last-Translator: \n"
+"Language-Team: Bahasa Indonesia\n"
+"Language: id\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+#: apps/accounts/admin.py:15
+msgid "Profile"
+msgstr "Profil"
+
+#: apps/accounts/admin.py:16
+msgid "Permissions"
+msgstr "Izin"
+
+#: apps/accounts/admin.py:17
+msgid "Dates"
+msgstr "Tanggal"
+
+#: apps/accounts/models.py:44
+msgid "email address"
+msgstr "alamat email"
+
+#: apps/accounts/models.py:45
+msgid "full name"
+msgstr "nama lengkap"
+
+#: apps/accounts/models.py:47
+msgid "WhatsApp number"
+msgstr "Nomor WhatsApp"
+
+#: apps/accounts/models.py:50
+msgid "Full international format, e.g. +6281234567890."
+msgstr "Format internasional lengkap, misalnya +6281234567890."
+
+#: apps/accounts/models.py:53
+msgid "language"
+msgstr "bahasa"
+
+#: apps/bookings/forms.py:25 apps/bookings/models.py:28
+#: apps/bookings/services.py:24
+msgid "Confirmed"
+msgstr "Terkonfirmasi"
+
+#: apps/bookings/forms.py:26 apps/bookings/models.py:29
+#: apps/guests/models.py:149
+msgid "Cancelled"
+msgstr "Dibatalkan"
+
+#: apps/bookings/forms.py:40 apps/villas/models.py:66
+#: templates/compliance/document_form.html:42
+#: templates/compliance/documents.html:31 templates/guests/list.html:43
+#: templates/guests/list.html:111
+msgid "Villa"
+msgstr "Villa"
+
+#: apps/bookings/forms.py:41
+#, fuzzy
+#| msgid "Add a villa"
+msgid "Choose a villa"
+msgstr "Tambah villa"
+
+#: apps/bookings/forms.py:43
+msgid "Choose which villa this booking is for."
+msgstr ""
+
+#: apps/bookings/forms.py:51
+#, fuzzy
+#| msgid "this room type"
+msgid "Room type"
+msgstr "jenis kamar ini"
+
+#: apps/bookings/forms.py:52 apps/bookings/views.py:208
+#, fuzzy
+#| msgid "this room type"
+msgid "Choose a room type"
+msgstr "jenis kamar ini"
+
+#: apps/bookings/forms.py:53
+msgid "Choose which room type this booking is for."
+msgstr ""
+
+#: apps/bookings/forms.py:56
+#, fuzzy
+#| msgid "Check-in time"
+msgid "Check-in date"
+msgstr "Waktu check-in"
+
+#: apps/bookings/forms.py:58
+msgid "Say when the guest checks in."
+msgstr ""
+
+#: apps/bookings/forms.py:61
+#, fuzzy
+#| msgid "Check-out time"
+msgid "Check-out date"
+msgstr "Waktu check-out"
+
+#: apps/bookings/forms.py:63
+msgid "Say when the guest checks out."
+msgstr ""
+
+#: apps/bookings/forms.py:66
+#, fuzzy
+#| msgid "Number of rooms"
+msgid "Number of guests"
+msgstr "Jumlah kamar"
+
+#: apps/bookings/forms.py:68
+msgid "Say how many guests are staying."
+msgstr ""
+
+#: apps/bookings/forms.py:72
+#, fuzzy
+#| msgid "Guest name"
+msgid "Guest full name"
+msgstr "Nama tamu"
+
+#: apps/bookings/forms.py:73
+msgid "e.g. Sarah Mitchell"
+msgstr ""
+
+#: apps/bookings/forms.py:74
+#, fuzzy
+#| msgid "Give the villa a name."
+msgid "Give the guest's name."
+msgstr "Beri nama villa ini."
+
+#: apps/bookings/forms.py:77
+#, fuzzy
+#| msgid "Invoice number"
+msgid "Phone number"
+msgstr "Nomor faktur"
+
+#: apps/bookings/forms.py:81 templates/registration/login.html:18
+msgid "Email"
+msgstr "Email"
+
+#: apps/bookings/forms.py:85
+#, fuzzy
+#| msgid "optional"
+msgid "Nationality"
+msgstr "opsional"
+
+#: apps/bookings/forms.py:86
+msgid "Choose a nationality"
+msgstr ""
+
+#: apps/bookings/forms.py:90
+#, fuzzy
+#| msgid "language"
+msgid "Preferred language"
+msgstr "bahasa"
+
+#: apps/bookings/forms.py:91
+#, fuzzy
+#| msgid "language"
+msgid "Choose a language"
+msgstr "bahasa"
+
+#: apps/bookings/forms.py:96 templates/guests/list.html:78
+msgid "Booked through"
+msgstr "Dipesan lewat"
+
+#: apps/bookings/forms.py:97
+msgid "Choose one"
+msgstr ""
+
+#: apps/bookings/forms.py:99
+msgid "Say how this booking came in."
+msgstr ""
+
+#: apps/bookings/forms.py:102 templates/compliance/documents.html:34
+#: templates/guests/list.html:59
+msgid "Status"
+msgstr "Status"
+
+#: apps/bookings/forms.py:107 apps/villas/forms.py:199 apps/villas/forms.py:220
+msgid "Nightly rate (IDR)"
+msgstr "Tarif per malam (IDR)"
+
+#: apps/bookings/forms.py:112
+#, fuzzy
+#| msgid "Monthly rate (IDR)"
+msgid "Total amount (IDR)"
+msgstr "Tarif per bulan (IDR)"
+
+#: apps/bookings/forms.py:116
+#, fuzzy
+#| msgid "Monthly rate (IDR)"
+msgid "Amount paid (IDR)"
+msgstr "Tarif per bulan (IDR)"
+
+#: apps/bookings/forms.py:121 templates/compliance/document_form.html:72
+msgid "Notes"
+msgstr "Catatan"
+
+#: apps/bookings/forms.py:124
+msgid "Anything else worth knowing about this booking"
+msgstr ""
+
+#: apps/bookings/forms.py:158
+#, fuzzy
+#| msgid "Pick a room type that belongs to this villa."
+msgid "Choose a room type that belongs to the selected villa."
+msgstr "Pilih jenis kamar yang termasuk villa ini."
+
+#: apps/bookings/forms.py:164
+msgid "Check-out has to be after check-in."
+msgstr ""
+
+#: apps/bookings/forms.py:172
+#, python-format
+msgid ""
+"Already booked by %(name)s, %(check_in)s to %(check_out)s. Check before "
+"saving."
+msgstr ""
+
+#: apps/bookings/forms.py:175 apps/bookings/views.py:245
+#, fuzzy
+#| msgid "Max guests"
+msgid "a guest"
+msgstr "Jumlah tamu maksimum"
+
+#: apps/bookings/forms.py:183
+msgid "Add a phone number or email so staff can reach the guest."
+msgstr ""
+
+#: apps/bookings/models.py:22
+msgid "Direct"
+msgstr "Langsung"
+
+#: apps/bookings/models.py:24
+msgid "Walk-in"
+msgstr ""
+
+#: apps/bookings/models.py:25 apps/bookings/services.py:200
+#: apps/bookings/services.py:369
+msgid "Other"
+msgstr "Lainnya"
+
+#: apps/bookings/models.py:30 apps/bookings/models.py:98
+#: apps/bookings/services.py:27 templates/dashboard/dashboard.html:70
+#: templates/dashboard/dashboard.html:100
+#: templates/dashboard/dashboard.html:130
+msgid "Not available"
+msgstr "Tidak tersedia"
+
+#: apps/bookings/models.py:35
+msgid "Full details"
+msgstr "Detail lengkap"
+
+#: apps/bookings/models.py:36
+msgid "Dates only"
+msgstr "Hanya tanggal"
+
+#: apps/bookings/models.py:37
+msgid "Entered by staff"
+msgstr "Dimasukkan oleh staf"
+
+#: apps/bookings/models.py:46
+msgid ""
+"Optional - only set once a villa's rooms are defined individually. PROTECT "
+"(not SET_NULL) on purpose: the calendar only draws bookings on room rows, so "
+"a booking silently losing its room would silently disappear from view - see "
+"apps/bookings/services.py's build_calendar_rows()."
+msgstr ""
+"Opsional - hanya diisi setelah kamar villa didefinisikan satu per satu. "
+"Sengaja menggunakan PROTECT (bukan SET_NULL): kalender hanya menggambar "
+"pemesanan pada baris kamar, sehingga pemesanan yang diam-diam kehilangan "
+"kamarnya akan diam-diam menghilang dari tampilan - lihat "
+"build_calendar_rows() di apps/bookings/services.py."
+
+#: apps/bookings/models.py:55
+msgid "Absent on calendar-only bookings - the feed carries no name."
+msgstr ""
+"Kosong untuk pemesanan yang hanya berasal dari kalender - feed tidak membawa "
+"nama."
+
+#: apps/bookings/models.py:77
+#, fuzzy
+#| msgid "Price for one night, in rupiah."
+msgid "Price for one night, in rupiah, agreed for this stay."
+msgstr "Harga untuk satu malam, dalam rupiah."
+
+#: apps/bookings/models.py:104
+msgid "That room doesn't belong to this booking's villa."
+msgstr "Kamar itu bukan milik villa pemesanan ini."
+
+#: apps/bookings/models.py:123
+msgid "Paid by the booking site"
+msgstr "Dibayar lewat situs pemesanan"
+
+#: apps/bookings/models.py:124
+msgid "Paid directly"
+msgstr "Dibayar langsung"
+
+#: apps/bookings/models.py:125
+msgid "Deposit"
+msgstr "Uang muka"
+
+#: apps/bookings/models.py:126
+msgid "Refund"
+msgstr "Pengembalian dana"
+
+#: apps/bookings/models.py:132
+msgid "Still owed - shows on the daily staff view."
+msgstr "Masih harus dibayar - muncul di tampilan harian staf."
+
+#: apps/bookings/services.py:25 apps/messaging/views.py:110
+msgid "Checked in"
+msgstr "Sudah check-in"
+
+#: apps/bookings/services.py:26 apps/messaging/views.py:112
+msgid "Checked out"
+msgstr "Sudah check-out"
+
+#: apps/bookings/services.py:28
+msgid "Payment incomplete"
+msgstr "Pembayaran belum lunas"
+
+#: apps/bookings/services.py:251 apps/bookings/services.py:407
+#: templates/guests/list.html:133
+msgid "Booked"
+msgstr "Dipesan"
+
+#: apps/bookings/services.py:400
+msgid "Unassigned"
+msgstr "Belum ditentukan"
+
+#: apps/bookings/services.py:413
+#, python-format
+msgid "%(start)s – %(end)s"
+msgstr "%(start)s – %(end)s"
+
+#: apps/bookings/services.py:417
+#: templates/bookings/_reservation_availability.html:19
+#, python-format
+msgid "%(n)s night"
+msgid_plural "%(n)s nights"
+msgstr[0] "%(n)s malam"
+msgstr[1] "%(n)s malam"
+
+#: apps/bookings/views.py:149
+#, fuzzy
+#| msgid "Reservations"
+msgid "Reservation saved."
+msgstr "Reservasi"
+
+#: apps/bookings/views.py:207
+msgid "Choose a villa first"
+msgstr ""
+
+#: apps/bookings/views.py:296
+#, fuzzy
+#| msgid "Booking reference"
+msgid "Booking removed."
+msgstr "Nomor referensi pemesanan"
+
+#: apps/bookings/views.py:315
+msgid "Invalid dates."
+msgstr ""
+
+#: apps/bookings/views.py:333
+#, fuzzy
+#| msgid "That one is already on the list."
+msgid "That room is already booked for part of those dates."
+msgstr "Itu sudah ada di daftar."
+
+#: apps/compliance/forms.py:24
+msgid "Or add your own type"
+msgstr "Atau tambahkan jenis sendiri"
+
+#: apps/compliance/forms.py:28 templates/compliance/document_form.html:67
+msgid "Remind us this many days before it expires"
+msgstr "Ingatkan kami berapa hari sebelum masa berlakunya habis"
+
+#: apps/compliance/forms.py:49 templates/compliance/document_form.html:44
+msgid "Leave blank if this covers the whole business."
+msgstr "Kosongkan jika ini berlaku untuk seluruh usaha."
+
+#: apps/compliance/forms.py:74
+msgid "Choose a document type, or add your own."
+msgstr "Pilih jenis dokumen, atau tambahkan sendiri."
+
+#: apps/compliance/models.py:30
+msgid "Leave empty for a type available to every client."
+msgstr "Kosongkan agar jenis ini tersedia untuk semua klien."
+
+#: apps/compliance/models.py:35
+msgid "A blank template staff can download and fill in."
+msgstr "Formulir kosong yang bisa diunduh dan diisi oleh staf."
+
+#: apps/compliance/models.py:40
+msgid ""
+"How long this document is normally valid for, used to suggest an expiry "
+"date. Leave blank if it doesn't expire."
+msgstr ""
+"Berapa lama dokumen ini biasanya berlaku, dipakai untuk menyarankan tanggal "
+"habis masa berlaku. Kosongkan jika tidak pernah kedaluwarsa."
+
+#: apps/compliance/models.py:45 apps/compliance/models.py:74
+msgid "Start warning this many days before it runs out."
+msgstr "Mulai beri peringatan berapa hari sebelum habis masa berlakunya."
+
+#: apps/compliance/models.py:64
+msgid "Leave empty if it covers the whole business."
+msgstr "Kosongkan jika ini berlaku untuk seluruh usaha."
+
+#: apps/compliance/models.py:100
+msgid "Still to do"
+msgstr "Masih harus dikerjakan"
+
+#: apps/compliance/models.py:101
+msgid "Marked as done by staff"
+msgstr "Ditandai selesai oleh staf"
+
+#: apps/compliance/models.py:102
+msgid "Not needed"
+msgstr "Tidak diperlukan"
+
+#: apps/compliance/models.py:111
+msgid "24 hours after arrival, Bali time."
+msgstr "24 jam setelah kedatangan, waktu Bali."
+
+#: apps/compliance/models.py:124
+msgid "police report reminder"
+msgstr "pengingat lapor polisi"
+
+#: apps/compliance/views.py:112
+msgid "Document added."
+msgstr "Dokumen berhasil ditambahkan."
+
+#: apps/compliance/views.py:132
+msgid "Marked as done."
+msgstr "Berhasil ditandai selesai."
+
+#: apps/core/calendar.py:26
+msgid "Island shutdown - nobody travels"
+msgstr "Pulau tutup total - tidak ada yang bepergian"
+
+#: apps/core/calendar.py:27
+msgid "Staff generally unavailable"
+msgstr "Staf umumnya tidak tersedia"
+
+#: apps/core/calendar.py:28
+msgid "Reduced staff availability"
+msgstr "Ketersediaan staf berkurang"
+
+#: apps/core/calendar.py:29
+msgid "Worth knowing, no staffing impact"
+msgstr "Perlu diketahui, tidak berdampak pada staf"
+
+#: apps/core/calendar.py:39
+msgid "Bali holiday"
+msgstr "hari libur Bali"
+
+#: apps/core/calendar.py:40
+msgid "Bali holidays"
+msgstr "hari libur Bali"
+
+#: apps/core/models.py:43
+msgid "operator"
+msgstr "operator"
+
+#: apps/core/models.py:68
+msgid "ISO 4217 code, exactly as the source reported it."
+msgstr "Kode ISO 4217, persis seperti yang dilaporkan sumbernya."
+
+#: apps/guests/constants.py:19
+msgid "Indonesian"
+msgstr ""
+
+#: apps/guests/constants.py:20
+msgid "Australian"
+msgstr ""
+
+#: apps/guests/constants.py:21
+msgid "American"
+msgstr ""
+
+#: apps/guests/constants.py:22
+msgid "British"
+msgstr ""
+
+#: apps/guests/constants.py:23
+msgid "German"
+msgstr ""
+
+#: apps/guests/constants.py:24
+msgid "French"
+msgstr ""
+
+#: apps/guests/constants.py:25
+msgid "Dutch"
+msgstr ""
+
+#: apps/guests/constants.py:26
+msgid "Russian"
+msgstr ""
+
+#: apps/guests/constants.py:27
+msgid "Japanese"
+msgstr ""
+
+#: apps/guests/constants.py:28
+msgid "South Korean"
+msgstr ""
+
+#: apps/guests/constants.py:29
+msgid "Singaporean"
+msgstr ""
+
+#: apps/guests/constants.py:30
+msgid "Malaysian"
+msgstr ""
+
+#: apps/guests/constants.py:31
+msgid "Chinese"
+msgstr ""
+
+#: apps/guests/constants.py:32
+msgid "Hong Kong"
+msgstr ""
+
+#: apps/guests/constants.py:33
+msgid "Taiwanese"
+msgstr ""
+
+#: apps/guests/constants.py:34
+msgid "Indian"
+msgstr ""
+
+#: apps/guests/constants.py:35
+msgid "Filipino"
+msgstr ""
+
+#: apps/guests/constants.py:36
+msgid "Thai"
+msgstr ""
+
+#: apps/guests/constants.py:37
+#, fuzzy
+#| msgid "Guest name"
+msgid "Vietnamese"
+msgstr "Nama tamu"
+
+#: apps/guests/constants.py:38
+msgid "Canadian"
+msgstr ""
+
+#: apps/guests/constants.py:39
+msgid "Spanish"
+msgstr ""
+
+#: apps/guests/constants.py:40
+msgid "Italian"
+msgstr ""
+
+#: apps/guests/constants.py:41
+msgid "Portuguese"
+msgstr ""
+
+#: apps/guests/constants.py:42
+msgid "Swedish"
+msgstr ""
+
+#: apps/guests/constants.py:43
+msgid "Norwegian"
+msgstr ""
+
+#: apps/guests/constants.py:44
+msgid "Danish"
+msgstr ""
+
+#: apps/guests/constants.py:45
+msgid "Finnish"
+msgstr ""
+
+#: apps/guests/constants.py:46
+msgid "Swiss"
+msgstr ""
+
+#: apps/guests/constants.py:47
+msgid "Austrian"
+msgstr ""
+
+#: apps/guests/constants.py:48
+msgid "Belgian"
+msgstr ""
+
+#: apps/guests/constants.py:49
+msgid "Irish"
+msgstr ""
+
+#: apps/guests/constants.py:50
+msgid "Polish"
+msgstr ""
+
+#: apps/guests/constants.py:51
+msgid "Brazilian"
+msgstr ""
+
+#: apps/guests/constants.py:52
+msgid "Mexican"
+msgstr ""
+
+#: apps/guests/constants.py:53
+msgid "Argentinian"
+msgstr ""
+
+#: apps/guests/constants.py:54
+msgid "South African"
+msgstr ""
+
+#: apps/guests/constants.py:55
+msgid "New Zealander"
+msgstr ""
+
+#: apps/guests/constants.py:56
+msgid "Emirati"
+msgstr ""
+
+#: apps/guests/constants.py:57
+msgid "Saudi Arabian"
+msgstr ""
+
+#: apps/guests/constants.py:58
+msgid "Israeli"
+msgstr ""
+
+#: apps/guests/constants.py:59
+msgid "Turkish"
+msgstr ""
+
+#: apps/guests/constants.py:60
+msgid "Ukrainian"
+msgstr ""
+
+#: apps/guests/models.py:40
+msgid "WhatsApp number, international format."
+msgstr "Nomor WhatsApp, format internasional."
+
+#: apps/guests/models.py:47
+msgid "ISO 3166-1 alpha-2. Required for the STM police report."
+msgstr "ISO 3166-1 alpha-2. Diperlukan untuk laporan STM ke polisi."
+
+#: apps/guests/models.py:56
+msgid "Internal. Never shown to the guest."
+msgstr "Internal. Tidak pernah ditampilkan ke tamu."
+
+#: apps/guests/models.py:60
+msgid "Delete or anonymise this record after this date."
+msgstr "Hapus atau samarkan identitas data ini setelah tanggal ini."
+
+#: apps/guests/models.py:91
+msgid "Opened their page"
+msgstr "Membuka halamannya"
+
+#: apps/guests/models.py:92
+msgid "Asked for something"
+msgstr "Meminta sesuatu"
+
+#: apps/guests/models.py:93
+msgid "Looked at a local activity"
+msgstr "Melihat aktivitas lokal"
+
+#: apps/guests/models.py:94
+msgid "Booked a local activity"
+msgstr "Memesan aktivitas lokal"
+
+#: apps/guests/models.py:95
+msgid "Left private feedback"
+msgstr "Memberi masukan pribadi"
+
+#: apps/guests/models.py:96
+msgid "Sent a message"
+msgstr "Mengirim pesan"
+
+#: apps/guests/models.py:119
+msgid "guest activity"
+msgstr "aktivitas tamu"
+
+#: apps/guests/models.py:138
+msgid "Cleaning"
+msgstr "Pembersihan"
+
+#: apps/guests/models.py:139
+msgid "Something is broken"
+msgstr "Ada yang rusak"
+
+#: apps/guests/models.py:140
+msgid "Private chef"
+msgstr "Koki pribadi"
+
+#: apps/guests/models.py:141
+msgid "Grocery stocking"
+msgstr "Belanja kebutuhan"
+
+#: apps/guests/models.py:142
+msgid "Airport transfer"
+msgstr "Antar-jemput bandara"
+
+#: apps/guests/models.py:143
+msgid "Something else"
+msgstr "Hal lainnya"
+
+#: apps/guests/models.py:146
+msgid "New"
+msgstr "Baru"
+
+#: apps/guests/models.py:147
+msgid "Seen by staff"
+msgstr "Sudah dilihat staf"
+
+#: apps/guests/models.py:148
+msgid "Done"
+msgstr "Selesai"
+
+#: apps/guests/models.py:163
+msgid "When staff were actually messaged."
+msgstr "Waktu staf benar-benar dikirimi pesan."
+
+#: apps/guests/models.py:189
+msgid "1 to 5."
+msgstr "1 sampai 5."
+
+#: apps/guests/models.py:196
+msgid "guest feedback"
+msgstr "masukan tamu"
+
+#: apps/marketing/models.py:50
+msgid "What the local operator pays the villa owner."
+msgstr "Yang dibayarkan operator lokal kepada pemilik villa."
+
+#: apps/marketing/staff_urls.py:16 templates/partials/_sidebar.html:70
+#: templates/partials/_topnav.html:44
+msgid "Marketing"
+msgstr "Pemasaran"
+
+#: apps/messaging/models.py:31
+msgid "Name registered with WhatsApp."
+msgstr "Nama yang terdaftar di WhatsApp."
+
+#: apps/messaging/models.py:99
+msgid "Waiting to send"
+msgstr "Menunggu dikirim"
+
+#: apps/messaging/models.py:100
+msgid "Sent"
+msgstr "Terkirim"
+
+#: apps/messaging/models.py:101
+msgid "Delivered"
+msgstr "Sudah diterima"
+
+#: apps/messaging/models.py:102 apps/sync/models.py:70
+msgid "Failed"
+msgstr "Gagal"
+
+#: apps/messaging/views.py:99 templates/guests/list.html:45
+msgid "All villas"
+msgstr "Semua villa"
+
+#: apps/messaging/views.py:115
+msgid "All guests"
+msgstr "Semua tamu"
+
+#: apps/messaging/views.py:118
+msgid "Last 24 hours"
+msgstr "24 jam terakhir"
+
+#: apps/messaging/views.py:173
+msgid ""
+"More than 24 hours since they last messaged - pick an approved template "
+"first."
+msgstr ""
+"Sudah lebih dari 24 jam sejak pesan terakhir mereka - pilih template yang "
+"sudah disetujui terlebih dahulu."
+
+#: apps/messaging/views.py:175
+msgid "Write a message before sending."
+msgstr "Tulis pesan sebelum mengirim."
+
+#: apps/organizations/models.py:17
+msgid "Connected accounts"
+msgstr "Akun tersambung"
+
+#: apps/organizations/models.py:19
+msgid "Calendar links only"
+msgstr "Hanya tautan kalender"
+
+#: apps/organizations/models.py:22
+msgid "Starter"
+msgstr "Starter"
+
+#: apps/organizations/models.py:23
+msgid "Growth"
+msgstr "Growth"
+
+#: apps/organizations/models.py:24
+msgid "Pro"
+msgstr "Pro"
+
+#: apps/organizations/models.py:45
+msgid "Currency the owner wants reports displayed in."
+msgstr "Mata uang yang diinginkan pemilik untuk tampilan laporan."
+
+#: apps/organizations/models.py:83
+msgid "Owner"
+msgstr "Pemilik"
+
+#: apps/organizations/models.py:84
+msgid "Manager"
+msgstr "Manajer"
+
+#: apps/organizations/models.py:85
+msgid "Staff"
+msgstr "Staf"
+
+#: apps/organizations/models.py:98
+msgid "Staff only. Leave empty for access to every villa."
+msgstr "Khusus staf. Kosongkan agar bisa mengakses semua villa."
+
+#: apps/sync/models.py:23
+msgid "Calendar link"
+msgstr "Tautan kalender"
+
+#: apps/sync/models.py:29
+msgid "iCal feeds are per villa. A Beds24 account covers many."
+msgstr "Feed iCal berlaku per villa. Satu akun Beds24 mencakup banyak villa."
+
+#: apps/sync/models.py:40
+msgid "Which site this feed comes from."
+msgstr "Situs asal feed ini."
+
+#: apps/sync/models.py:63
+msgid "Pushed by the source"
+msgstr "Dikirim oleh sumbernya"
+
+#: apps/sync/models.py:64
+msgid "Routine check"
+msgstr "Pemeriksaan rutin"
+
+#: apps/sync/models.py:65
+msgid "Started by hand"
+msgstr "Dijalankan manual"
+
+#: apps/sync/models.py:68
+msgid "Worked"
+msgstr "Berhasil"
+
+#: apps/sync/models.py:69
+msgid "Partly worked"
+msgstr "Sebagian berhasil"
+
+#: apps/villas/admin.py:54
+msgid "rooms"
+msgstr "kamar"
+
+#: apps/villas/forms.py:86
+msgid "Write the price in numbers only, like 1.500.000."
+msgstr "Tulis harga hanya dengan angka, seperti 1.500.000."
+
+#: apps/villas/forms.py:87
+msgid "A price can't be less than zero."
+msgstr "Harga tidak boleh kurang dari nol."
+
+#: apps/villas/forms.py:120
+msgid "Name"
+msgstr "Nama"
+
+#: apps/villas/forms.py:121
+msgid "Property type"
+msgstr "Jenis properti"
+
+#: apps/villas/forms.py:122
+msgid "Area"
+msgstr "Area"
+
+#: apps/villas/forms.py:123
+msgid "Address"
+msgstr "Alamat"
+
+#: apps/villas/forms.py:124
+msgid "Google Maps link"
+msgstr "Tautan Google Maps"
+
+#: apps/villas/forms.py:125
+msgid "Check-in time"
+msgstr "Waktu check-in"
+
+#: apps/villas/forms.py:126
+msgid "Check-out time"
+msgstr "Waktu check-out"
+
+#: apps/villas/forms.py:127
+msgid "Description (English)"
+msgstr "Deskripsi (Bahasa Inggris)"
+
+#: apps/villas/forms.py:128
+msgid "Description (Indonesian)"
+msgstr "Deskripsi (Bahasa Indonesia)"
+
+#: apps/villas/forms.py:131
+msgid "e.g. Villa Kenanga"
+msgstr "misalnya Villa Kenanga"
+
+#: apps/villas/forms.py:135
+msgid "e.g. Canggu"
+msgstr "misalnya Canggu"
+
+#: apps/villas/forms.py:138
+msgid "Street address"
+msgstr "Alamat jalan"
+
+#: apps/villas/forms.py:146 apps/villas/forms.py:149
+msgid "A few sentences guests will see"
+msgstr "Beberapa kalimat yang akan dilihat tamu"
+
+#: apps/villas/forms.py:153
+msgid "Give the villa a name."
+msgstr "Beri nama villa ini."
+
+#: apps/villas/forms.py:154
+msgid "That doesn't look like a link. It should start with https://"
+msgstr "Itu sepertinya bukan tautan. Harus dimulai dengan https://"
+
+#: apps/villas/forms.py:163
+msgid "Say which area it's in."
+msgstr "Sebutkan area lokasinya."
+
+#: apps/villas/forms.py:189
+msgid "Number of rooms"
+msgstr "Jumlah kamar"
+
+#: apps/villas/forms.py:193
+msgid "Say how many rooms of this kind there are."
+msgstr "Sebutkan berapa jumlah kamar jenis ini."
+
+#: apps/villas/forms.py:194
+msgid "There has to be at least one room of this kind."
+msgstr "Harus ada minimal satu kamar jenis ini."
+
+#: apps/villas/forms.py:195
+msgid ""
+"That's more rooms than we can add at once. Split it into two room types."
+msgstr ""
+"Jumlah ini terlalu banyak untuk ditambahkan sekaligus. Bagi menjadi dua "
+"jenis kamar."
+
+#: apps/villas/forms.py:203 apps/villas/forms.py:221
+msgid "Monthly rate (IDR)"
+msgstr "Tarif per bulan (IDR)"
+
+#: apps/villas/forms.py:217
+msgid "Amenities"
+msgstr "Fasilitas"
+
+#: apps/villas/forms.py:218
+msgid "Size (m²)"
+msgstr "Luas (m²)"
+
+#: apps/villas/forms.py:219
+msgid "Max guests"
+msgstr "Jumlah tamu maksimum"
+
+#: apps/villas/forms.py:222
+msgid "Minimum nights"
+msgstr "Minimum malam menginap"
+
+#: apps/villas/forms.py:228
+msgid "Standard"
+msgstr "Standar"
+
+#: apps/villas/forms.py:235
+msgid "Give this kind of room a name."
+msgstr "Beri nama untuk jenis kamar ini."
+
+#: apps/villas/forms.py:236
+msgid "Say the fewest nights someone can book."
+msgstr "Sebutkan jumlah malam menginap paling sedikit yang bisa dipesan."
+
+#: apps/villas/forms.py:297
+#, python-format
+msgid ""
+"You already have a room type called \"%(name)s\". Give this one a different "
+"name."
+msgstr ""
+"Anda sudah memiliki jenis kamar bernama \"%(name)s\". Beri nama lain untuk "
+"yang ini."
+
+#: apps/villas/forms.py:326
+msgid "e.g. Yoga deck"
+msgstr "misalnya Yoga deck"
+
+#: apps/villas/forms.py:329
+msgid "Type what it is first."
+msgstr "Tulis dulu apa itu."
+
+#: apps/villas/forms.py:338
+msgid "That one is already on the list."
+msgstr "Itu sudah ada di daftar."
+
+#: apps/villas/models.py:67
+msgid "Guesthouse"
+msgstr "Guesthouse"
+
+#: apps/villas/models.py:68
+msgid "Apartment"
+msgstr "Apartemen"
+
+#: apps/villas/models.py:69
+msgid "House"
+msgstr "Rumah"
+
+#: apps/villas/models.py:73
+msgid "Used in the villa's public web address."
+msgstr "Digunakan dalam alamat web publik villa."
+
+#: apps/villas/models.py:80
+msgid "Canggu, Ubud, Uluwatu, Seminyak."
+msgstr "Canggu, Ubud, Uluwatu, Seminyak."
+
+#: apps/villas/models.py:84
+msgid "Paste a Google Maps link so staff and guests can find it."
+msgstr "Tempel tautan Google Maps agar staf dan tamu bisa menemukannya."
+
+#: apps/villas/models.py:111
+msgid "Show this villa's own web page and direct booking."
+msgstr "Tampilkan halaman web villa ini sendiri dan pemesanan langsung."
+
+#: apps/villas/models.py:170
+msgid "size (m²)"
+msgstr "luas (m²)"
+
+#: apps/villas/models.py:182
+msgid "Price for one night, in rupiah."
+msgstr "Harga untuk satu malam, dalam rupiah."
+
+#: apps/villas/models.py:185
+msgid "Price for a whole month, in rupiah."
+msgstr "Harga untuk satu bulan penuh, dalam rupiah."
+
+#: apps/villas/models.py:192
+msgid "room categories"
+msgstr "kategori kamar"
+
+#: apps/villas/models.py:217
+msgid "One of this villa's own room types."
+msgstr "Salah satu jenis kamar milik villa ini."
+
+#: apps/villas/models.py:236
+msgid "Pick a room type that belongs to this villa."
+msgstr "Pilih jenis kamar yang termasuk villa ini."
+
+#: apps/villas/models.py:290
+msgid "Leave empty for an amenity every operator can pick."
+msgstr "Kosongkan agar fasilitas ini bisa dipilih semua operator."
+
+#: apps/villas/models.py:295
+msgid "amenities"
+msgstr "fasilitas"
+
+#: apps/villas/views.py:263
+#, python-format
+msgid ""
+"You've reached your plan's limit of %(limit)s villas. Contact us to add more."
+msgstr ""
+"Anda sudah mencapai batas %(limit)s villa pada paket Anda. Hubungi kami "
+"untuk menambah lagi."
+
+#: apps/villas/views.py:284
+msgid ""
+"Those pictures couldn't be processed. Try different ones, or carry on "
+"without them and add them later."
+msgstr ""
+"Foto-foto itu tidak bisa diproses. Coba foto lain, atau lanjutkan tanpa foto "
+"dan tambahkan nanti."
+
+#: apps/villas/views.py:312 apps/villas/views.py:398
+msgid "Saved."
+msgstr "Tersimpan."
+
+#: apps/villas/views.py:387
+#, python-format
+msgid "%(count)s room(s) were kept because they still have bookings on them."
+msgstr "%(count)s kamar tetap dipertahankan karena masih memiliki pemesanan."
+
+#: apps/villas/views.py:396
+#, python-format
+msgid "%(name)s is ready."
+msgstr "%(name)s sudah siap."
+
+#: apps/villas/views.py:490
+msgid ""
+"A villa needs at least one room type - add another before removing this one."
+msgstr ""
+"Villa harus memiliki minimal satu jenis kamar - tambahkan yang lain sebelum "
+"menghapus ini."
+
+#: apps/villas/views.py:512
+#, python-format
+msgid "%(count)s room(s) moved to %(name)s."
+msgstr "%(count)s kamar dipindahkan ke %(name)s."
+
+#: apps/villas/views.py:565 apps/villas/views.py:609
+msgid "Those pictures couldn't be processed. Try different ones."
+msgstr "Foto-foto itu tidak bisa diproses. Coba foto lain."
+
+#: apps/villas/views.py:709
+#, python-format
+msgid "%(name)s was removed from your villas."
+msgstr "%(name)s telah dihapus dari daftar villa Anda."
+
+#: apps/villas/views.py:754
+msgid "Pick a room type first."
+msgstr ""
+
+#: apps/villas/views.py:769
+msgid "A villa needs at least one room - add another before removing this one."
+msgstr ""
+"Villa harus memiliki minimal satu kamar - tambahkan yang lain sebelum "
+"menghapus ini."
+
+#: apps/villas/views.py:775
+msgid "This room still has bookings - move or remove those first."
+msgstr ""
+"Kamar ini masih memiliki pemesanan - pindahkan atau hapus itu terlebih "
+"dahulu."
+
+#: templates/base.html:6 templates/base_auth.html:6
+#: templates/partials/_sidebar.html:12 templates/partials/_topnav.html:13
+msgid "Rumah"
+msgstr ""
+
+#: templates/bookings/_calendar_panel.html:4
+#: templates/bookings/calendar.html:10
+#: templates/compliance/action_needed.html:10
+#: templates/compliance/documents.html:10 templates/dashboard/dashboard.html:9
+#: templates/guests/list.html:10 templates/messaging/inbox.html:10
+#: templates/villas/list.html:10
+msgid "Your account isn't linked to a property yet."
+msgstr "Akun Anda belum terhubung ke properti mana pun."
+
+#: templates/bookings/_calendar_panel.html:14
+#, python-format
+msgid "%(n)s days"
+msgstr "%(n)s hari"
+
+#: templates/bookings/_calendar_panel.html:22
+#: templates/dashboard/dashboard.html:4 templates/dashboard/dashboard.html:16
+#: templates/partials/_sidebar.html:28 templates/partials/_topnav.html:20
+msgid "Today"
+msgstr "Hari ini"
+
+#: templates/bookings/_calendar_panel.html:25
+msgid "Back one range"
+msgstr "Mundur satu rentang"
+
+#: templates/bookings/_calendar_panel.html:29
+msgid "Back one day"
+msgstr "Mundur satu hari"
+
+#: templates/bookings/_calendar_panel.html:37
+msgid "Forward one day"
+msgstr "Maju satu hari"
+
+#: templates/bookings/_calendar_panel.html:41
+msgid "Forward one range"
+msgstr "Maju satu rentang"
+
+#: templates/bookings/_calendar_panel.html:50
+msgid "Search bookings or guests"
+msgstr "Cari pemesanan atau tamu"
+
+#: templates/bookings/_calendar_panel.html:63
+#, fuzzy
+#| msgid "New booking"
+msgid "Start a new booking?"
+msgstr "Pemesanan baru"
+
+#: templates/bookings/_calendar_panel.html:66
+msgid "New booking"
+msgstr "Pemesanan baru"
+
+#: templates/bookings/_calendar_panel.html:88
+#, python-format
+msgid "Move %%(guest)s's booking to %%(dates)s?"
+msgstr ""
+
+#: templates/bookings/_calendar_panel.html:89
+#, python-format
+msgid "Move %%(guest)s's booking to %%(room)s, %%(dates)s?"
+msgstr ""
+
+#: templates/bookings/_calendar_panel.html:90
+#, python-format
+msgid "Change %%(guest)s's stay to %%(dates)s?"
+msgstr ""
+
+#: templates/bookings/_calendar_panel.html:91
+#, python-format
+msgid ""
+"This booking is synced from %%(channel)s - changes here may be overwritten "
+"by the next sync."
+msgstr ""
+
+#: templates/bookings/_calendar_panel.html:92
+msgid "Couldn't save that change. Try again."
+msgstr ""
+
+#: templates/bookings/_calendar_panel.html:135
+#, python-format
+msgid "Show or hide rooms in %(name)s"
+msgstr "Tampilkan atau sembunyikan kamar di %(name)s"
+
+#: templates/bookings/_calendar_panel.html:148
+#: templates/bookings/_calendar_panel.html:170
+#, python-format
+msgid "Remove %(name)s"
+msgstr "Hapus %(name)s"
+
+#: templates/bookings/_calendar_panel.html:149
+#, python-format
+msgid "Remove %(name)s? This can't be undone."
+msgstr "Hapus %(name)s? Tindakan ini tidak bisa dibatalkan."
+
+#: templates/bookings/_calendar_panel.html:171
+#, python-format
+msgid "Remove room %(name)s? This can't be undone."
+msgstr "Hapus kamar %(name)s? Tindakan ini tidak bisa dibatalkan."
+
+#: templates/bookings/_calendar_panel.html:194
+#, fuzzy, python-format
+#| msgid "Remove %(name)s? This can't be undone."
+msgid "Remove %(name)s's booking? This can't be undone."
+msgstr "Hapus %(name)s? Tindakan ini tidak bisa dibatalkan."
+
+#: templates/bookings/_calendar_panel.html:226
+#: templates/bookings/_calendar_panel.html:233
+msgid "Add room"
+msgstr "Tambah kamar"
+
+#: templates/bookings/_calendar_panel.html:255
+msgid "Which room type is the new room?"
+msgstr ""
+
+#: templates/bookings/_calendar_panel.html:272
+#, python-format
+msgid "%(n)s room of this type so far"
+msgid_plural "%(n)s rooms of this type so far"
+msgstr[0] ""
+
+#: templates/bookings/_calendar_panel.html:274
+#, python-format
+msgid "Sleeps up to %(n)s"
+msgstr ""
+
+#: templates/bookings/_calendar_panel.html:277
+#, fuzzy, python-format
+#| msgid "%(n)s night"
+#| msgid_plural "%(n)s nights"
+msgid "Rp %(amount)s a night"
+msgstr "%(n)s malam"
+
+#: templates/bookings/_calendar_panel.html:284
+#: templates/bookings/_calendar_panel.html:335 templates/bookings/add.html:191
+#: templates/compliance/document_form.html:81
+#: templates/villas/add_details.html:19 templates/villas/confirm_delete.html:20
+msgid "Cancel"
+msgstr "Batal"
+
+#: templates/bookings/_calendar_panel.html:289
+#: templates/villas/_amenity_checkboxes.html:41
+msgid "Add"
+msgstr "Tambah"
+
+#: templates/bookings/_calendar_panel.html:299
+msgid "No villas match what you searched for."
+msgstr "Tidak ada villa yang cocok dengan pencarian Anda."
+
+#: templates/bookings/_calendar_panel.html:307
+#, fuzzy
+#| msgid "Add a villa"
+msgid "Add a new villa?"
+msgstr "Tambah villa"
+
+#: templates/bookings/_calendar_panel.html:310
+msgid "Add villa"
+msgstr "Tambah villa"
+
+#: templates/bookings/_calendar_panel.html:338
+#, fuzzy
+#| msgid "Continue to rooms"
+msgid "Continue"
+msgstr "Lanjut ke kamar"
+
+#: templates/bookings/_calendar_panel.html:342
+#, fuzzy
+#| msgid "Confirmed"
+msgid "Confirm"
+msgstr "Terkonfirmasi"
+
+#: templates/bookings/_calendar_panel.html:349
+msgid "Remove"
+msgstr "Hapus"
+
+#: templates/bookings/_reservation_availability.html:26
+#, fuzzy
+#| msgid "That one is already on the list."
+msgid "This room is free for these dates."
+msgstr "Itu sudah ada di daftar."
+
+#: templates/bookings/_reservation_availability.html:32
+#, python-format
+msgid ""
+"\n"
+"          Already booked by %(name)s, %(check_in)s to %(check_out)s. Check "
+"before saving.\n"
+"        "
+msgstr ""
+
+#: templates/bookings/_side_panel.html:29
+msgid "nights"
+msgstr "malam"
+
+#: templates/bookings/_side_panel.html:33
+msgid ""
+"This villa is on a basic calendar link - guest details aren't available, "
+"only the dates."
+msgstr ""
+"Villa ini menggunakan tautan kalender dasar - detail tamu tidak tersedia, "
+"hanya tanggalnya."
+
+#: templates/bookings/_side_panel.html:38 templates/guests/list.html:106
+#: templates/partials/_sidebar.html:49 templates/partials/_topnav.html:41
+msgid "Guests"
+msgstr "Tamu"
+
+#: templates/bookings/_side_panel.html:42 templates/guests/list.html:105
+msgid "Booked via"
+msgstr "Dipesan lewat"
+
+#: templates/bookings/_side_panel.html:47
+msgid "Still owed"
+msgstr "Masih harus dibayar"
+
+#: templates/bookings/_side_panel.html:56
+#, fuzzy
+#| msgid "New booking"
+msgid "Remove booking"
+msgstr "Pemesanan baru"
+
+#: templates/bookings/_side_panel.html:58
+msgid "Close"
+msgstr "Tutup"
+
+#: templates/bookings/add.html:4 templates/bookings/add.html:21
+#, fuzzy
+#| msgid "Create reservation"
+msgid "New reservation"
+msgstr "Buat reservasi"
+
+#: templates/bookings/add.html:22
+msgid "Enter what you have — the rest can wait."
+msgstr ""
+
+#: templates/bookings/add.html:29
+#, fuzzy
+#| msgid "Needs attention"
+msgid "Still needs attention"
+msgstr "Perlu perhatian"
+
+#: templates/bookings/add.html:30
+msgid "Nationality wasn't entered — add it soon for the police report."
+msgstr ""
+
+#: templates/bookings/add.html:32
+msgid "Got it"
+msgstr ""
+
+#: templates/bookings/add.html:46
+msgid "1. The stay"
+msgstr ""
+
+#: templates/bookings/add.html:47
+msgid "The stay"
+msgstr ""
+
+#: templates/bookings/add.html:84
+msgid "2. The guest"
+msgstr ""
+
+#: templates/bookings/add.html:85
+#, fuzzy
+#| msgid "All guests"
+msgid "The guest"
+msgstr "Semua tamu"
+
+#: templates/bookings/add.html:100 templates/bookings/add.html:137
+#: templates/bookings/add.html:148 templates/bookings/add.html:159
+#: templates/villas/_field.html:21 templates/villas/_room_block.html:70
+#: templates/villas/_room_block.html:81 templates/villas/_room_block.html:96
+#: templates/villas/_villa_fields.html:50
+msgid "optional"
+msgstr "opsional"
+
+#: templates/bookings/add.html:114
+msgid ""
+"This guest is foreign — a police report will be needed within 24 hours of "
+"check-in."
+msgstr ""
+
+#: templates/bookings/add.html:122
+#, fuzzy
+#| msgid "Bookings"
+msgid "3. Booking details"
+msgstr "Pemesanan"
+
+#: templates/bookings/add.html:123
+#, fuzzy
+#| msgid "Bookings"
+msgid "Booking details"
+msgstr "Pemesanan"
+
+#: templates/bookings/add.html:170
+#, python-format
+msgid "Rp %(amount)s still owed"
+msgstr ""
+
+#: templates/bookings/add.html:177
+msgid "Paid in full"
+msgstr ""
+
+#: templates/bookings/add.html:182
+msgid "Pricing is only visible to owners and managers."
+msgstr ""
+
+#: templates/bookings/add.html:190
+#, fuzzy
+#| msgid "Create reservation"
+msgid "Save reservation"
+msgstr "Buat reservasi"
+
+#: templates/bookings/calendar.html:4 templates/bookings/calendar.html:26
+msgid "Booking calendar"
+msgstr "Kalender pemesanan"
+
+#: templates/bookings/calendar.html:12
+#: templates/compliance/action_needed.html:13
+#: templates/dashboard/dashboard.html:11 templates/guests/list.html:13
+#: templates/messaging/inbox.html:13 templates/villas/list.html:13
+msgid "Ask an owner to add you, or use the admin panel to set this up."
+msgstr ""
+"Minta pemilik untuk menambahkan Anda, atau gunakan panel admin untuk "
+"mengaturnya."
+
+#: templates/bookings/calendar.html:27
+msgid "All villas, one view."
+msgstr "Semua villa, satu tampilan."
+
+#: templates/compliance/action_needed.html:4
+#: templates/compliance/action_needed.html:20
+#: templates/partials/_sidebar.html:56 templates/partials/_topnav.html:42
+msgid "Compliance"
+msgstr "Kepatuhan"
+
+#: templates/compliance/action_needed.html:21
+msgid "What needs doing - not a verified-compliant checklist."
+msgstr ""
+"Yang perlu dikerjakan - bukan daftar yang menyatakan sudah patuh sepenuhnya."
+
+#: templates/compliance/action_needed.html:23
+msgid "View all documents"
+msgstr "Lihat semua dokumen"
+
+#: templates/compliance/action_needed.html:27
+msgid "Items needing attention"
+msgstr "Item yang perlu perhatian"
+
+#: templates/compliance/action_needed.html:36
+msgid "Documents expiring soon"
+msgstr "Dokumen yang segera habis masa berlakunya"
+
+#: templates/compliance/action_needed.html:43
+#: templates/compliance/documents.html:42
+msgid "Whole business"
+msgstr "Seluruh usaha"
+
+#: templates/compliance/action_needed.html:47
+#: templates/compliance/documents.html:33
+msgid "Expires"
+msgstr "Habis masa berlaku"
+
+#: templates/compliance/action_needed.html:49
+msgid "No expiry date on file"
+msgstr "Tidak ada tanggal habis masa berlaku yang tercatat"
+
+#: templates/compliance/action_needed.html:56
+msgid "Nothing expiring soon."
+msgstr "Tidak ada yang segera habis masa berlakunya."
+
+#: templates/compliance/action_needed.html:61
+msgid "Police report reminders (STM)"
+msgstr "Pengingat lapor polisi (STM)"
+
+#: templates/compliance/action_needed.html:63
+msgid ""
+"A reminder only - the report itself is still filed in person at the police "
+"station."
+msgstr ""
+"Hanya pengingat - laporan itu sendiri tetap harus diajukan langsung di "
+"kantor polisi."
+
+#: templates/compliance/action_needed.html:75 templates/guests/detail.html:108
+msgid "Overdue"
+msgstr "Terlambat"
+
+#: templates/compliance/action_needed.html:76
+msgid "Due"
+msgstr "Jatuh tempo"
+
+#: templates/compliance/action_needed.html:84
+msgid "Mark as done"
+msgstr "Tandai selesai"
+
+#: templates/compliance/action_needed.html:90
+msgid "Nothing due soon."
+msgstr "Tidak ada yang segera jatuh tempo."
+
+#: templates/compliance/document_form.html:4
+#: templates/compliance/document_form.html:8
+#: templates/compliance/document_form.html:79
+#: templates/compliance/documents.html:21
+msgid "Add document"
+msgstr "Tambah dokumen"
+
+#: templates/compliance/document_form.html:18
+#: templates/compliance/documents.html:30
+msgid "Type"
+msgstr "Jenis"
+
+#: templates/compliance/document_form.html:22
+msgid "Download blank template"
+msgstr "Unduh formulir kosong"
+
+#: templates/compliance/document_form.html:25
+msgid "+ Add your own type"
+msgstr "+ Tambah jenis sendiri"
+
+#: templates/compliance/document_form.html:30
+msgid "Choose from the list instead"
+msgstr "Pilih dari daftar saja"
+
+#: templates/compliance/document_form.html:47
+msgid "Reference number"
+msgstr "Nomor referensi"
+
+#: templates/compliance/document_form.html:51
+#: templates/compliance/documents.html:35
+msgid "File"
+msgstr "Berkas"
+
+#: templates/compliance/document_form.html:57
+msgid "Issued on"
+msgstr "Diterbitkan pada"
+
+#: templates/compliance/document_form.html:61
+msgid "Expires on"
+msgstr "Habis masa berlaku pada"
+
+#: templates/compliance/documents.html:4 templates/compliance/documents.html:17
+msgid "Documents"
+msgstr "Dokumen"
+
+#: templates/compliance/documents.html:18
+msgid "Back to compliance"
+msgstr "Kembali ke kepatuhan"
+
+#: templates/compliance/documents.html:32 templates/guests/list.html:104
+msgid "Reference"
+msgstr "Referensi"
+
+#: templates/compliance/documents.html:47
+msgid "Needs attention"
+msgstr "Perlu perhatian"
+
+#: templates/compliance/documents.html:49
+msgid "On file"
+msgstr "Sudah tercatat"
+
+#: templates/compliance/documents.html:53
+msgid "View"
+msgstr "Lihat"
+
+#: templates/compliance/documents.html:62
+msgid "No documents on file yet."
+msgstr "Belum ada dokumen yang tercatat."
+
+#: templates/dashboard/coming_soon.html:10
+msgid "This part of the dashboard isn't built yet."
+msgstr "Bagian dasbor ini belum tersedia."
+
+#: templates/dashboard/dashboard.html:25
+msgid "Occupied today"
+msgstr "Terisi hari ini"
+
+#: templates/dashboard/dashboard.html:27
+msgid "of"
+msgstr "dari"
+
+#: templates/dashboard/dashboard.html:30
+msgid "Revenue this month"
+msgstr "Pendapatan bulan ini"
+
+#: templates/dashboard/dashboard.html:36
+#, python-format
+msgid ""
+"\n"
+"          %(n)s payment left out - no exchange rate on file\n"
+"        "
+msgid_plural ""
+"\n"
+"          %(n)s payments left out - no exchange rate on file\n"
+"        "
+msgstr[0] "%(n)s pembayaran tidak dihitung - tidak ada kurs yang tercatat"
+msgstr[1] "%(n)s pembayaran tidak dihitung - tidak ada kurs yang tercatat"
+
+#: templates/dashboard/dashboard.html:45
+msgid "Needs doing"
+msgstr "Perlu dikerjakan"
+
+#: templates/dashboard/dashboard.html:59
+msgid "Arriving today"
+msgstr "Datang hari ini"
+
+#: templates/dashboard/dashboard.html:75
+#, python-format
+msgid "Check-in %(time)s"
+msgstr "Check-in %(time)s"
+
+#: templates/dashboard/dashboard.html:79
+msgid "No one arriving today"
+msgstr "Tidak ada yang datang hari ini"
+
+#: templates/dashboard/dashboard.html:89
+msgid "Leaving today"
+msgstr "Pulang hari ini"
+
+#: templates/dashboard/dashboard.html:105
+#, python-format
+msgid "Check-out %(time)s"
+msgstr "Check-out %(time)s"
+
+#: templates/dashboard/dashboard.html:109
+msgid "No one leaving today"
+msgstr "Tidak ada yang pulang hari ini"
+
+#: templates/dashboard/dashboard.html:119
+msgid "Still owe money"
+msgstr "Masih ada tunggakan"
+
+#: templates/dashboard/dashboard.html:139
+msgid "Everyone is paid up"
+msgstr "Semua sudah lunas"
+
+#: templates/guests/detail.html:8
+msgid "Back to guests"
+msgstr "Kembali ke tamu"
+
+#: templates/guests/detail.html:18
+msgid "No contact details on file"
+msgstr "Tidak ada detail kontak yang tercatat"
+
+#: templates/guests/detail.html:24
+#, python-format
+msgid "%(n)s stay"
+msgid_plural "%(n)s stays"
+msgstr[0] "%(n)s kunjungan"
+msgstr[1] "%(n)s kunjungan"
+
+#: templates/guests/detail.html:36 templates/partials/_sidebar.html:35
+msgid "Bookings"
+msgstr "Pemesanan"
+
+#: templates/guests/detail.html:43
+msgid "to"
+msgstr "sampai"
+
+#: templates/guests/detail.html:47
+msgid "dates only, no further detail"
+msgstr "hanya tanggal, tanpa detail lain"
+
+#: templates/guests/detail.html:53
+msgid "No bookings on file."
+msgstr "Tidak ada pemesanan yang tercatat."
+
+#: templates/guests/detail.html:58
+msgid "Requests"
+msgstr "Permintaan"
+
+#: templates/guests/detail.html:73
+msgid "No requests yet."
+msgstr "Belum ada permintaan."
+
+#: templates/guests/detail.html:78
+msgid "Private feedback"
+msgstr "Masukan pribadi"
+
+#: templates/guests/detail.html:86
+msgid "Sent to owner"
+msgstr "Dikirim ke pemilik"
+
+#: templates/guests/detail.html:95
+msgid "No feedback yet."
+msgstr "Belum ada masukan."
+
+#: templates/guests/detail.html:100
+msgid "Police report reminders"
+msgstr "Pengingat lapor polisi"
+
+#: templates/guests/detail.html:113
+msgid "Deadline"
+msgstr "Batas waktu"
+
+#: templates/guests/detail.html:118
+msgid "None on file."
+msgstr "Tidak ada yang tercatat."
+
+#: templates/guests/detail.html:123
+msgid "Recent activity"
+msgstr "Aktivitas terbaru"
+
+#: templates/guests/detail.html:137
+msgid "Nothing recorded yet."
+msgstr "Belum ada yang tercatat."
+
+#: templates/guests/detail.html:143
+msgid "Internal notes"
+msgstr "Catatan internal"
+
+#: templates/guests/detail.html:144
+msgid "Staff only - never shown to the guest."
+msgstr "Khusus staf - tidak pernah ditampilkan ke tamu."
+
+#: templates/guests/list.html:4 templates/guests/list.html:19
+msgid "Reservations"
+msgstr "Reservasi"
+
+#: templates/guests/list.html:21
+msgid "Create reservation"
+msgstr "Buat reservasi"
+
+#: templates/guests/list.html:28
+msgid "Guest name"
+msgstr "Nama tamu"
+
+#: templates/guests/list.html:33
+msgid "Booking reference"
+msgstr "Nomor referensi pemesanan"
+
+#: templates/guests/list.html:34 templates/guests/list.html:39
+msgid "Not available yet"
+msgstr "Belum tersedia"
+
+#: templates/guests/list.html:38
+msgid "Invoice number"
+msgstr "Nomor faktur"
+
+#: templates/guests/list.html:52
+msgid "Date type"
+msgstr "Jenis tanggal"
+
+#: templates/guests/list.html:54 templates/guests/list.html:107
+msgid "Check-in"
+msgstr "Check-in"
+
+#: templates/guests/list.html:55 templates/guests/list.html:108
+msgid "Check-out"
+msgstr "Check-out"
+
+#: templates/guests/list.html:61
+msgid "All statuses"
+msgstr "Semua status"
+
+#: templates/guests/list.html:68
+msgid "Date from"
+msgstr "Tanggal dari"
+
+#: templates/guests/list.html:73
+msgid "Date to"
+msgstr "Tanggal sampai"
+
+#: templates/guests/list.html:80
+msgid "All sources"
+msgstr "Semua sumber"
+
+#: templates/guests/list.html:89
+msgid "Search"
+msgstr "Cari"
+
+#: templates/guests/list.html:95
+#, python-format
+msgid "%(n)s reservation found"
+msgid_plural "%(n)s reservations found"
+msgstr[0] "%(n)s reservasi ditemukan"
+msgstr[1] "%(n)s reservasi ditemukan"
+
+#: templates/guests/list.html:103
+msgid "Guest"
+msgstr "Tamu"
+
+#: templates/guests/list.html:109
+msgid "Booked on"
+msgstr "Dipesan pada"
+
+#: templates/guests/list.html:110
+msgid "ETA"
+msgstr "Estimasi tiba"
+
+#: templates/guests/list.html:112
+msgid "Total"
+msgstr "Total"
+
+#: templates/guests/list.html:113
+msgid "Outstanding"
+msgstr "Belum dibayar"
+
+#: templates/guests/list.html:114
+msgid "Invoice"
+msgstr "Faktur"
+
+#: templates/guests/list.html:160
+msgid "No reservations match this search."
+msgstr "Tidak ada reservasi yang cocok dengan pencarian ini."
+
+#: templates/messaging/inbox.html:4 templates/messaging/inbox.html:19
+#: templates/partials/_sidebar.html:63 templates/partials/_topnav.html:43
+msgid "Messages"
+msgstr "Pesan"
+
+#: templates/messaging/inbox.html:21
+#, python-format
+msgid ""
+"\n"
+"        %(n)s conversation\n"
+"      "
+msgid_plural ""
+"\n"
+"        %(n)s conversations\n"
+"      "
+msgstr[0] "%(n)s percakapan"
+msgstr[1] "%(n)s percakapan"
+
+#: templates/messaging/inbox.html:62
+msgid "You:"
+msgstr "Anda:"
+
+#: templates/messaging/inbox.html:65
+msgid "No messages yet"
+msgstr "Belum ada pesan"
+
+#: templates/messaging/inbox.html:77
+msgid "No conversations match these filters."
+msgstr "Tidak ada percakapan yang cocok dengan filter ini."
+
+#: templates/messaging/inbox.html:79
+msgid "Show all conversations"
+msgstr "Tampilkan semua percakapan"
+
+#: templates/messaging/inbox.html:84
+msgid "No conversations yet."
+msgstr "Belum ada percakapan."
+
+#: templates/messaging/inbox.html:86
+msgid "Conversations show up here once a guest messages you on WhatsApp."
+msgstr ""
+"Percakapan akan muncul di sini setelah tamu mengirim pesan lewat WhatsApp."
+
+#: templates/messaging/thread.html:8
+msgid "Back to messages"
+msgstr "Kembali ke pesan"
+
+#: templates/messaging/thread.html:25
+msgid "No messages yet."
+msgstr "Belum ada pesan."
+
+#: templates/messaging/thread.html:46
+msgid "No template - write freely"
+msgstr "Tanpa template - tulis bebas"
+
+#: templates/messaging/thread.html:54
+msgid ""
+"No approved template on file yet - nothing can be sent until one is "
+"approved, or they message you again."
+msgstr ""
+"Belum ada template yang disetujui - tidak ada yang bisa dikirim sampai ada "
+"yang disetujui, atau sampai mereka mengirim pesan lagi."
+
+#: templates/messaging/thread.html:62
+msgid "Type a message"
+msgstr "Ketik pesan"
+
+#: templates/messaging/thread.html:70
+msgid "Send"
+msgstr "Kirim"
+
+#: templates/partials/_sidebar.html:42 templates/partials/_topnav.html:40
+msgid "Villas"
+msgstr "Villa"
+
+#: templates/partials/_sync_badge.html:5
+msgid "Updated just now"
+msgstr "Baru saja diperbarui"
+
+#: templates/partials/_sync_badge.html:9
+msgid "From calendar links. Dates only, and can be a few hours behind."
+msgstr "Dari tautan kalender. Hanya tanggal, dan bisa tertinggal beberapa jam."
+
+#: templates/partials/_topbar.html:7
+msgid "Open menu"
+msgstr "Buka menu"
+
+#: templates/partials/_topbar.html:20 templates/partials/_topnav.html:73
+msgid "Log out"
+msgstr "Keluar"
+
+#: templates/partials/_topnav.html:17
+msgid "Calendar"
+msgstr "Kalender"
+
+#: templates/partials/_topnav.html:26
+msgid "More"
+msgstr "Lainnya"
+
+#: templates/registration/login.html:4 templates/registration/login.html:8
+#: templates/registration/login.html:30
+msgid "Log in"
+msgstr "Masuk"
+
+#: templates/registration/login.html:12
+msgid "That email or password isn't right. Try again."
+msgstr "Email atau kata sandi salah. Coba lagi."
+
+#: templates/registration/login.html:23
+msgid "Password"
+msgstr "Kata sandi"
+
+#: templates/villas/_amenity_checkboxes.html:36
+msgid "Add your own"
+msgstr "Tambah sendiri"
+
+#: templates/villas/_amenity_new.html:19
+#, python-format
+msgid "Added %(name)s. It'll be on the list next time too."
+msgstr "%(name)s berhasil ditambahkan. Akan muncul di daftar lain kali juga."
+
+#: templates/villas/_photo_grid.html:34 templates/villas/_photo_grid.html:35
+msgid "Remove this picture"
+msgstr "Hapus foto ini"
+
+#: templates/villas/_room_block.html:22
+msgid "Show or hide this room type"
+msgstr "Tampilkan atau sembunyikan jenis kamar ini"
+
+#: templates/villas/_room_block.html:31
+#, python-format
+msgid "%(n)s room"
+msgid_plural "%(n)s rooms"
+msgstr[0] "%(n)s kamar"
+msgstr[1] "%(n)s kamar"
+
+#: templates/villas/_room_block.html:33
+#, python-format
+msgid "%(n)s amenity"
+msgid_plural "%(n)s amenities"
+msgstr[0] "%(n)s fasilitas"
+msgstr[1] "%(n)s fasilitas"
+
+#: templates/villas/_room_block.html:42 templates/villas/_room_block.html:43
+msgid "Remove this room type"
+msgstr "Hapus jenis kamar ini"
+
+#: templates/villas/_room_block.html:48
+msgid "this room type"
+msgstr "jenis kamar ini"
+
+#: templates/villas/_room_block.html:48
+#, python-format
+msgid "Remove %(name)s?"
+msgstr "Hapus %(name)s?"
+
+#: templates/villas/_room_block.html:95 templates/villas/_villa_fields.html:49
+msgid "Photos"
+msgstr "Foto"
+
+#: templates/villas/_room_blocks.html:36
+msgid "Add another kind of room"
+msgstr "Tambah jenis kamar lain"
+
+#: templates/villas/_room_blocks.html:39
+msgid ""
+"Only if this villa has rooms that differ - a bigger one, or one with its own "
+"price. Renting the whole villa out as one? One kind of room is all you need."
+msgstr ""
+"Hanya jika villa ini punya kamar yang berbeda-beda - yang lebih besar, atau "
+"yang harganya sendiri. Menyewakan seluruh villa sebagai satu unit? Satu "
+"jenis kamar sudah cukup."
+
+#: templates/villas/_step_indicator.html:14 templates/villas/edit.html:20
+msgid "About the villa"
+msgstr "Tentang villa"
+
+#: templates/villas/_step_indicator.html:24 templates/villas/add_rooms.html:4
+#: templates/villas/edit.html:31
+msgid "Rooms"
+msgstr "Kamar"
+
+#: templates/villas/_villa_fields.html:43
+msgid "Left empty, this is 2:00 PM."
+msgstr "Jika dikosongkan, jam 2 siang."
+
+#: templates/villas/_villa_fields.html:44
+msgid "Left empty, this is 11:00 AM."
+msgstr "Jika dikosongkan, jam 11 pagi."
+
+#: templates/villas/add_details.html:4 templates/villas/add_details.html:8
+#: templates/villas/add_rooms.html:8 templates/villas/list.html:100
+msgid "Add a villa"
+msgstr "Tambah villa"
+
+#: templates/villas/add_details.html:9 templates/villas/add_rooms.html:9
+msgid "General details, then room types."
+msgstr "Detail umum, lalu jenis kamar."
+
+#: templates/villas/add_details.html:20
+msgid "Continue to rooms"
+msgstr "Lanjut ke kamar"
+
+#: templates/villas/add_details.html:27
+msgid ""
+"Everything here is already saved. You can close this and come back to it."
+msgstr ""
+"Semua di sini sudah tersimpan. Anda bisa menutup ini dan kembali lagi nanti."
+
+#: templates/villas/add_details.html:31
+#, python-format
+msgid ""
+"\n"
+"        %(used)s of %(limit)s villas used on your plan.\n"
+"      "
+msgstr "%(used)s dari %(limit)s villa terpakai pada paket Anda."
+
+#: templates/villas/add_rooms.html:14
+msgid ""
+"Add one kind of room for every kind this villa has. Renting the whole place "
+"out as one is fine - that's a single kind of room with one room in it."
+msgstr ""
+"Tambahkan satu jenis kamar untuk setiap jenis yang dimiliki villa ini. "
+"Menyewakan seluruh tempat sebagai satu unit juga boleh - itu tetap satu "
+"jenis kamar dengan satu kamar di dalamnya."
+
+#: templates/villas/add_rooms.html:25
+msgid "Back to villa details"
+msgstr "Kembali ke detail villa"
+
+#: templates/villas/add_rooms.html:27
+msgid "Save villa"
+msgstr "Simpan villa"
+
+#: templates/villas/add_rooms.html:32
+msgid ""
+"Everything you've typed is already saved. You can close this and come back "
+"to it."
+msgstr ""
+"Semua yang sudah Anda ketik sudah tersimpan. Anda bisa menutup ini dan "
+"kembali lagi nanti."
+
+#: templates/villas/confirm_delete.html:4
+msgid "Delete villa"
+msgstr "Hapus villa"
+
+#: templates/villas/confirm_delete.html:9
+#, python-format
+msgid "Delete %(name)s?"
+msgstr "Hapus %(name)s?"
+
+#: templates/villas/confirm_delete.html:12
+msgid ""
+"This takes it off your villa list. Its bookings, guests, and documents are "
+"kept, not deleted."
+msgstr ""
+"Ini akan menghapus villa dari daftar Anda. Pemesanan, tamu, dan dokumennya "
+"tetap disimpan, tidak ikut terhapus."
+
+#: templates/villas/confirm_delete.html:18
+msgid "Yes, delete it"
+msgstr "Ya, hapus"
+
+#: templates/villas/edit.html:9
+msgid "Everything on file about this villa."
+msgstr "Semua yang tercatat tentang villa ini."
+
+#: templates/villas/edit.html:25
+msgid "Save these details"
+msgstr "Simpan detail ini"
+
+#: templates/villas/edit.html:33
+msgid ""
+"Each kind of room, and how many there are. Change a number to add or take "
+"away rooms."
+msgstr ""
+"Setiap jenis kamar, dan berapa jumlahnya. Ubah angkanya untuk menambah atau "
+"mengurangi kamar."
+
+#: templates/villas/edit.html:42
+msgid "Save the rooms"
+msgstr "Simpan kamar"
+
+#: templates/villas/edit.html:47
+msgid ""
+"A room with bookings on it is always kept, even if you lower the number - "
+"move those bookings first."
+msgstr ""
+"Kamar yang memiliki pemesanan akan selalu dipertahankan, meski Anda "
+"menurunkan jumlahnya - pindahkan pemesanan itu terlebih dahulu."
+
+#: templates/villas/edit.html:52
+msgid "Back to villas"
+msgstr "Kembali ke villa"
+
+#: templates/villas/edit.html:54
+msgid "Remove this villa"
+msgstr "Hapus villa ini"
+
+#: templates/villas/list.html:4 templates/villas/list.html:19
+msgid "Your villas"
+msgstr "Villa Anda"
+
+#: templates/villas/list.html:21
+#, python-format
+msgid ""
+"\n"
+"        %(n)s of %(villa_limit)s villas used\n"
+"      "
+msgid_plural ""
+"\n"
+"        %(n)s of %(villa_limit)s villas used\n"
+"      "
+msgstr[0] "%(n)s dari %(villa_limit)s villa terpakai"
+msgstr[1] "%(n)s dari %(villa_limit)s villa terpakai"
+
+#: templates/villas/list.html:38
+msgid "Not finished yet"
+msgstr "Belum selesai"
+
+#: templates/villas/list.html:45
+msgid "Finish setting it up"
+msgstr "Selesaikan pengaturannya"
+
+#: templates/villas/list.html:48
+msgid "Discard"
+msgstr "Buang"
+
+#: templates/villas/list.html:65
+#, python-format
+msgid "Available %(date)s"
+msgstr "Tersedia %(date)s"
+
+#: templates/villas/list.html:68
+msgid "Available now"
+msgstr "Tersedia sekarang"
+
+#: templates/villas/list.html:73
+#, python-format
+msgid ""
+"\n"
+"              %(n)s room - sleeps %(guests)s\n"
+"            "
+msgid_plural ""
+"\n"
+"              %(n)s rooms - sleeps %(guests)s\n"
+"            "
+msgstr[0] "%(n)s kamar - muat %(guests)s tamu"
+msgstr[1] "%(n)s kamar - muat %(guests)s tamu"
+
+#: templates/villas/list.html:83
+msgid "Open dashboard"
+msgstr "Buka dasbor"
+
+#: templates/villas/list.html:86
+msgid "Edit"
+msgstr "Ubah"
+
+#: templates/villas/list.html:87
+msgid "Delete"
+msgstr "Hapus"
+
+#: templates/villas/list.html:107
+#, python-format
+msgid ""
+"\n"
+"          You've reached your plan's limit of %(limit)s villas. Contact us "
+"to add more.\n"
+"        "
+msgstr ""
+"Anda sudah mencapai batas %(limit)s villa pada paket Anda. Hubungi kami "
+"untuk menambah lagi."
+
+#: templates/villas/list.html:115
+msgid "You haven't added a villa yet."
+msgstr "Anda belum menambahkan villa."
+
+#: templates/villas/list.html:116
+msgid "Add your first one to get started."
+msgstr "Tambahkan villa pertama Anda untuk memulai."
+
+#: templates/villas/list.html:121
+msgid "Add your first villa"
+msgstr "Tambah villa pertama Anda"
+
+#, fuzzy
+#~| msgid "Add your first villa"
+#~ msgid "Add a room to this villa?"
+#~ msgstr "Tambah villa pertama Anda"
+
+#~ msgid "Villa dashboard"
+#~ msgstr "Dasbor villa"
+
+#~ msgid "Villa Dashboard"
+#~ msgstr "Dasbor Villa"

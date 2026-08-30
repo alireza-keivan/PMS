@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load i18n %}
+{% load humanize i18n %}
 
 {% block title %}{% translate "Today" %}{% endblock %}
 
@@ -28,7 +28,7 @@ not part of the design handoff's own Today layout but real spec'd features
   <div class="card">
     <p class="text-sm opacity-65">{% translate "Revenue this month" %}</p>
     <p class="mt-1 text-2xl font-semibold">
-      {{ organization.default_currency }} {{ revenue_this_month|floatformat:0 }}
+      {{ organization.default_currency }} {{ revenue_this_month|floatformat:0|intcomma }}
     </p>
     {% if revenue_unconverted_count %}
       <p class="text-xs text-amber-700">
@@ -70,7 +70,7 @@ not part of the design handoff's own Today layout but real spec'd features
             <div class="text-xs opacity-65">{{ booking.villa.name }}</div>
           </div>
           <div class="flex-none max-w-[110px] text-right text-[11.5px] opacity-65">
-            {% blocktranslate with time=booking.villa.check_in_time|time:"g:i A" %}Check-in {{ time }}{% endblocktranslate %}
+            {% blocktranslate with time=booking.villa.check_in_time|time:"TIME_FORMAT" %}Check-in {{ time }}{% endblocktranslate %}
           </div>
         </div>
       {% empty %}
@@ -99,7 +99,7 @@ not part of the design handoff's own Today layout but real spec'd features
             <div class="text-xs opacity-65">{{ booking.villa.name }}</div>
           </div>
           <div class="flex-none max-w-[110px] text-right text-[11.5px] opacity-65">
-            {% blocktranslate with time=booking.villa.check_out_time|time:"g:i A" %}Check-out {{ time }}{% endblocktranslate %}
+            {% blocktranslate with time=booking.villa.check_out_time|time:"TIME_FORMAT" %}Check-out {{ time }}{% endblocktranslate %}
           </div>
         </div>
       {% empty %}
@@ -128,7 +128,7 @@ not part of the design handoff's own Today layout but real spec'd features
             <div class="text-xs opacity-65">{{ payment.booking.villa.name }}</div>
           </div>
           <div class="flex-none text-right text-[12.5px] font-semibold text-teal-700">
-            {{ payment.currency }} {{ payment.amount }}
+            {{ payment.currency }} {{ payment.amount|floatformat:0|intcomma }}
           </div>
         </div>
       {% empty %}

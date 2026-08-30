@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% translate "Add a villa" %}{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-2xl">
+  <h2 class="mb-0.5 text-[32px]">{% translate "Add a villa" %}</h2>
+  <p class="m-0 mb-6 text-ink-600">{% translate "General details, then room types." %}</p>
+
+  {% include "villas/_step_indicator.html" %}
+
+  <div class="card">
+    <form method="post" enctype="multipart/form-data" novalidate>
+      {% csrf_token %}
+      {% include "villas/_villa_fields.html" %}
+
+      <div class="mt-8 flex items-center justify-between">
+        <a href="{% url 'villas:list' %}" class="btn btn-ghost">{% translate "Cancel" %}</a>
+        <button type="submit" class="btn btn-primary">{% translate "Continue to rooms" %} &rarr;</button>
+      </div>
+    </form>
+  </div>
+
+  {% if villa %}
+    <p class="mt-4 text-center text-sm text-ink-600">
+      {% translate "Everything here is already saved. You can close this and come back to it." %}
+    </p>
+  {% elif organization %}
+    <p class="mt-4 text-center text-sm text-ink-600">
+      {% blocktranslate with used=organization.villas.live.count limit=organization.villa_limit %}
+        {{ used }} of {{ limit }} villas used on your plan.
+      {% endblocktranslate %}
+    </p>
+  {% endif %}
+</div>
+{% endblock %}

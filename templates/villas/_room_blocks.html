@@ -1,0 +1,40 @@
+{% load i18n %}
+{% comment %}
+Every room type of one villa, plus the hidden counter Django needs to read
+them back. HTMX swaps this whole thing in after a block is added or removed -
+all of it together, because Django numbers the blocks 0, 1, 2 with no gaps
+allowed, so taking one out of the middle means renumbering the rest.
+
+Lives inside the form with id="room-form".
+{% endcomment %}
+
+{{ formset.management_form }}
+
+{% if blocks_error %}
+  <p class="mb-4 rounded-md bg-red-50 p-3 text-sm text-teal-700">{{ blocks_error }}</p>
+{% endif %}
+{% if blocks_note %}
+  <p class="mb-4 rounded-md bg-accent2-100 p-3 text-sm text-accent2-800">{{ blocks_note }}</p>
+{% endif %}
+{% if formset.non_form_errors and not hide_errors %}
+  <p class="mb-4 rounded-md bg-red-50 p-3 text-sm text-teal-700">{{ formset.non_form_errors|join:" " }}</p>
+{% endif %}
+
+<div class="space-y-4">
+  {% for form in formset %}
+    {% include "villas/_room_block.html" with form=form %}
+  {% endfor %}
+</div>
+
+<button
+  type="button"
+  class="btn btn-secondary mt-4"
+  hx-post="{% url 'villas:add_room_category' villa.slug %}"
+  hx-include="#room-form"
+  hx-target="#room-blocks"
+  hx-swap="innerHTML"
+>+ {% translate "Add another kind of room" %}</button>
+
+<p class="mt-2 text-xs text-ink-600">
+  {% translate "Only if this villa has rooms that differ - a bigger one, or one with its own price. Renting the whole villa out as one? One kind of room is all you need." %}
+</p>

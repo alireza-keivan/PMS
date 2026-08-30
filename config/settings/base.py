@@ -32,6 +32,7 @@ DJANGO_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django.contrib.humanize",  # intcomma, for locale-aware money grouping
 ]
 
 THIRD_PARTY_APPS = [
@@ -131,7 +132,16 @@ LANGUAGE_CODE = "en"
 LANGUAGES = [("en", "English"), ("id", "Bahasa Indonesia")]
 LOCALE_PATHS = [BASE_DIR / "locale"]
 USE_I18N = True
-USE_L10N = True
+
+# No USE_L10N here on purpose: Django dropped it in 5.0 and now always formats
+# dates and numbers by the active locale. Setting it would read like a switch
+# that does something when it does nothing.
+#
+# Thousand separators are NOT turned on globally either. That setting groups
+# every number rendered in a template, ids and counts included, so an Indonesian
+# page would print villa 1234 as "1.234" and break the JavaScript reading it
+# back. Money is grouped where it is actually shown instead - the intcomma
+# filter in templates, apps.bookings.services._money in Python.
 
 # Bali is WITA (UTC+8). Stored timestamps are UTC; this is the display default
 # and the basis for the STM 24-hour police-report deadline.
@@ -177,3 +187,46 @@ STRIPE_WEBHOOK_SECRET = env("STRIPE_WEBHOOK_SECRET", default="")
 # failure rather than silently falling back to another format - see CLAUDE.md.
 IMAGE_OUTPUT_FORMAT = "WEBP"
 IMAGE_WEBP_QUALITY = 82
+
+
+# -------------------------------------------------------------------- logging
+
+# Every app writes through a logger named after its module ("apps.villas.views"
+# and so on), so one switch here decides how much detail the whole project
+# gives. The file is a rotating one on purpose - a chatty log left running for
+# months should never be the thing that fills a small server's disk.
+LOG_DIR = BASE_DIR / "logs"
+LOG_DIR.mkdir(exist_ok=True)
+LOG_LEVEL = env("LOG_LEVEL", default="INFO")
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "detailed": {
+            "format": "{asctime} {levelname:<7} {name} {funcName}:{lineno} - {message}",
+            "style": "{",
+        },
+        "plain": {"format": "{levelname:<7} {name} - {message}", "style": "{"},
+    },
+    "handlers": {
+        "console": {"class": "logging.StreamHandler", "formatter": "plain"},
+        "file": {
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": LOG_DIR / "app.log",
+            "maxBytes": 5 * 1024 * 1024,
+            "backupCount": 5,
+            "formatter": "detailed",
+            "encoding": "utf-8",
+        },
+    },
+    "root": {"handlers": ["console", "file"], "level": "WARNING"},
+    "loggers": {
+        # Our own code, in full.
+        "apps": {"handlers": ["console", "file"], "level": LOG_LEVEL, "propagate": False},
+        # Django's own noise stays at WARNING; a request log line per page view
+        # would bury everything above.
+        "django": {"handlers": ["console", "file"], "level": "WARNING", "propagate": False},
+        "django.request": {"handlers": ["console", "file"], "level": "ERROR", "propagate": False},
+    },
+}

@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load i18n i18n_extras %}
 {% comment %}
 Top bar, per the design handoff: brand wordmark, a Calendar/Today segmented
 control, everything else behind "More", then the user and the language switch
@@ -10,7 +10,7 @@ one click away rather than crowding the bar.
 {% url 'bookings:calendar' as calendar_url %}
 
 <header class="sticky top-0 z-30 flex h-16 flex-shrink-0 items-center gap-s4 border-b border-sand-300 bg-sand-100 px-s6">
-  <a href="{{ calendar_url }}" class="font-display text-[19px] text-ink-900">{% translate "Villa Dashboard" %}</a>
+  <a href="{{ calendar_url }}" class="font-display text-[19px] text-ink-900">{% translate "Rumah" %}</a>
 
   <div class="seg">
     <a href="{{ calendar_url }}" class="seg-opt {% if request.path == calendar_url %}seg-opt-active{% endif %}">
@@ -60,7 +60,7 @@ one click away rather than crowding the bar.
       <form method="post" action="{% url 'set_language' %}" class="contents">
         {% csrf_token %}
         <input type="hidden" name="language" value="{{ code }}">
-        <input type="hidden" name="next" value="{{ request.get_full_path }}">
+        <input type="hidden" name="next" value="{% language_url code %}">
         <button type="submit" class="seg-opt {% if LANGUAGE_CODE == code %}seg-opt-active{% endif %}">
           {{ code|upper }}
         </button>

@@ -1,0 +1,23 @@
+{% load i18n %}
+{% comment %}
+The answer to "add something that isn't listed". Swapped into the small note
+area under the box; when it worked, the tickbox itself is sent along too and
+lands in the list above, already ticked.
+{% endcomment %}
+{% if amenity %}
+  <label
+    class="flex items-center gap-2 text-sm text-ink-900"
+    hx-swap-oob="beforeend:#amenities-{{ category_pk }}"
+  >
+    <input
+      type="checkbox" name="{{ field_name }}" value="{{ amenity.pk }}" checked
+      class="h-4 w-4 rounded border-sand-400 text-teal-600 focus:ring-teal-600"
+    >
+    <span>{{ amenity.name_en }}</span>
+  </label>
+  <p class="mt-1 text-xs text-accent2-700">
+    {% blocktranslate with name=amenity.name_en %}Added {{ name }}. It'll be on the list next time too.{% endblocktranslate %}
+  </p>
+{% else %}
+  <p class="mt-1 text-sm text-red-700">{{ error }}</p>
+{% endif %}

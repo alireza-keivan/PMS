@@ -1,0 +1,56 @@
+{% load i18n %}
+{% comment %}
+Everything about the property itself. Shared by step 1 of the add form and the
+top of the edit page, so a villa is described the same way either side.
+
+Included inside a <form> that carries its own csrf token, its own buttons, and
+enctype="multipart/form-data" - there is a file box in here.
+
+One flowing form, top to bottom - required and optional fields side by side in
+the same order a person would naturally fill them in, told apart only by the
+mark next to each label (see _field.html). Not split into a "required" section
+and an "anything else" section: that split makes the optional half look like
+extra homework instead of what it is - genuinely fine to skip.
+{% endcomment %}
+
+{% if form.non_field_errors %}
+  <p class="mb-4 rounded-md bg-red-50 p-3 text-sm text-teal-700">{{ form.non_field_errors|join:" " }}</p>
+{% endif %}
+
+<div class="space-y-4">
+  {% include "villas/_field.html" with field=form.name %}
+
+  <div class="grid gap-4 sm:grid-cols-2">
+    {% include "villas/_field.html" with field=form.property_type %}
+    {% include "villas/_field.html" with field=form.area %}
+  </div>
+
+  {# Native list of suggestions: the common areas are one click away, and #}
+  {# anywhere else can simply be typed. #}
+  <datalist id="bali-areas">
+    {% for area in areas %}<option value="{{ area }}"></option>{% endfor %}
+  </datalist>
+
+  {% include "villas/_field.html" with field=form.address %}
+  {% include "villas/_field.html" with field=form.google_maps_url %}
+
+  <div class="grid gap-4 sm:grid-cols-2">
+    {% include "villas/_field.html" with field=form.description_en %}
+    {% include "villas/_field.html" with field=form.description_id %}
+  </div>
+
+  <div class="grid gap-4 sm:grid-cols-2">
+    {% include "villas/_field.html" with field=form.check_in_time hint=_("Left empty, this is 2:00 PM.") %}
+    {% include "villas/_field.html" with field=form.check_out_time hint=_("Left empty, this is 11:00 AM.") %}
+  </div>
+
+  <div class="field">
+    <label class="mb-1 flex items-baseline gap-1 text-sm text-ink-800">
+      <span>{% translate "Photos" %}</span>
+      <span class="text-xs text-ink-500">({% translate "optional" %})</span>
+    </label>
+    <div id="photos-villa">
+      {% include "villas/_photo_grid.html" with photos=villa.photos.all remove_url_name="villas:remove_villa_photo" %}
+    </div>
+  </div>
+</div>

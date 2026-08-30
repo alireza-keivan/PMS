@@ -17,16 +17,28 @@ def test_same_organization_cannot_reuse_a_slug(org):
         Villa.objects.create(organization=org, name="Villa B", slug="melati")
 
 
-def test_amenity_is_shared_across_organizations(org, other_org):
-    """One Amenity row, linked from villas owned by different organizations."""
-    pool = Amenity.objects.create(name_en="Pool", name_id="Kolam renang")
+def test_a_shared_amenity_is_one_row_used_by_every_organization(org, other_org):
+    """The built-in amenities belong to nobody, so two operators' room types
+    point at the same row rather than each getting their own copy of "Pool".
+    """
+    pool = Amenity.objects.get(name_en="Pool", organization=None)
     villa_a = Villa.objects.create(organization=org, name="Villa A", slug="a")
     villa_b = Villa.objects.create(organization=other_org, name="Villa B", slug="b")
 
-    pool.villas.add(villa_a, villa_b)
+    villa_a.room_categories.first().amenities.add(pool)
+    villa_b.room_categories.first().amenities.add(pool)
 
-    assert Amenity.objects.count() == 1
-    assert set(pool.villas.all()) == {villa_a, villa_b}
+    assert Amenity.objects.filter(name_en="Pool").count() == 1
+    assert {c.villa for c in pool.room_categories.all()} == {villa_a, villa_b}
+
+
+def test_a_custom_amenity_is_only_offered_back_to_who_made_it(org, other_org):
+    mine = Amenity.objects.create(name_en="Yoga deck", name_id="Yoga deck", organization=org)
+
+    assert mine in Amenity.available_to(org)
+    assert mine not in Amenity.available_to(other_org)
+    # and the shared ones are still there alongside it
+    assert Amenity.available_to(org).filter(name_en="Pool").exists()
 
 
 def test_villa_photos_are_ordered_by_sort_order(villa):

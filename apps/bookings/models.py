@@ -21,6 +21,7 @@ class Booking(TenantOwnedModel):
         BOOKING_COM = "booking_com", "Booking.com"
         DIRECT = "direct", _("Direct")
         WHATSAPP = "whatsapp", "WhatsApp"
+        WALK_IN = "walk_in", _("Walk-in")
         OTHER = "other", _("Other")
 
     class Status(models.TextChoices):
@@ -67,6 +68,14 @@ class Booking(TenantOwnedModel):
     # Identity in the upstream system, so repeated syncs update rather than duplicate.
     external_id = models.CharField(max_length=120, blank=True, db_index=True)
     last_synced_at = models.DateTimeField(null=True, blank=True)
+
+    # The rate actually agreed for this stay - not necessarily the room type's
+    # listed nightly_rate (see villas.RoomCategory), since a manually entered
+    # booking may carry a negotiated or discounted price. Whole rupiah, same
+    # as RoomCategory.nightly_rate.
+    nightly_rate = models.PositiveBigIntegerField(
+        null=True, blank=True, help_text=_("Price for one night, in rupiah, agreed for this stay.")
+    )
 
     notes = models.TextField(blank=True)
 

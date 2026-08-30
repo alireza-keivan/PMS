@@ -45,6 +45,21 @@
   .tag-accent { @apply bg-teal-50 text-teal-800; }
   .tag-accent-2 { @apply bg-accent2-100 text-accent2-800; }
   .tag-neutral { @apply bg-sand-200 text-ink-800; }
+  /* A toggleable pill - amenities on the room form. Outlined when off, solid
+     when the hidden checkbox behind it is checked - see :has() below, which
+     needs no JS. */
+  .tag-toggle {
+    @apply cursor-pointer select-none border border-teal-600 px-3 py-1 text-sm text-teal-700 transition-colors;
+  }
+  .tag-toggle:hover { @apply bg-teal-50; }
+  label:has(> .tag-toggle-input:checked) .tag-toggle {
+    @apply border-teal-600 bg-teal-600 text-sand-50;
+  }
+  /* The checkbox itself is visually hidden (see CHECKBOX in forms.py) - a
+     keyboard user tabbing onto it still needs to see where focus landed. */
+  label:has(> .tag-toggle-input:focus-visible) .tag-toggle {
+    @apply outline outline-2 outline-offset-1 outline-teal-600;
+  }
 
   .seg { @apply inline-flex overflow-hidden rounded-full border border-sand-300; }
   .seg-opt { @apply flex cursor-pointer items-center gap-1.5 px-3 py-1.5 text-sm text-ink-900 transition-colors; }
@@ -53,4 +68,16 @@
   .seg-opt:not(.seg-opt-active):hover { @apply bg-sand-200; }
 
   .card { @apply rounded-card border border-sand-300 bg-sand-100 p-4 shadow-sm; }
+
+  /* One labelled field - label, control, hint/error, stacked with a small
+     consistent gap. Used by templates/villas/_field.html. */
+  .field { @apply flex flex-col gap-1.5; }
+
+  /* The room-type card's title: reads as plain bold text until it's touched,
+     not a boxed input sitting above a separate label. */
+  .title-input {
+    @apply w-full min-w-0 flex-1 truncate rounded-md border-none bg-transparent px-1.5 py-0.5 font-sans text-[15px] font-semibold text-ink-900 outline-none transition-colors placeholder:font-normal placeholder:text-ink-500;
+  }
+  .title-input:hover { @apply bg-sand-200; }
+  .title-input:focus { @apply bg-teal-50 ring-2 ring-teal-600; }
 }

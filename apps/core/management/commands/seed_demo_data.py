@@ -227,18 +227,27 @@ class Command(BaseCommand):
     # ------------------------------------------------------------ villas
 
     def _build_amenities(self):
+        """The shared list, matching what migration 0011 already put there.
+
+        organization=None on both sides of the lookup on purpose: these are
+        the ones everybody gets, and an operator's own custom amenity must
+        never be picked up here and handed to somebody else's villa.
+        """
         pairs = [
             ("Pool", "Kolam renang"),
             ("WiFi", "WiFi"),
-            ("Air conditioning", "AC"),
+            ("Air conditioning", "Pendingin ruangan"),
             ("Full kitchen", "Dapur lengkap"),
             ("Free parking", "Parkir gratis"),
             ("Rice field view", "Pemandangan sawah"),
             ("Private garden", "Taman pribadi"),
             ("Daily housekeeping", "Bersih-bersih harian"),
+            ("Electricity included", "Listrik sudah termasuk"),
         ]
         self.amenities = {
-            en: Amenity.objects.get_or_create(name_en=en, defaults={"name_id": idn})[0]
+            en: Amenity.objects.get_or_create(
+                name_en=en, organization=None, defaults={"name_id": idn},
+            )[0]
             for en, idn in pairs
         }
 
@@ -247,12 +256,17 @@ class Command(BaseCommand):
             v, _ = Villa.objects.get_or_create(
                 organization=org, slug=slug,
                 defaults=dict(
-                    name=name, area=area, bedrooms=bedrooms, max_guests=max_guests,
+                    name=name, area=area, bedrooms=bedrooms,
                     is_listed_publicly=public, description_en=desc_en, description_id=desc_id,
                 ),
             )
-            for a in amenity_names:
-                self.amenities[a].villas.add(v)
+            # How many guests a room sleeps, and what it comes with, live on
+            # the room type - so they go on the one the villa started with.
+            category = v.room_categories.first()
+            if category is not None:
+                category.max_guests = max(max_guests // max(bedrooms, 1), 1)
+                category.save(update_fields=["max_guests"])
+                category.amenities.set([self.amenities[a] for a in amenity_names])
             return v
 
         self.villa_sunset = villa(
@@ -347,13 +361,23 @@ class Command(BaseCommand):
 
     def _build_bookings(self):
         d = timezone.timedelta
+        room_index: dict[int, int] = {}
 
         def booking(org, villa, external_id, channel, guest, check_in, check_out,
                     source_detail, status=Booking.Status.CONFIRMED, guest_count=2, notes=""):
+            # Round-robin across the villa's rooms (already provisioned when
+            # the villa was created - see provision_starter_rooms) so bookings
+            # spread across room rows on the calendar instead of piling onto
+            # room 1. The calendar has no "unassigned" fallback row, so every
+            # booking needs a real room to show up at all.
+            rooms = list(villa.rooms.order_by("id"))
+            i = room_index.get(villa.id, 0)
+            room_index[villa.id] = i + 1
             obj, _ = Booking.objects.get_or_create(
                 organization=org, external_id=external_id,
                 defaults=dict(
-                    villa=villa, guest=guest, check_in=check_in, check_out=check_out,
+                    villa=villa, room=rooms[i % len(rooms)], guest=guest,
+                    check_in=check_in, check_out=check_out,
                     channel=channel, status=status, source_detail=source_detail,
                     guest_count=guest_count, notes=notes,
                     last_synced_at=self.now if source_detail == Booking.SourceDetail.FULL else None,
@@ -468,9 +492,9 @@ class Command(BaseCommand):
             ("Hutan 2", "Suite"),
         ])
 
-        # A couple of real bookings assigned to a room, and one left
-        # unassigned on purpose - exercises the calendar's synthetic
-        # "Unassigned" row alongside real room rows.
+        # Move these two onto named rooms for narrative flavor - they already
+        # got a room at creation time (see _build_bookings), just not one of
+        # the newly-renamed ones above.
         self.b_james_current.room = sunset_rooms[0]
         self.b_james_current.save(update_fields=["room"])
         self.b_sophie.room = hutan_rooms[0]
@@ -989,15 +1013,24 @@ class Command(BaseCommand):
             villa, _created = Villa.objects.get_or_create(
                 organization=org, slug=slugify(name),
                 defaults=dict(
-                    name=name, area=area, property_type=ptype,
-                    bedrooms=bedrooms, bathrooms=bathrooms, max_guests=max_guests,
-                    base_nightly_rate=str(750_000 + bedrooms * 400_000),
-                    base_monthly_rate=str((750_000 + bedrooms * 400_000) * 22),
+                    name=name, area=area, property_type=ptype, bedrooms=bedrooms,
                 ),
             )
             villas.append(villa)
-            for amenity in self.rng.sample(list(self.amenities.values()), k=self.rng.randint(3, 5)):
-                amenity.villas.add(villa)
+            # Prices, size and amenities belong to the room type, not the
+            # villa - so they go on the type the villa was given when it was
+            # created. See the note at the top of apps/villas/models.py.
+            nightly = 750_000 + bedrooms * 400_000
+            category = villa.room_categories.first()
+            if category is not None:
+                category.max_guests = max(max_guests // max(bedrooms, 1), 1)
+                category.nightly_rate = nightly
+                category.monthly_rate = nightly * 22
+                category.size_sqm = 30 + bathrooms * 5
+                category.save()
+                category.amenities.set(
+                    self.rng.sample(list(self.amenities.values()), k=self.rng.randint(3, 5))
+                )
             if not villa.photos.exists():
                 VillaPhoto.objects.create(
                     organization=org, villa=villa,
@@ -1025,6 +1058,7 @@ class Command(BaseCommand):
         currencies = [("IDR", 1), ("USD", 15800), ("AUD", 10400), ("EUR", 17200)]
         bookings = []
         for v_idx, villa in enumerate(villas):
+            rooms = list(villa.rooms.order_by("id"))
             cursor = self.today - d(days=90)
             b_idx = 0
             while cursor < self.today + d(days=120):
@@ -1035,11 +1069,12 @@ class Command(BaseCommand):
                 booking, _created = Booking.objects.get_or_create(
                     organization=org, external_id=f"horizon-{v_idx}-{b_idx}",
                     defaults=dict(
-                        villa=villa, guest=guest, check_in=check_in, check_out=check_out,
+                        villa=villa, room=rooms[b_idx % len(rooms)], guest=guest,
+                        check_in=check_in, check_out=check_out,
                         channel=self.rng.choice(channels),
                         status=Booking.Status.CANCELLED if is_cancelled else Booking.Status.CONFIRMED,
                         source_detail=Booking.SourceDetail.FULL,
-                        guest_count=self.rng.randint(2, min(villa.max_guests, 8)),
+                        guest_count=self.rng.randint(2, max(min(villa.sleeps, 8), 2)),
                         last_synced_at=self.now,
                     ),
                 )

@@ -11,14 +11,14 @@ from datetime import timedelta
 from decimal import Decimal
 
 from django.db.models import Max, Q, Sum
-from django.utils import timezone
+from django.utils import formats, timezone
 from django.utils.text import slugify
-from django.utils.translation import gettext
+from django.utils.translation import gettext, ngettext
 from django.utils.translation import gettext_lazy as _
 
 from apps.bookings.models import Booking, BookingPayment
 from apps.organizations.models import Membership
-from apps.villas.models import Room, Villa
+from apps.villas.models import Room, RoomCategory, Villa
 
 CALENDAR_STATUS_LABELS = {
     "confirmed": _("Confirmed"),
@@ -27,6 +27,22 @@ CALENDAR_STATUS_LABELS = {
     "blocked": _("Not available"),
     "payment_incomplete": _("Payment incomplete"),
 }
+
+
+def _short_date(value) -> str:
+    """"04 Aug" in English, "04 Agu" in Indonesian.
+
+    Never strftime for anything a person reads: strftime takes its month names
+    from the operating system's C locale, so it would say "Aug" even with the
+    dashboard switched to Bahasa Indonesia. Django's own formatter routes the
+    "M" specifier through the translated month table instead.
+    """
+    return formats.date_format(value, "d M")
+
+
+def _money(amount) -> str:
+    """A figure with the active locale's own grouping - 1,500,000 or 1.500.000."""
+    return formats.number_format(amount, force_grouping=True)
 
 
 def calendar_status(booking: Booking, today, amount_owed: Decimal) -> str:
@@ -76,7 +92,7 @@ def scoped_villas(request):
     """
     org = request.organization
     membership = request.user.memberships.get(organization=org)
-    villas = Villa.objects.filter(organization=org, is_active=True)
+    villas = Villa.objects.filter(organization=org).live()
     if membership.role == Membership.Role.STAFF and membership.villas.exists():
         villas = villas.filter(id__in=membership.villas.values_list("id", flat=True))
     return list(villas.order_by("name")), membership
@@ -163,6 +179,7 @@ def build_calendar_rows(request, start, days, q) -> dict:
     """
     today = timezone.localdate()
     villas, bookings, payments, rooms_by_villa, membership = _calendar_query(request, start, days, q)
+    categories_by_villa = _room_categories_by_villa([v.id for v in villas])
 
     day_columns = [
         {
@@ -213,7 +230,12 @@ def build_calendar_rows(request, start, days, q) -> dict:
                         for b in bookings_by_room.get(room.id, [])
                     ],
                 })
-            rows.append({"kind": "add_room", "villa_id": villa.id, "villa_slug": villa.slug})
+            rows.append({
+                "kind": "add_room",
+                "villa_id": villa.id,
+                "villa_slug": villa.slug,
+                "categories": categories_by_villa.get(villa.id, []),
+            })
 
     return {"day_columns": day_columns, "rows": rows}
 
@@ -237,6 +259,12 @@ def _build_bar(booking, today, payment, can_see_money, start, days) -> dict:
 
     bar = {
         "id": booking.id,
+        "room_id": booking.room_id,
+        # Real (unclamped) dates, for the drag-to-reschedule flow - start_offset/
+        # end_offset above are clamped to the visible window and only ever meant
+        # for positioning, not for telling the client what the booking actually is.
+        "check_in_iso": booking.check_in.isoformat(),
+        "check_out_iso": booking.check_out.isoformat(),
         "label": label,
         "status": status,
         "status_display": str(CALENDAR_STATUS_LABELS[status]),
@@ -246,7 +274,7 @@ def _build_bar(booking, today, payment, can_see_money, start, days) -> dict:
         ),
         "villa_name": booking.villa.name,
         "room_name": booking.room.name if booking.room_id else "",
-        "date_range": f"{booking.check_in.strftime('%d %b')} – {booking.check_out.strftime('%d %b')}",
+        "date_range": f"{_short_date(booking.check_in)} – {_short_date(booking.check_out)}",
         "nights": booking.nights,
         "guest_count": booking.guest_count,
         "channel_display": booking.get_channel_display(),
@@ -257,9 +285,39 @@ def _build_bar(booking, today, payment, can_see_money, start, days) -> dict:
     }
     if can_see_money:
         owed = payment.get("amount_owed")
-        bar["amount_owed"] = str(owed) if owed is not None else None
+        bar["amount_owed"] = _money(owed) if owed is not None else None
         bar["currency"] = payment.get("currency")
     return bar
+
+
+def find_available_room(room_category: RoomCategory, check_in, check_out):
+    """The first of this room type's rooms that's free for the given dates,
+    and the conflicting booking if none are.
+
+    Used by the Add Reservation form both for the live availability check
+    (apps.bookings.views.ReservationAvailabilityView) and to actually assign a
+    room on save - re-run server-side at submit time rather than trusting
+    whatever the live check last showed the client, same principle as
+    BookingRescheduleView's overlap check.
+
+    Returns (room, None) if a room is free, or (None, conflicting_booking) if
+    every room of this type is booked - conflicting_booking is whichever one
+    overlaps first, purely so the clash message can name a guest and dates.
+    """
+    rooms = list(room_category.rooms.filter(is_active=True).order_by("id"))
+    overlapping = {
+        b.room_id: b
+        for b in Booking.objects.filter(
+            organization=room_category.organization_id,
+            room_id__in=[r.id for r in rooms],
+            check_in__lt=check_out, check_out__gt=check_in,
+        ).exclude(status=Booking.Status.CANCELLED).select_related("guest").order_by("check_in")
+    }
+    for room in rooms:
+        if room.id not in overlapping:
+            return room, None
+    conflict = next(iter(overlapping.values()), None)
+    return None, conflict
 
 
 def _rooms_by_villa(villa_ids: list) -> dict:
@@ -277,6 +335,30 @@ def _rooms_by_villa(villa_ids: list) -> dict:
     )
     for room in rooms:
         buckets.setdefault(room.villa_id, []).append(room)
+    return buckets
+
+
+def _room_categories_by_villa(villa_ids: list) -> dict:
+    """{villa_id: [category dict, ...]} for the calendar's "+ Add room" card,
+    which needs to know whether a villa has more than one room type before
+    deciding whether to ask which one - and, if it asks, what to show about
+    each type once picked.
+    """
+    buckets: dict = {}
+    categories = (
+        RoomCategory.objects.filter(villa_id__in=villa_ids)
+        .prefetch_related("amenities").order_by("sort_order", "name")
+    )
+    for category in categories:
+        buckets.setdefault(category.villa_id, []).append({
+            "id": category.id,
+            "name": category.name,
+            "room_count": category.room_count,
+            "max_guests": category.max_guests,
+            "size_sqm": category.size_sqm,
+            "nightly_rate": category.nightly_rate,
+            "amenity_names": [amenity.name_en for amenity in category.amenities.all()],
+        })
     return buckets
 
 
@@ -329,10 +411,10 @@ def _build_item(booking: Booking, today, payment: dict, can_see_money: bool, roo
         class_names += " cal-no-detail"
 
     date_range = gettext("%(start)s – %(end)s") % {
-        "start": booking.check_in.strftime("%d %b"),
-        "end": booking.check_out.strftime("%d %b"),
+        "start": _short_date(booking.check_in),
+        "end": _short_date(booking.check_out),
     }
-    nights_label = gettext("%(n)s nights") % {"n": booking.nights}
+    nights_label = ngettext("%(n)s night", "%(n)s nights", booking.nights) % {"n": booking.nights}
     title = "<br>".join([
         content,
         booking.villa.name,

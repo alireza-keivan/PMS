@@ -1,0 +1,104 @@
+{% load i18n %}
+{% comment %}
+One kind of room. A villa rented out whole is one of these with a single room
+in it, so this same block covers both cases.
+
+Include with `form` - one of the formset's forms.
+
+The hidden id is written out by hand rather than through {{ form.id }},
+because a block appended by HTMX is built on its own, outside the formset, and
+still has to say which room type it stands for. It is never rendered twice -
+nothing below loops over the form's fields.
+{% endcomment %}
+{% with category=form.instance %}
+<div class="card overflow-hidden !p-0" x-data="{ open: true }">
+  <input type="hidden" name="{{ form.prefix }}-id" value="{{ category.pk }}">
+
+  <div class="flex items-center gap-2 bg-sand-200 px-s6 py-s3">
+    <button
+      type="button" @click="open = !open"
+      class="flex h-6 w-6 flex-none items-center justify-center text-ink-600 hover:text-ink-900"
+      :aria-expanded="open ? 'true' : 'false'"
+      aria-label="{% translate 'Show or hide this room type' %}"
+    >
+      <span x-show="open">&#9662;</span>
+      <span x-show="!open" x-cloak>&#9656;</span>
+    </button>
+
+    {{ form.name }}
+
+    <span class="whitespace-nowrap text-xs text-ink-600">
+      {% blocktranslate count n=category.rooms.count %}{{ n }} room{% plural %}{{ n }} rooms{% endblocktranslate %}
+      &middot;
+      {% blocktranslate count n=category.amenities.count %}{{ n }} amenity{% plural %}{{ n }} amenities{% endblocktranslate %}
+    </span>
+
+    {# The last one can't go: a villa's rooms have to belong to something, #}
+    {# and the calendar draws bookings on room rows. #}
+    {% if formset|length > 1 %}
+      <button
+        type="button"
+        class="btn btn-icon btn-ghost flex-none opacity-60 hover:opacity-100"
+        title="{% translate 'Remove this room type' %}"
+        aria-label="{% translate 'Remove this room type' %}"
+        hx-post="{% url 'villas:remove_room_category' villa.slug category.pk %}"
+        hx-include="#room-form"
+        hx-target="#room-blocks"
+        hx-swap="innerHTML"
+        hx-confirm="{% blocktranslate with name=category.name|default:_('this room type') %}Remove {{ name }}?{% endblocktranslate %}"
+      >
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+      </button>
+    {% endif %}
+  </div>
+
+  <div x-show="open" class="space-y-4 px-s8 py-s6">
+    <div class="grid gap-4 sm:grid-cols-2">
+      {% include "villas/_field.html" with field=form.room_count %}
+      {% include "villas/_field.html" with field=form.max_guests %}
+    </div>
+
+    <div class="grid gap-4 sm:grid-cols-2">
+      {% include "villas/_field.html" with field=form.size_sqm %}
+      {% include "villas/_field.html" with field=form.minimum_nights %}
+    </div>
+
+    <div class="grid gap-4 sm:grid-cols-2">
+      <div class="field">
+        <label class="mb-1 flex items-baseline gap-1 text-sm text-ink-800" for="{{ form.nightly_rate.id_for_label }}">
+          <span>{{ form.nightly_rate.label }}</span>
+          <span class="text-xs text-ink-500">({% translate "optional" %})</span>
+        </label>
+        {{ form.nightly_rate }}
+        <span class="text-xs text-ink-600" data-idr-preview></span>
+        {% if form.nightly_rate.errors and not hide_errors %}
+          <p class="mt-1 text-sm text-teal-700">{{ form.nightly_rate.errors|join:" " }}</p>
+        {% endif %}
+      </div>
+      <div class="field">
+        <label class="mb-1 flex items-baseline gap-1 text-sm text-ink-800" for="{{ form.monthly_rate.id_for_label }}">
+          <span>{{ form.monthly_rate.label }}</span>
+          <span class="text-xs text-ink-500">({% translate "optional" %})</span>
+        </label>
+        {{ form.monthly_rate }}
+        <span class="text-xs text-ink-600" data-idr-preview></span>
+        {% if form.monthly_rate.errors and not hide_errors %}
+          <p class="mt-1 text-sm text-teal-700">{{ form.monthly_rate.errors|join:" " }}</p>
+        {% endif %}
+      </div>
+    </div>
+
+    {% include "villas/_amenity_checkboxes.html" with field=form.amenities %}
+
+    <div class="field">
+      <label class="mb-1 flex items-baseline gap-1 text-sm text-ink-800">
+        <span>{% translate "Photos" %}</span>
+        <span class="text-xs text-ink-500">({% translate "optional" %})</span>
+      </label>
+      <div id="photos-room-{{ category.pk }}">
+        {% include "villas/_photo_grid.html" with photos=category.photos.all remove_url_name="villas:remove_room_photo" %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endwith %}

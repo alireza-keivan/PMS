@@ -1,0 +1,72 @@
+{% load i18n %}
+{% comment %}
+The whole photo row for one villa or one room type: existing pictures as
+square thumbnails, each with its own remove button, then a dashed tile that
+opens the file picker. Swapped in whole by HTMX after a picture is added or
+removed, so it always shows what is really stored.
+
+Include with:
+  photos           - the pictures to show
+  remove_url_name  - which URL removes one of them
+  villa            - always
+  category         - only for a room type's pictures
+  error            - optional, something that went wrong while uploading
+
+The add tile uploads the moment a file is picked, same as the rest of this
+page - except on a villa that doesn't exist yet (the very first step 1, before
+anything is saved), where there is no row yet to attach a photo to. There, the
+tile is a plain field that rides along with the whole form when it is
+submitted, and static/js/villa_form.js gives it a local preview so it doesn't
+look inert in the meantime.
+{% endcomment %}
+
+{% if error %}
+  <p class="mb-2 rounded-md bg-red-50 p-2 text-sm text-red-700">{{ error }}</p>
+{% endif %}
+
+<div class="flex flex-wrap gap-2">
+  {% for photo in photos %}
+    <div class="group relative h-[74px] w-[74px] flex-none overflow-hidden rounded-sm border border-sand-300">
+      <img src="{{ photo.image.url }}" alt="" class="h-full w-full object-cover" loading="lazy">
+      <button
+        type="button"
+        class="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-ink-900/65 text-sand-50 opacity-0 transition-opacity hover:bg-ink-900 focus:opacity-100 group-hover:opacity-100"
+        title="{% translate 'Remove this picture' %}"
+        aria-label="{% translate 'Remove this picture' %}"
+        {% if category %}
+          hx-post="{% url remove_url_name villa.slug category.pk photo.pk %}"
+          hx-target="#photos-room-{{ category.pk }}"
+        {% else %}
+          hx-post="{% url remove_url_name villa.slug photo.pk %}"
+          hx-target="#photos-villa"
+        {% endif %}
+        hx-swap="innerHTML"
+      >
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+  {% endfor %}
+
+  <label class="relative flex h-[74px] w-[74px] flex-none cursor-pointer items-center justify-center rounded-sm border-[1.5px] border-dashed border-sand-400 text-ink-600 hover:bg-sand-100 focus-within:ring-2 focus-within:ring-teal-600">
+    {% if category %}
+      <input
+        type="file" name="photos" multiple accept="image/*" class="sr-only"
+        hx-post="{% url 'villas:add_room_photos' villa.slug category.pk %}"
+        hx-encoding="multipart/form-data" hx-trigger="change"
+        hx-target="#photos-room-{{ category.pk }}" hx-swap="innerHTML"
+        hx-on::after-request="this.value = ''"
+      >
+    {% elif villa.pk %}
+      <input
+        type="file" name="photos" multiple accept="image/*" class="sr-only"
+        hx-post="{% url 'villas:add_villa_photos' villa.slug %}"
+        hx-encoding="multipart/form-data" hx-trigger="change"
+        hx-target="#photos-villa" hx-swap="innerHTML"
+        hx-on::after-request="this.value = ''"
+      >
+    {% else %}
+      <input type="file" name="photos" multiple accept="image/*" class="sr-only" data-blob-preview>
+    {% endif %}
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+  </label>
+</div>
