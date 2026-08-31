@@ -5,16 +5,16 @@ area under the box; when it worked, the tickbox itself is sent along too and
 lands in the list above, already ticked.
 {% endcomment %}
 {% if amenity %}
-  <label
-    class="flex items-center gap-2 text-sm text-ink-900"
-    hx-swap-oob="beforeend:#amenities-{{ category_pk }}"
-  >
-    <input
-      type="checkbox" name="{{ field_name }}" value="{{ amenity.pk }}" checked
-      class="h-4 w-4 rounded border-sand-400 text-teal-600 focus:ring-teal-600"
-    >
-    <span>{{ amenity.name_en }}</span>
-  </label>
+  <div hx-swap-oob="beforeend:#amenities-{{ category_pk }}">
+    {% include "villas/_amenity_pill.html" with value=amenity.pk label=amenity.name_en force_removable=True %}
+  </div>
+  {# Empty the box, ready for the next one. #}
+  <script>
+    (function () {
+      var box = document.getElementById("new-amenity-{{ category_pk }}");
+      if (box) box.value = "";
+    })();
+  </script>
   <p class="mt-1 text-xs text-accent2-700">
     {% blocktranslate with name=amenity.name_en %}Added {{ name }}. It'll be on the list next time too.{% endblocktranslate %}
   </p>

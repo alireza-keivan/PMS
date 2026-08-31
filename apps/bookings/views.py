@@ -63,8 +63,13 @@ class CalendarView(LoginRequiredMixin, TemplateView):
         start = _parse_date(self.request.GET.get("start")) or today
         days = _parse_days(self.request.GET.get("days"))
         q = self.request.GET.get("q", "").strip()
+        focus_booking_id = self.request.GET.get("focus", "").strip()
 
-        data = build_calendar_rows(self.request, start=start, days=days, q=q)
+        # A suggestion click carries the guest name in q purely so the search
+        # box still shows it (see BookingSearchSuggestionsView) - it isn't
+        # meant to also filter the grid down to that guest's villa, so skip
+        # filtering whenever we're jumping to a specific booking.
+        data = build_calendar_rows(self.request, start=start, days=days, q="" if focus_booking_id else q)
 
         context.update(
             day_columns=data["day_columns"],
@@ -72,10 +77,11 @@ class CalendarView(LoginRequiredMixin, TemplateView):
             start=start,
             days=days,
             q=q,
+            focus_booking_id=focus_booking_id,
             today=today,
             range_end=start + timedelta(days=days - 1),
             range_size_tabs=[
-                {"label": str(n), "href": _tab_href(self.request, days=n), "active": n == days}
+                {"label": str(n), "href": _tab_href(self.request, days=n, q=None, focus=None), "active": n == days}
                 for n in VALID_RANGE_SIZES
             ],
             nav=_nav_hrefs(self.request, start, days),
@@ -85,6 +91,46 @@ class CalendarView(LoginRequiredMixin, TemplateView):
             ],
         )
         return context
+
+
+class BookingSearchSuggestionsView(LoginRequiredMixin, View):
+    """Dropdown under the calendar's search box - the top guest/villa matches
+    for what's been typed so far, each linking straight to that booking
+    instead of making staff scan the whole filtered grid for it.
+    """
+
+    template_name = "bookings/_search_suggestions.html"
+    MAX_RESULTS = 8
+
+    def get(self, request, *args, **kwargs):
+        q = request.GET.get("q", "").strip()
+        days = _parse_days(request.GET.get("days"))
+        results = []
+        if q and request.organization is not None:
+            villas, _membership = scoped_villas(request)
+            bookings = (
+                Booking.objects.filter(
+                    organization=request.organization,
+                    villa_id__in=[v.id for v in villas],
+                    guest__full_name__icontains=q,
+                )
+                .exclude(status=Booking.Status.CANCELLED)
+                .select_related("villa", "guest", "room")
+                .order_by("-check_in")[: self.MAX_RESULTS]
+            )
+            for booking in bookings:
+                results.append({
+                    "id": booking.pk,
+                    "guest_name": booking.guest.full_name,
+                    "villa_name": booking.villa.name,
+                    "room_name": booking.room.name if booking.room_id else "",
+                    "date_range": f"{booking.check_in:%d %b} – {booking.check_out:%d %b}",
+                    "href": _tab_href(
+                        request, q=None, start=booking.check_in.isoformat(),
+                        days=days, focus=booking.pk,
+                    ),
+                })
+        return render(request, self.template_name, {"results": results, "q": q})
 
 
 class ReservationCreateView(LoginRequiredMixin, View):
@@ -388,9 +434,9 @@ def _nav_hrefs(request, start, days) -> dict:
         # forward) rather than pinning it as the first column, so jumping back
         # from a future month lands the way the button is drawn - today in
         # the middle, not at the left edge.
-        "today": _tab_href(request, start=(today - timedelta(days=days // 2)).isoformat()),
-        "day_back": _tab_href(request, start=(start - timedelta(days=1)).isoformat()),
-        "day_forward": _tab_href(request, start=(start + timedelta(days=1)).isoformat()),
-        "range_back": _tab_href(request, start=(start - timedelta(days=days)).isoformat()),
-        "range_forward": _tab_href(request, start=(start + timedelta(days=days)).isoformat()),
+        "today": _tab_href(request, start=(today - timedelta(days=days // 2)).isoformat(), q=None, focus=None),
+        "day_back": _tab_href(request, start=(start - timedelta(days=1)).isoformat(), q=None, focus=None),
+        "day_forward": _tab_href(request, start=(start + timedelta(days=1)).isoformat(), q=None, focus=None),
+        "range_back": _tab_href(request, start=(start - timedelta(days=days)).isoformat(), q=None, focus=None),
+        "range_forward": _tab_href(request, start=(start + timedelta(days=days)).isoformat(), q=None, focus=None),
     }

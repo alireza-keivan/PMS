@@ -2,6 +2,7 @@ from django.urls import path
 
 from apps.villas.views import (
     AmenityCreateView,
+    AmenityDeleteView,
     RoomAddView,
     RoomCategoryCreateView,
     RoomCategoryDeleteView,
@@ -65,4 +66,5 @@ urlpatterns = [
     ),
 
     path("amenities/add/", AmenityCreateView.as_view(), name="add_amenity"),
+    path("amenities/<int:pk>/remove/", AmenityDeleteView.as_view(), name="remove_amenity"),
 ]

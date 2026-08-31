@@ -12,7 +12,7 @@
  *   accent2 = the sage secondary accent ramp
  */
 module.exports = {
-  content: ["./templates/**/*.html", "./apps/**/*.py"],
+  content: ["./templates/**/*.html", "./apps/**/*.py", "./static/js/**/*.js"],
   // Component classes defined in src.css (@layer components) are purged the
   // same way utilities are - safelisted so they survive regardless of which
   // templates have adopted them yet.
@@ -20,6 +20,7 @@ module.exports = {
     "btn", "btn-primary", "btn-secondary", "btn-ghost", "btn-icon",
     "input", "tag", "tag-accent", "tag-accent-2", "tag-neutral", "tag-toggle",
     "seg", "seg-opt", "seg-opt-active", "card", "field", "title-input",
+    "elev-sm", "guest-scroll", "detail-card-fade", "cal-search-focus",
   ],
   theme: {
     extend: {

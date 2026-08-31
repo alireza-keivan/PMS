@@ -280,7 +280,11 @@ def _build_bar(booking, today, payment, can_see_money, start, days) -> dict:
         "guest_count": booking.guest_count,
         "channel_display": booking.get_channel_display(),
         "has_guest_details": booking.has_guest_details,
-        "guest_url": reverse("guests:detail", args=[booking.guest_id]) if booking.has_guest_details else "",
+        "guest_url": (
+            reverse("guests:detail", args=[booking.guest_id])
+            if booking.has_guest_details and booking.guest_id
+            else ""
+        ),
         "can_see_money": can_see_money,
         "amount_owed": None,
         "currency": None,

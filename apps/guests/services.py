@@ -5,8 +5,10 @@ Call it from views and tasks rather than creating GuestActivity rows directly,
 so every event lands with consistent tenant, villa and timestamp fields.
 """
 
+from django.db.models import Max, Q, Sum
 from django.utils import timezone
 
+from apps.bookings.models import BookingPayment
 from apps.guests.models import Guest, GuestActivity
 
 
@@ -44,6 +46,24 @@ def find_or_create_guest(organization, *, full_name, email="", phone="", nationa
     if updates:
         Guest.objects.filter(pk=guest.pk).update(**updates)
     return guest
+
+
+def guest_spend_summary(guest) -> dict:
+    """Total paid and still-owed across every one of this guest's bookings.
+
+    Same shape as apps.bookings.services.payment_summary_by_booking, just
+    aggregated across the whole guest rather than one booking at a time - for
+    the guest profile's "total expenditure" / "amount due" fields.
+    """
+    row = (
+        BookingPayment.objects.filter(organization=guest.organization, booking__guest=guest)
+        .aggregate(
+            total_amount=Sum("amount", filter=~Q(kind=BookingPayment.Kind.REFUND)),
+            amount_owed=Sum("amount", filter=Q(is_outstanding=True)),
+            currency=Max("currency"),
+        )
+    )
+    return row
 
 
 def log_activity(guest, kind, *, booking=None, villa=None, subject="", detail=None):

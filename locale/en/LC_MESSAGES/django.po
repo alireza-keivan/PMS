@@ -1031,7 +1031,7 @@ msgid ""
 msgstr ""
 
 #: apps/villas/views.py:312 apps/villas/views.py:398
-msgid "Saved."
+msgid "Saved"
 msgstr ""
 
 #: apps/villas/views.py:387

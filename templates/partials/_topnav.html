@@ -7,7 +7,6 @@ the bar, then the user and the language switch pushed right.
 {% url 'reporting:dashboard' as today_url %}
 {% url 'bookings:calendar' as calendar_url %}
 {% url 'villas:list' as villas_url %}
-{% url 'guests:list' as guests_url %}
 {% url 'compliance:action_needed' as compliance_url %}
 {% url 'messaging:inbox' as messages_url %}
 {% url 'marketing_admin:overview' as marketing_url %}
@@ -26,7 +25,6 @@ the bar, then the user and the language switch pushed right.
 
   <nav class="flex flex-1 items-center justify-center gap-s4">
     <a href="{{ villas_url }}" class="text-sm text-ink-900/75 hover:text-ink-900 {% if request.path == villas_url %}text-ink-900 font-medium{% endif %}">{% translate "Villas" %}</a>
-    <a href="{{ guests_url }}" class="text-sm text-ink-900/75 hover:text-ink-900 {% if request.path == guests_url %}text-ink-900 font-medium{% endif %}">{% translate "Guests" %}</a>
     <a href="{{ compliance_url }}" class="text-sm text-ink-900/75 hover:text-ink-900 {% if request.path == compliance_url %}text-ink-900 font-medium{% endif %}">{% translate "Compliance" %}</a>
     <a href="{{ messages_url }}" class="text-sm text-ink-900/75 hover:text-ink-900 {% if request.path == messages_url %}text-ink-900 font-medium{% endif %}">{% translate "Messages" %}</a>
     <a href="{{ marketing_url }}" class="text-sm text-ink-900/75 hover:text-ink-900 {% if request.path == marketing_url %}text-ink-900 font-medium{% endif %}">{% translate "Marketing" %}</a>

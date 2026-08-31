@@ -27,6 +27,70 @@
     }
   }
 
+  /* Search box in the calendar toolbar.
+   *
+   * The suggestion list is server-rendered and swapped in by HTMX on every
+   * keystroke, so there is no client-side copy of the results to track an
+   * index against. Instead we read the links straight out of the DOM each
+   * time a key is pressed, and mark the highlighted one with a class - that
+   * survives nothing, which is exactly right: a new list means a new
+   * highlight, starting from nothing again.
+   */
+  var SEARCH_ACTIVE_CLASSES = ["bg-teal-50", "ring-1", "ring-inset", "ring-teal-500"];
+
+  window.calendarSearch = function () {
+    return {
+      searchOpen: false,
+      index: -1,
+
+      // $root, not $el: these run from the input's own keydown handlers, where
+      // $el is the input rather than the wrapper holding the results.
+      items: function () {
+        var box = this.$root.querySelector("#calendar-search-suggestions");
+        return box ? Array.prototype.slice.call(box.querySelectorAll("a")) : [];
+      },
+
+      paint: function () {
+        var self = this;
+        this.items().forEach(function (link, i) {
+          SEARCH_ACTIVE_CLASSES.forEach(function (cls) {
+            link.classList.toggle(cls, i === self.index);
+          });
+        });
+      },
+
+      // A fresh list arrived - drop the old highlight.
+      reset: function () {
+        this.index = -1;
+        this.paint();
+      },
+
+      move: function (step) {
+        var items = this.items();
+        if (!items.length) return;
+        this.searchOpen = true;
+        // Wraps around at both ends so holding a key never dead-ends.
+        if (this.index < 0) this.index = step > 0 ? 0 : items.length - 1;
+        else this.index = (this.index + step + items.length) % items.length;
+        this.paint();
+        items[this.index].scrollIntoView({ block: "nearest" });
+      },
+
+      choose: function (event) {
+        var items = this.items();
+        if (this.index < 0 || !items[this.index]) return; // let the form do its normal thing
+        event.preventDefault();
+        items[this.index].click();
+        this.close();
+      },
+
+      close: function () {
+        this.searchOpen = false;
+        this.reset();
+      },
+    };
+  };
+
   window.calendarGrid = function () {
     return {
       collapsed: readCollapsed(),
@@ -85,7 +149,98 @@
     }
     updateStickyOffsets();
     observeStickyHeaders();
+    // Only the calendar panel's own swaps can need a jump. The search
+    // dropdown swaps into #calendar-search-suggestions on every keystroke,
+    // and jumping on those is what yanked the view back to the last guest
+    // the moment you clicked the box to type a new name.
+    var swapped = evt.detail && evt.detail.target;
+    if (swapped && swapped.id !== "calendar-search-suggestions") {
+      focusSearchedBooking();
+    }
   });
+
+  // ---- jump to a guest picked from the search dropdown -------------------
+  //
+  // The search box (see _calendar_panel.html + BookingSearchSuggestionsView)
+  // navigates the calendar to a range starting on that booking's check-in
+  // date with ?focus=<id>; the grid renders data-focus-booking-id so this
+  // runs after every swap (and on first load) to scroll the bar into view
+  // and flash it, rather than making staff hunt for it in the new range.
+
+  function focusSearchedBooking() {
+    var grid = document.getElementById("calendar-grid");
+    var id = grid && grid.dataset.focusBookingId;
+    if (!id) return;
+    var bar = grid.querySelector('[data-booking-id="' + id + '"]');
+    if (!bar) return;
+    // Jump once per grid. Without this, anything that re-runs this (a
+    // re-render, a later swap) would drag the view back to a guest the
+    // person has already moved on from.
+    delete grid.dataset.focusBookingId;
+
+    // hx-push-url put ?focus=<id> in the address bar so this jump survives
+    // a fresh navigation. Once the jump has happened, drop it from the URL -
+    // otherwise refreshing the page (or copying the link) replays the same
+    // jump-to-guest every time instead of just showing the calendar.
+    if (window.history && window.history.replaceState) {
+      var url = new URL(window.location.href);
+      if (url.searchParams.has("focus")) {
+        url.searchParams.delete("focus");
+        window.history.replaceState(window.history.state, "", url);
+      }
+    }
+
+    // The bar is always in the DOM, but its villa may be collapsed (that
+    // choice is remembered per browser in localStorage), which leaves it
+    // display:none - scrolling to it then does nothing at all. That is why
+    // the jump looked like it worked for some guests and not others: it
+    // depended entirely on whether that guest's villa happened to be open.
+    // So open the villa first, and only then scroll.
+    var host = bar.closest("[data-villa-id]");
+    var villaId = host && host.dataset.villaId;
+    var root = document.querySelector('[x-data="calendarGrid()"]');
+    var state = null;
+    try {
+      state = window.Alpine && root ? window.Alpine.$data(root) : null;
+    } catch (err) {
+      state = null; // Alpine not ready yet - fall through to the plain scroll
+    }
+    if (state && villaId && !state.isOpen(villaId)) state.toggle(villaId);
+
+    var reveal = function () {
+      // Wait a frame so Alpine's x-show/x-cloak collapse toggling (the
+      // expand above, plus the initTree run just before this in the same
+      // htmx:afterSwap handler) has actually applied to layout - scrolling
+      // against stale positions is what left this only moving the view
+      // horizontally, since the date columns don't shift when rows above the
+      // bar collapse/expand but its vertical offset does.
+      window.requestAnimationFrame(function () {
+        window.requestAnimationFrame(function () {
+          bar.scrollIntoView({ behavior: "smooth", block: "center", inline: "center" });
+          bar.classList.add("cal-search-focus");
+          window.setTimeout(function () {
+            bar.classList.remove("cal-search-focus");
+          }, 750);
+        });
+      });
+    };
+
+    if (window.Alpine && window.Alpine.nextTick) {
+      window.Alpine.nextTick(reveal);
+    } else {
+      reveal();
+    }
+  }
+
+  // On a full page load (opening a ?focus=... URL directly, or a refresh)
+  // this file runs before alpine.min.js does, so the rows are still hidden
+  // behind x-cloak and there is no Alpine to expand a collapsed villa with -
+  // wait for Alpine to finish starting instead of scrolling into nothing.
+  if (window.Alpine && window.Alpine.version) {
+    focusSearchedBooking();
+  } else {
+    document.addEventListener("alpine:initialized", focusSearchedBooking, { once: true });
+  }
 
   // ---- keep the stacked sticky headers (date / area / villa) in sync ----
   //
@@ -153,7 +308,10 @@
   function addDays(iso, days) {
     var d = new Date(iso + "T00:00:00");
     d.setDate(d.getDate() + days);
-    return d.toISOString().slice(0, 10);
+    var y = d.getFullYear();
+    var m = String(d.getMonth() + 1).padStart(2, "0");
+    var day = String(d.getDate()).padStart(2, "0");
+    return y + "-" + m + "-" + day;
   }
 
   function fillTemplate(str, values) {
@@ -194,6 +352,11 @@
 
     downEvent.preventDefault();
     bar.setPointerCapture(downEvent.pointerId);
+    // elementFromPoint below needs to see the row *under* the cursor, but the
+    // bar itself is what's sitting at the cursor (it's the thing following the
+    // pointer) - without this it flip-flops between the bar's own home row and
+    // the real hovered row, which reads as the box jittering between rows.
+    if (mode === "move") bar.style.pointerEvents = "none";
 
     function highlight(row) {
       if (targetRow !== homeRow) targetRow.style.backgroundColor = "";
@@ -216,13 +379,18 @@
       if (mode === "move") {
         var offset = Math.max(-origLeftPx, Math.min(rowRect.width - origWidthPx - origLeftPx, dayDelta * dayWidth));
         finalDays = Math.round(offset / dayWidth);
-        bar.style.transform = "translateX(" + finalDays * dayWidth + "px)";
 
         var hovered = document.elementFromPoint(moveEvent.clientX, moveEvent.clientY);
         var hoveredRow = hovered && hovered.closest("[data-room-row-id]");
         if (hoveredRow && hoveredRow.dataset.villaId === homeRow.dataset.villaId && hoveredRow !== targetRow) {
           highlight(hoveredRow);
         }
+
+        // Vertical offset follows whichever row is currently highlighted,
+        // so the bar visually snaps into the hovered room row instead of
+        // only ever sliding sideways within its original row.
+        var offsetY = targetRow.getBoundingClientRect().top - rowRect.top;
+        bar.style.transform = "translate(" + finalDays * dayWidth + "px, " + offsetY + "px)";
       } else if (mode === "start") {
         var maxLeft = origLeftPx + origWidthPx - dayWidth;
         var newLeft = Math.max(0, Math.min(maxLeft, origLeftPx + dayDelta * dayWidth));
@@ -240,6 +408,7 @@
     function onUp() {
       window.removeEventListener("pointermove", onMove);
       window.removeEventListener("pointerup", onUp);
+      bar.style.pointerEvents = "";
 
       if (moved) {
         // A real drag happened - the click Alpine's own @click would still
@@ -286,8 +455,16 @@
             .then(function (r) { return r.json().then(function (body) { return { ok: r.ok && body.ok, body: body }; }); })
             .then(function (result) {
               if (result.ok) {
+                // Re-fetching the whole panel replaces content above the fold
+                // too, which otherwise leaves the browser's own scroll-anchor
+                // logic free to reset the page to the top - restore the
+                // scroll position the user was actually looking at.
+                var scrollX = window.scrollX;
+                var scrollY = window.scrollY;
                 window.htmx.ajax("GET", window.location.pathname + window.location.search, {
                   target: "#calendar-panel", swap: "innerHTML",
+                }).then(function () {
+                  window.scrollTo(scrollX, scrollY);
                 });
               } else {
                 revert();

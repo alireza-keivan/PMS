@@ -23,7 +23,7 @@
     {% endif %}
   </p>
 
-  <form method="post" action="{% url 'villas:rooms' villa.slug %}" id="room-form" novalidate>
+  <form method="post" action="{% url 'villas:rooms' villa.slug %}" id="room-form" novalidate{% if not villa.is_draft %} data-dirty-guard{% endif %}>
     {% csrf_token %}
     <div id="room-blocks">
       {% include "villas/_room_blocks.html" %}
@@ -33,7 +33,7 @@
       <a href="{% if villa.is_draft %}{% url 'villas:add_details' villa.slug %}{% else %}{% url 'villas:edit' villa.slug %}{% endif %}" class="btn btn-ghost">
         &larr; {% translate "Back to villa details" %}
       </a>
-      <button type="submit" class="btn btn-primary">
+      <button type="submit" class="btn btn-primary"{% if not villa.is_draft %} data-dirty-submit{% endif %}>
         {% if villa.is_draft %}{% translate "Save villa" %}{% else %}{% translate "Save the rooms" %}{% endif %}
       </button>
     </div>

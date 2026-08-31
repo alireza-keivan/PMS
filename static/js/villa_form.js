@@ -93,4 +93,48 @@
       row.insertBefore(box, tile);
     });
   });
+
+  // ---- 4. "Save" stays off until something actually changes ------------
+  //
+  // On a villa that already exists, pressing save with nothing changed just
+  // reloads the same page for no reason. So the button starts switched off
+  // and only wakes up once the form's values differ from what they were when
+  // the page loaded. A draft villa is not marked up with this, because its
+  // first save has to go through even if nothing was typed.
+  //
+  // The comparison is on the whole form's values at once, so it also catches
+  // a block HTMX swapped in or out - and it goes back off by itself if the
+  // values are put back the way they were.
+
+  function snapshot(form) {
+    var pairs = [];
+    new FormData(form).forEach(function (value, name) {
+      if (name === "csrfmiddlewaretoken") return;
+      // A file box holds a File here, which is never equal to itself across
+      // two readings - the name alone is enough to notice a picked file.
+      pairs.push(name + "=" + (value instanceof File ? value.name : value));
+    });
+    return pairs.join("&");
+  }
+
+  function watchDirty(form) {
+    var button = form.querySelector("[data-dirty-submit]");
+    if (!button) return;
+    var clean = snapshot(form);
+
+    function refresh() {
+      button.disabled = snapshot(form) === clean;
+    }
+    refresh();
+
+    form.addEventListener("input", refresh);
+    form.addEventListener("change", refresh);
+    document.body.addEventListener("htmx:afterSwap", function (evt) {
+      if (evt.detail && evt.detail.target && form.contains(evt.detail.target)) refresh();
+    });
+  }
+
+  document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll("form[data-dirty-guard]").forEach(watchDirty);
+  });
 })();

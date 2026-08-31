@@ -43,15 +43,34 @@
     </a>
   </div>
 
-  <div class="relative min-w-[200px] max-w-[300px] flex-1">
+  {% comment %}
+    Guests can be picked with the keyboard: Up/Down or Page Up/Page Down walk the
+    list, Enter opens the highlighted one, Escape closes it. The highlight lives on
+    the links themselves, which HTMX replaces on every keystroke, so the index is
+    reset whenever a fresh list arrives.
+  {% endcomment %}
+  <div class="relative min-w-[200px] max-w-[300px] flex-1"
+       x-data="calendarSearch()"
+       @click.outside="close()"
+       @htmx:after-swap="reset()">
     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#82796a" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"
          class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
     <input
       type="search" name="q" value="{{ q }}" placeholder="{% translate 'Search bookings or guests' %}"
-      hx-get="{% url 'bookings:calendar' %}" hx-trigger="input changed delay:400ms" hx-include="[name=start],[name=days]"
-      hx-target="#calendar-panel" hx-push-url="true"
+      autocomplete="off"
+      hx-get="{% url 'bookings:calendar_search' %}" hx-include="[name=days]"
+      hx-trigger="input changed delay:250ms, focus[target.value.length > 0]"
+      hx-target="#calendar-search-suggestions" hx-swap="innerHTML"
+      @htmx:before-request="searchOpen = true" @focus="searchOpen = true"
+      @keydown.arrow-down.prevent="move(1)"
+      @keydown.arrow-up.prevent="move(-1)"
+      @keydown.page-down.prevent="move(1)"
+      @keydown.page-up.prevent="move(-1)"
+      @keydown.enter="choose($event)"
+      @keydown.escape="close()"
       class="input pl-[34px]"
     >
+    <div id="calendar-search-suggestions" x-show="searchOpen" x-cloak></div>
   </div>
 
   {% comment %}Carried so the search and date picker don't reset the chosen range size.{% endcomment %}
@@ -84,6 +103,7 @@ in with String.replace after the fact. Kept here rather than hardcoded in JS
 so both languages go through the normal .po catalog like everywhere else.
 {% endcomment %}
 <div class="mx-s6 rounded-lg bg-sand-100 shadow-sm" id="calendar-grid" data-days="{{ days }}"
+     data-focus-booking-id="{{ focus_booking_id }}"
      data-msg-move-same-room="{% translate "Move %(guest)s's booking to %(dates)s?" %}"
      data-msg-move-new-room="{% translate "Move %(guest)s's booking to %(room)s, %(dates)s?" %}"
      data-msg-resize="{% translate "Change %(guest)s's stay to %(dates)s?" %}"
@@ -181,6 +201,7 @@ so both languages go through the normal .po catalog like everywhere else.
               type="button"
               class="absolute inset-y-[9px] z-[2] flex min-w-[44px] items-center overflow-hidden whitespace-nowrap rounded-sm px-2 text-left text-xs font-semibold shadow-sm"
               style="{{ bar.style }}"
+              title="{{ bar.label }}"
               data-booking-id="{{ bar.id }}"
               data-room-id="{{ bar.room_id }}"
               data-check-in="{{ bar.check_in_iso }}"
@@ -298,14 +319,7 @@ so both languages go through the normal .po catalog like everywhere else.
 
 </div>
 
-<div class="mx-s6 mb-s8 border-t border-sand-300 bg-sand-100 p-s3">
-  <button type="button" class="btn btn-secondary"
-          data-confirm-message="{% translate 'Add a new villa?' %}"
-          data-confirm-url="{% url 'villas:add' %}?next={{ request.get_full_path|urlencode }}"
-          @click="confirmTarget = { message: $el.dataset.confirmMessage, mode: 'navigate', url: $el.dataset.confirmUrl }">
-    + {% translate "Add villa" %}
-  </button>
-</div>
+<div class="mb-s8"></div>
 
 {% comment %}
 One shared confirm dialog for every write-adjacent action on this page -

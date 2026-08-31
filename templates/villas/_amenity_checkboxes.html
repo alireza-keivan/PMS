@@ -15,10 +15,7 @@ turns up ready to pick on every villa they add afterwards.
 
   <div id="amenities-{{ category.pk }}" class="flex flex-wrap gap-2">
     {% for choice in field %}
-      <label>
-        {{ choice.tag }}
-        <span class="tag tag-toggle">{{ choice.choice_label }}</span>
-      </label>
+      {% include "villas/_amenity_pill.html" with value=choice.data.value label=choice.choice_label tag=choice.tag %}
     {% endfor %}
   </div>
 
@@ -26,21 +23,29 @@ turns up ready to pick on every villa they add afterwards.
     <p class="mt-1 text-sm text-teal-700">{{ field.errors|join:" " }}</p>
   {% endif %}
 
+  {# The box is named per room type. Everything on this page lives in one big #}
+  {# form, and HTMX sends that whole form along with the request - so a plain #}
+  {# name="name_en" in every block would send several boxes at once and the #}
+  {# server would read the wrong (empty) one. A name of its own keeps each #}
+  {# block's box apart; hx-vals says which block asked. #}
   <div class="mt-2 flex flex-wrap items-center gap-1.5">
-    {# Names the box the new tickbox has to join, so it lands on this room #}
-    {# type rather than one of the others. #}
-    <input type="hidden" name="field_name" value="{{ field.html_name }}">
-    <input type="hidden" name="category_pk" value="{{ category.pk }}">
     <input
-      type="text" name="name_en" maxlength="80"
+      type="text" name="new_amenity_{{ category.pk }}" maxlength="80"
+      id="new-amenity-{{ category.pk }}"
       placeholder="{% translate 'Add your own' %}"
       class="input max-w-[13rem]"
+      hx-post="{% url 'villas:add_amenity' %}"
+      hx-vals='{"field_name": "{{ field.html_name }}", "category_pk": "{{ category.pk }}"}'
+      hx-target="#amenity-note-{{ category.pk }}"
+      hx-swap="innerHTML"
+      hx-trigger="keydown[key=='Enter'] consume"
+      onkeydown="if (event.key === 'Enter') event.preventDefault();"
     >
     <button
       type="button" class="btn btn-ghost px-2.5"
       aria-label="{% translate 'Add' %}"
       hx-post="{% url 'villas:add_amenity' %}"
-      hx-include="closest div"
+      hx-vals='{"field_name": "{{ field.html_name }}", "category_pk": "{{ category.pk }}"}'
       hx-target="#amenity-note-{{ category.pk }}"
       hx-swap="innerHTML"
     >+</button>

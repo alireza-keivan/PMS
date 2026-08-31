@@ -1,0 +1,31 @@
+{% load i18n %}
+{% comment %}
+One amenity tickbox. Include with `value` (the choice's pk), `label` and
+`tag` (the checkbox itself, from the field's choice) - or, for a freshly
+added one, `value`/`label` from the new amenity and no `tag` at all, since
+it's rendered ready-checked by hand instead.
+
+Only an amenity this operator typed in themselves - one of `custom_amenity_ids`,
+or `force_removable` for one just added and not in that set yet - gets the
+small remove cross. The shared, built-in ones can't be removed.
+{% endcomment %}
+<div class="group relative inline-flex">
+  <label>
+    {% if tag %}{{ tag }}{% else %}
+      <input type="checkbox" name="{{ field_name }}" value="{{ value }}" checked class="tag-toggle-input sr-only">
+    {% endif %}
+    <span class="tag tag-toggle">{{ label }}</span>
+  </label>
+  {% if force_removable or value|stringformat:"s" in custom_amenity_ids %}
+    <button
+      type="button"
+      class="tag-toggle-remove"
+      title="{% translate 'Remove this amenity' %}"
+      aria-label="{% blocktranslate %}Remove {{ label }}{% endblocktranslate %}"
+      hx-post="{% url 'villas:remove_amenity' value %}"
+      hx-target="closest div"
+      hx-swap="outerHTML"
+      hx-confirm="{% blocktranslate %}Remove {{ label }} from your amenity list?{% endblocktranslate %}"
+    >&times;</button>
+  {% endif %}
+</div>

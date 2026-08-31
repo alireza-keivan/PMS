@@ -1091,7 +1091,7 @@ msgstr ""
 "dan tambahkan nanti."
 
 #: apps/villas/views.py:312 apps/villas/views.py:398
-msgid "Saved."
+msgid "Saved"
 msgstr "Tersimpan."
 
 #: apps/villas/views.py:387

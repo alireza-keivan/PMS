@@ -218,6 +218,12 @@ def _rooms_context(villa, organization, formset, hide_errors=False):
         # errors, which is the safer way round to be wrong.
         "hide_errors": hide_errors,
         "max_rooms_per_type": MAX_ROOMS_PER_TYPE,
+        # Only amenities this operator typed in themselves can be removed -
+        # never one of the shared, built-in ones. Stringified so the template
+        # can compare it straight against a checkbox's value.
+        "custom_amenity_ids": {
+            str(pk) for pk in Amenity.objects.filter(organization=organization).values_list("pk", flat=True)
+        } if organization else set(),
     }
 
 
@@ -310,7 +316,7 @@ class VillaDetailsView(LoginRequiredMixin, View):
         )
         if villa.is_draft:
             return redirect("villas:rooms", slug=villa.slug)
-        messages.success(request, _("Saved."))
+        messages.success(request, _("Saved"))
         return redirect("villas:edit", slug=villa.slug)
 
     def _render(self, form):
@@ -392,8 +398,8 @@ class VillaRoomsView(LoginRequiredMixin, View):
         if was_draft:
             messages.success(request, _("%(name)s is ready.") % {"name": self.villa.name})
             return redirect("villas:list")
-        messages.success(request, _("Saved."))
-        return redirect("villas:edit", slug=self.villa.slug)
+        messages.success(request, _("Saved"))
+        return redirect("villas:rooms", slug=self.villa.slug)
 
     def _render(self, formset):
         context = _rooms_context(self.villa, self.organization, formset)
@@ -639,13 +645,18 @@ class AmenityCreateView(LoginRequiredMixin, View):
 
     def post(self, request):
         organization = request.organization
-        form = CustomAmenityForm(request.POST, organization=organization)
         # Which block asked for it, so the new tickbox joins that room type's
         # list and not one of the others on the page.
+        category_pk = request.POST.get("category_pk", "")
         context = {
             "field_name": request.POST.get("field_name", f"{ROOMS_PREFIX}-0-amenities"),
-            "category_pk": request.POST.get("category_pk", ""),
+            "category_pk": category_pk,
         }
+        # Every room block on the page is inside one form, and HTMX sends that
+        # whole form - so each block's box carries a name of its own and we
+        # pick out the one belonging to the block that asked.
+        typed = request.POST.get(f"new_amenity_{category_pk}", "")
+        form = CustomAmenityForm({"name_en": typed}, organization=organization)
 
         if not form.is_valid():
             context["error"] = next(iter(form.errors.values()))[0]
@@ -653,6 +664,21 @@ class AmenityCreateView(LoginRequiredMixin, View):
 
         context["amenity"] = form.save()
         return render(request, "villas/_amenity_new.html", context)
+
+
+class AmenityDeleteView(LoginRequiredMixin, View):
+    """Drops one of the operator's own custom amenities from their list.
+
+    Scoped to `organization` so an operator can never touch another
+    operator's amenity - and can never delete one of the shared, built-in
+    ones, since those have no organization to match.
+    """
+
+    def post(self, request, pk):
+        amenity = get_object_or_404(Amenity, pk=pk, organization=request.organization)
+        amenity.delete()
+        logger.info("Removed custom amenity %s for organization %s", pk, request.organization.pk)
+        return HttpResponse("")
 
 
 # ---------------------------------------------------------------------------

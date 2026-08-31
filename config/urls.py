@@ -24,12 +24,12 @@ urlpatterns = [
 
 # Language-prefixed (/en/..., /id/...) so both locales are linkable and indexable.
 urlpatterns += i18n_patterns(
-    path("", include("apps.reporting.urls", namespace="reporting")),
+    path("", include("apps.bookings.urls", namespace="bookings")),
+    path("today/", include("apps.reporting.urls", namespace="reporting")),
     path("accounts/", include("apps.accounts.urls", namespace="accounts")),
     path("villas/", include("apps.villas.urls", namespace="villas")),
-    path("bookings/", include("apps.bookings.urls", namespace="bookings")),
-    path("compliance/", include("apps.compliance.urls", namespace="compliance")),
     path("guests/", include("apps.guests.urls", namespace="guests")),
+    path("compliance/", include("apps.compliance.urls", namespace="compliance")),
     path("messages/", include("apps.messaging.urls", namespace="messaging")),
     path("marketing/", include("apps.marketing.staff_urls", namespace="marketing_admin")),
     path("stay/", include("apps.guests.portal_urls", namespace="portal")),

@@ -1,0 +1,22 @@
+{% load i18n %}
+{% if q %}
+  <div class="absolute left-0 right-0 top-[calc(100%+4px)] z-30 overflow-hidden rounded-md border border-sand-300 bg-sand-50 shadow-lg">
+    {% if results %}
+      {% for result in results %}
+        <a href="{{ result.href }}" hx-get="{{ result.href }}" hx-target="#calendar-panel" hx-push-url="true"
+           @click="searchOpen = false"
+           class="flex items-center justify-between gap-s3 border-b border-sand-200 px-s4 py-s3 text-[13px] last:border-b-0 hover:bg-teal-50">
+          <span class="min-w-0">
+            <span class="block truncate font-semibold text-ink-900">{{ result.guest_name }}</span>
+            <span class="block truncate text-[11.5px] opacity-65">
+              {{ result.villa_name }}{% if result.room_name %} · {{ result.room_name }}{% endif %}
+            </span>
+          </span>
+          <span class="flex-none whitespace-nowrap text-[11.5px] font-medium text-teal-700">{{ result.date_range }}</span>
+        </a>
+      {% endfor %}
+    {% else %}
+      <div class="px-s4 py-s3 text-[13px] opacity-60">{% translate "No guests or bookings match." %}</div>
+    {% endif %}
+  </div>
+{% endif %}

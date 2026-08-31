@@ -4,147 +4,172 @@
 {% block title %}{{ guest.full_name }}{% endblock %}
 
 {% block content %}
-<div class="mb-4">
-  <a href="{% url 'guests:list' %}" class="text-sm text-ink-600 underline">{% translate "Back to guests" %}</a>
+<div class="mb-s4">
+  <a href="{% url 'bookings:calendar' %}" class="text-sm text-teal-700 underline">{% translate "← Back to calendar" %}</a>
 </div>
 
-<div class="mb-6 flex flex-wrap items-start justify-between gap-3">
-  <div>
-    <h1 class="text-xl font-semibold text-ink-900">{{ guest.full_name }}</h1>
-    <p class="mt-1 text-sm text-ink-600">
-      {{ guest.email|default:"" }}
-      {% if guest.email and guest.phone %} - {% endif %}
-      {{ guest.phone|default:"" }}
-      {% if not guest.email and not guest.phone %}{% translate "No contact details on file" %}{% endif %}
-    </p>
-  </div>
-  <div class="flex gap-2">
+<div class="mb-s6 flex flex-wrap items-center justify-between gap-s3">
+  <h2 class="text-3xl text-ink-900">{{ guest.full_name }}</h2>
+  <div class="flex items-center gap-s2">
     {% if guest.is_returning %}
-      <span class="rounded-full bg-teal-50 px-3 py-1 text-xs text-teal-700">
+      <span class="tag tag-accent">
         {% blocktranslate count n=guest.total_stays %}{{ n }} stay{% plural %}{{ n }} stays{% endblocktranslate %}
       </span>
     {% endif %}
-    {% if guest.nationality %}
-      <span class="rounded-full bg-sand-100 px-3 py-1 text-xs text-ink-600">{{ guest.nationality }}</span>
-    {% endif %}
   </div>
 </div>
 
-<div class="grid gap-6 lg:grid-cols-2">
+<div class="grid grid-cols-1 gap-s6 md:grid-cols-3">
 
-  <section class="rounded-lg border border-sand-200 bg-sand-100 p-4 shadow-sm sm:p-6">
-    <h2 class="mb-3 font-semibold text-ink-900">{% translate "Bookings" %}</h2>
-    {% if bookings %}
-      <ul class="divide-y divide-sand-100">
+  {% comment %}Bookings{% endcomment %}
+  <div class="card elev-sm relative flex h-[304px] flex-col p-[10px]">
+    <h4 class="flex-none px-s2 pt-s1 text-lg">{% translate "Bookings" %}</h4>
+    <div class="guest-scroll min-h-0 flex-1 overflow-y-auto px-s2">
+      {% if bookings %}
         {% for booking in bookings %}
-          <li class="py-2">
-            <p class="text-ink-900">
-              {{ booking.villa.name }}
-              <span class="text-ink-600">- {{ booking.check_in|date:"j M Y" }} {% translate "to" %} {{ booking.check_out|date:"j M Y" }}</span>
+          <div class="border-b border-sand-300 py-s3 last:border-b-0">
+            <p class="text-[13.5px] font-bold text-ink-900">
+              {{ booking.villa.name }} - {{ booking.check_in|date:"j M Y" }} {% translate "to" %} {{ booking.check_out|date:"j M Y" }}
             </p>
-            <p class="text-xs text-ink-600">
-              {{ booking.get_channel_display }} - {{ booking.get_status_display }}
-              {% if not booking.has_guest_details %} - {% translate "dates only, no further detail" %}{% endif %}
-            </p>
-          </li>
+            <p class="text-xs text-ink-600">{{ booking.get_channel_display }} - {{ booking.get_status_display }}</p>
+          </div>
         {% endfor %}
-      </ul>
-    {% else %}
-      <p class="text-sm text-ink-600">{% translate "No bookings on file." %}</p>
-    {% endif %}
-  </section>
+      {% else %}
+        <p class="py-s3 text-[13.5px] text-ink-600">{% translate "No bookings on file." %}</p>
+      {% endif %}
+    </div>
+    {% if bookings|length > 4 %}<div class="detail-card-fade"></div>{% endif %}
+  </div>
 
-  <section class="rounded-lg border border-sand-200 bg-sand-100 p-4 shadow-sm sm:p-6">
-    <h2 class="mb-3 font-semibold text-ink-900">{% translate "Requests" %}</h2>
-    {% if requests %}
-      <ul class="divide-y divide-sand-100">
+  {% comment %}Requests{% endcomment %}
+  <div class="card elev-sm relative flex h-[304px] flex-col p-[10px]">
+    <h4 class="flex-none px-s2 pt-s1 text-lg">{% translate "Requests" %}</h4>
+    <div class="guest-scroll min-h-0 flex-1 overflow-y-auto px-s2">
+      {% if requests %}
         {% for req in requests %}
-          <li class="py-2">
-            <p class="text-ink-900">
-              {{ req.get_kind_display }}
-              <span class="rounded-full bg-sand-100 px-2 py-0.5 text-xs text-ink-600">{{ req.get_status_display }}</span>
-            </p>
-            {% if req.message %}<p class="text-xs text-ink-600">{{ req.message }}</p>{% endif %}
-            <p class="text-xs text-ink-600">{{ req.created_at|date:"j M Y, H:i" }}</p>
-          </li>
+          <div class="border-b border-sand-300 py-s3 last:border-b-0">
+            <p class="text-[13.5px] font-bold text-ink-900">{{ req.get_kind_display }}</p>
+            <p class="text-xs text-ink-600">{{ req.message|default:req.get_status_display }}</p>
+          </div>
         {% endfor %}
-      </ul>
-    {% else %}
-      <p class="text-sm text-ink-600">{% translate "No requests yet." %}</p>
-    {% endif %}
-  </section>
+      {% else %}
+        <p class="py-s3 text-[13.5px] text-ink-600">{% translate "No requests yet." %}</p>
+      {% endif %}
+    </div>
+    {% if requests|length > 4 %}<div class="detail-card-fade"></div>{% endif %}
+  </div>
 
-  <section class="rounded-lg border border-sand-200 bg-sand-100 p-4 shadow-sm sm:p-6">
-    <h2 class="mb-3 font-semibold text-ink-900">{% translate "Private feedback" %}</h2>
-    {% if feedback_entries %}
-      <ul class="divide-y divide-sand-100">
+  {% comment %}Guest info{% endcomment %}
+  <div class="card elev-sm relative flex h-[304px] flex-col p-[10px]">
+    <h4 class="flex-none px-s2 pt-s1 text-lg">{% translate "Guest info" %}</h4>
+    <div class="guest-scroll min-h-0 flex-1 overflow-y-auto px-s2">
+      <div class="border-b border-sand-300 py-s3">
+        <p class="text-[11px] uppercase tracking-wide text-ink-600">{% translate "Full name" %}</p>
+        <p class="text-[13.5px] font-bold text-ink-900">{{ guest.full_name }}</p>
+      </div>
+      <div class="border-b border-sand-300 py-s3">
+        <p class="text-[11px] uppercase tracking-wide text-ink-600">{% translate "Phone" %}</p>
+        <p class="text-[13.5px] font-bold text-ink-900">{{ guest.phone|default:"—" }}</p>
+      </div>
+      <div class="border-b border-sand-300 py-s3">
+        <p class="text-[11px] uppercase tracking-wide text-ink-600">{% translate "Email" %}</p>
+        <p class="text-[13.5px] font-bold text-ink-900">{{ guest.email|default:"—" }}</p>
+      </div>
+      <div class="border-b border-sand-300 py-s3">
+        <p class="text-[11px] uppercase tracking-wide text-ink-600">{% translate "Nationality" %}</p>
+        <p class="text-[13.5px] font-bold text-ink-900">{{ guest.get_nationality_display|default:"—" }}</p>
+      </div>
+      <div class="border-b border-sand-300 py-s3">
+        <p class="text-[11px] uppercase tracking-wide text-ink-600">{% translate "Preferred language" %}</p>
+        <p class="text-[13.5px] font-bold text-ink-900">{{ guest.preferred_language|default:"—" }}</p>
+      </div>
+      {% if can_see_money %}
+        <div class="border-b border-sand-300 py-s3">
+          <p class="text-[11px] uppercase tracking-wide text-ink-600">{% translate "Total expenditure" %}</p>
+          <p class="text-[13.5px] font-bold text-ink-900">{{ total_expenditure|default:"—" }}</p>
+        </div>
+        <div class="py-s3 last:border-b-0">
+          <p class="text-[11px] uppercase tracking-wide text-ink-600">{% translate "Amount due" %}</p>
+          <p class="text-[13.5px] font-bold text-ink-900">{{ amount_due|default:"—" }}</p>
+        </div>
+      {% endif %}
+    </div>
+    {% if can_see_money %}<div class="detail-card-fade"></div>{% endif %}
+  </div>
+
+  {% comment %}Private feedback{% endcomment %}
+  <div class="card elev-sm relative flex h-[304px] flex-col p-[10px]">
+    <h4 class="flex-none px-s2 pt-s1 text-lg">{% translate "Private feedback" %}</h4>
+    <div class="guest-scroll min-h-0 flex-1 overflow-y-auto px-s2">
+      {% if feedback_entries %}
         {% for entry in feedback_entries %}
-          <li class="py-2">
-            <p class="text-ink-900">
-              {{ entry.rating }}/5
-              {% if entry.escalated_to_owner %}
-                <span class="rounded-full bg-red-50 px-2 py-0.5 text-xs text-red-700">{% translate "Sent to owner" %}</span>
-              {% endif %}
+          <div class="border-b border-sand-300 py-s3 last:border-b-0">
+            <p class="text-[13.5px] font-bold text-ink-900">
+              {% if entry.comment %}{{ entry.comment }}{% else %}{{ entry.rating }}/5{% endif %}
+              {% if entry.escalated_to_owner %}<span class="tag tag-accent">{% translate "Sent to owner" %}</span>{% endif %}
             </p>
-            {% if entry.comment %}<p class="text-xs text-ink-600">{{ entry.comment }}</p>{% endif %}
             <p class="text-xs text-ink-600">{{ entry.created_at|date:"j M Y" }}</p>
-          </li>
+          </div>
         {% endfor %}
-      </ul>
-    {% else %}
-      <p class="text-sm text-ink-600">{% translate "No feedback yet." %}</p>
-    {% endif %}
-  </section>
+      {% else %}
+        <p class="py-s3 text-[13.5px] text-ink-600">{% translate "No feedback yet." %}</p>
+      {% endif %}
+    </div>
+    {% if feedback_entries|length > 4 %}<div class="detail-card-fade"></div>{% endif %}
+  </div>
 
-  <section class="rounded-lg border border-sand-200 bg-sand-100 p-4 shadow-sm sm:p-6">
-    <h2 class="mb-3 font-semibold text-ink-900">{% translate "Police report reminders" %}</h2>
-    {% if police_reports %}
-      <ul class="divide-y divide-sand-100">
+  {% comment %}Recent activity{% endcomment %}
+  <div class="card elev-sm relative flex h-[304px] flex-col p-[10px]">
+    <h4 class="flex-none px-s2 pt-s1 text-lg">{% translate "Recent activity" %}</h4>
+    <div class="guest-scroll min-h-0 flex-1 overflow-y-auto px-s2">
+      {% if recent_activity %}
+        {% for event in recent_activity %}
+          <div class="border-b border-sand-300 py-s3 last:border-b-0">
+            <p class="text-[13.5px] font-bold text-ink-900">
+              {{ event.get_kind_display }}{% if event.subject %} - {{ event.subject }}{% endif %}
+            </p>
+            <p class="text-xs text-ink-600">{{ event.occurred_at|date:"j M Y, H:i" }}</p>
+          </div>
+        {% endfor %}
+      {% else %}
+        <p class="py-s3 text-[13.5px] text-ink-600">{% translate "Nothing recorded yet." %}</p>
+      {% endif %}
+    </div>
+    {% if recent_activity|length > 4 %}<div class="detail-card-fade"></div>{% endif %}
+  </div>
+
+  {% comment %}Police report reminders{% endcomment %}
+  <div class="card elev-sm relative flex h-[304px] flex-col p-[10px]">
+    <h4 class="flex-none px-s2 pt-s1 text-lg">{% translate "Police report reminders" %}</h4>
+    <div class="guest-scroll min-h-0 flex-1 overflow-y-auto px-s2">
+      {% if police_reports %}
         {% for report in police_reports %}
-          <li class="py-2">
-            <p class="text-ink-900">
+          <div class="border-b border-sand-300 py-s3 last:border-b-0">
+            <p class="text-[13.5px] font-bold text-ink-900">
               {{ report.booking.villa.name }}
               {% if report.is_overdue %}
-                <span class="rounded-full bg-red-50 px-2 py-0.5 text-xs text-red-700">{% translate "Overdue" %}</span>
+                <span class="tag tag-accent">{% translate "Overdue" %}</span>
               {% else %}
-                <span class="rounded-full bg-sand-100 px-2 py-0.5 text-xs text-ink-600">{{ report.get_status_display }}</span>
+                <span class="tag tag-neutral">{{ report.get_status_display }}</span>
               {% endif %}
             </p>
             <p class="text-xs text-ink-600">{% translate "Deadline" %}: {{ report.deadline|date:"j M Y, H:i" }}</p>
-          </li>
+          </div>
         {% endfor %}
-      </ul>
-    {% else %}
-      <p class="text-sm text-ink-600">{% translate "None on file." %}</p>
-    {% endif %}
-  </section>
-
-  <section class="rounded-lg border border-sand-200 bg-sand-100 p-4 shadow-sm sm:p-6 lg:col-span-2">
-    <h2 class="mb-3 font-semibold text-ink-900">{% translate "Recent activity" %}</h2>
-    {% if recent_activity %}
-      <ul class="divide-y divide-sand-100">
-        {% for event in recent_activity %}
-          <li class="flex items-center justify-between py-2">
-            <p class="text-ink-900">
-              {{ event.get_kind_display }}
-              {% if event.subject %}<span class="text-ink-600">- {{ event.subject }}</span>{% endif %}
-            </p>
-            <p class="text-xs text-ink-600">{{ event.occurred_at|date:"j M Y, H:i" }}</p>
-          </li>
-        {% endfor %}
-      </ul>
-    {% else %}
-      <p class="text-sm text-ink-600">{% translate "Nothing recorded yet." %}</p>
-    {% endif %}
-  </section>
-
-  {% if guest.notes %}
-    <section class="rounded-lg border border-sand-200 bg-sand-100 p-4 shadow-sm sm:p-6 lg:col-span-2">
-      <h2 class="mb-3 font-semibold text-ink-900">{% translate "Internal notes" %}</h2>
-      <p class="text-sm text-ink-600">{% translate "Staff only - never shown to the guest." %}</p>
-      <p class="mt-2 text-sm text-ink-900">{{ guest.notes|linebreaksbr }}</p>
-    </section>
-  {% endif %}
+      {% else %}
+        <p class="py-s3 text-[13.5px] text-ink-600">{% translate "None on file." %}</p>
+      {% endif %}
+    </div>
+    {% if police_reports|length > 4 %}<div class="detail-card-fade"></div>{% endif %}
+  </div>
 
 </div>
+
+{% if guest.notes %}
+  <div class="card elev-sm mt-s6 p-s4">
+    <h4 class="mb-s2 text-lg">{% translate "Internal notes" %}</h4>
+    <p class="text-xs text-ink-600">{% translate "Staff only - never shown to the guest." %}</p>
+    <p class="mt-s2 text-[13.5px] text-ink-900">{{ guest.notes|linebreaksbr }}</p>
+  </div>
+{% endif %}
 {% endblock %}

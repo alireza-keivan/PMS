@@ -37,6 +37,24 @@
 
   .input {
     @apply w-full rounded-full border border-sand-300 bg-sand-100 px-4 py-1.5 text-sm text-ink-900 placeholder:text-ink-600 focus:border-teal-600 focus:outline-none;
+    accent-color: theme("colors.teal.600");
+  }
+
+  /* The native type=search "clear" button renders blue in some browsers,
+     which clashes with the design palette - swap in a red one instead. */
+  .input[type="search"]::-webkit-search-cancel-button {
+    -webkit-appearance: none;
+    appearance: none;
+    height: 15px;
+    width: 15px;
+    cursor: pointer;
+    background-color: theme("colors.red.600");
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='18' y1='6' x2='6' y2='18'/%3E%3Cline x1='6' y1='6' x2='18' y2='18'/%3E%3C/svg%3E");
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='18' y1='6' x2='6' y2='18'/%3E%3Cline x1='6' y1='6' x2='18' y2='18'/%3E%3C/svg%3E");
+    -webkit-mask-size: contain;
+    mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
   }
 
   .tag {
@@ -60,6 +78,16 @@
   label:has(> .tag-toggle-input:focus-visible) .tag-toggle {
     @apply outline outline-2 outline-offset-1 outline-teal-600;
   }
+  /* The small cross that lets an operator drop one of their own custom
+     amenities. Hidden until the pill is hovered or focused, so the row of
+     shared amenities (which never get one) doesn't look cluttered. */
+  .tag-toggle-remove {
+    @apply absolute -right-1.5 -top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-ink-700 text-[10px] leading-none text-sand-50 opacity-0 transition-opacity;
+  }
+  .group:hover .tag-toggle-remove,
+  .tag-toggle-remove:focus-visible {
+    @apply opacity-100;
+  }
 
   .seg { @apply inline-flex overflow-hidden rounded-full border border-sand-300; }
   .seg-opt { @apply flex cursor-pointer items-center gap-1.5 px-3 py-1.5 text-sm text-ink-900 transition-colors; }
@@ -68,10 +96,64 @@
   .seg-opt:not(.seg-opt-active):hover { @apply bg-sand-200; }
 
   .card { @apply rounded-card border border-sand-300 bg-sand-100 p-4 shadow-sm; }
+  /* Guest detail page: fixed-height card, ~4 rows visible, rest scrollable.
+     Radius is locally overridden to 20px per the design handoff, rather than
+     the shared --radius-lg used elsewhere. */
+  .card.elev-sm { @apply rounded-[20px] shadow-sm; }
+  .guest-scroll { scrollbar-width: thin; scrollbar-color: theme("colors.teal.600") theme("colors.sand.200"); }
+  .guest-scroll::-webkit-scrollbar { width: 6px; }
+  .guest-scroll::-webkit-scrollbar-track { background: theme("colors.sand.200"); }
+  .guest-scroll::-webkit-scrollbar-thumb { background: theme("colors.teal.600"); border-radius: 999px; }
+  /* Bottom fade so a scrollable card hints there's more below the 4th row,
+     without needing JS to detect actual overflow. */
+  .detail-card-fade {
+    @apply pointer-events-none absolute inset-x-0 bottom-0 h-9 rounded-b-[20px];
+    background: linear-gradient(to bottom, transparent, theme("colors.sand.100"));
+  }
 
   /* One labelled field - label, control, hint/error, stacked with a small
      consistent gap. Used by templates/villas/_field.html. */
   .field { @apply flex flex-col gap-1.5; }
+
+  /* The bar you were just sent to by the search box: a single quick ring
+     pulse plus a light sweeping across it, long enough to catch the eye in a
+     grid full of other bars and short enough to be out of the way before
+     anyone reads it. The sweep rides on ::after so it doesn't disturb the
+     bar's own status colour or its guest name. */
+  .cal-search-focus {
+    animation: cal-search-focus-pulse 0.7s ease-out 1;
+    box-shadow: 0 0 0 3px theme("colors.teal.600");
+  }
+  @keyframes cal-search-focus-pulse {
+    0% { box-shadow: 0 0 0 3px theme("colors.teal.600"); }
+    50% { box-shadow: 0 0 0 6px theme("colors.teal.300"); }
+    100% { box-shadow: 0 0 0 3px theme("colors.teal.600"); }
+  }
+  .cal-search-focus::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(
+      100deg,
+      transparent 35%,
+      rgba(255, 255, 255, 0.15) 45%,
+      rgba(255, 255, 255, 0.85) 50%,
+      rgba(255, 255, 255, 0.15) 55%,
+      transparent 65%
+    );
+    background-size: 250% 100%;
+    animation: cal-search-shine 0.7s ease-out 1;
+  }
+  @keyframes cal-search-shine {
+    from { background-position: 150% 0; }
+    to { background-position: -50% 0; }
+  }
+  /* Anyone who has asked their system to cut motion gets the ring only. */
+  @media (prefers-reduced-motion: reduce) {
+    .cal-search-focus { animation: none; }
+    .cal-search-focus::after { animation: none; background: none; }
+  }
 
   /* The room-type card's title: reads as plain bold text until it's touched,
      not a boxed input sitting above a separate label. */

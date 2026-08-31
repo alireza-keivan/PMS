@@ -56,7 +56,10 @@ class DashboardView(LoginRequiredMixin, TemplateView):
 
         villas = Villa.objects.filter(organization=org).live().order_by("name")
         total_villas = villas.count()
-        occupied_villa_ids = set(bookings_today.values_list("villa_id", flat=True))
+        live_villa_ids = {villa.id for villa in villas}
+        # A booking can still point at a villa that has since been archived, so
+        # only count the ones we are actually showing on this page.
+        occupied_villa_ids = set(bookings_today.values_list("villa_id", flat=True)) & live_villa_ids
         occupied_villas = len(occupied_villa_ids)
         occupancy_percent = round(occupied_villas / total_villas * 100) if total_villas else 0
 
@@ -70,7 +73,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             booking.room_label = (
                 f"{booking.villa.name} · {booking.room.name}" if booking.room_id else booking.villa.name
             )
-            if booking.room_id:
+            if booking.room_id and booking.villa_id in occupied_room_counts:
                 occupied_room_counts[booking.villa_id] += 1
 
         villa_occupancy = []

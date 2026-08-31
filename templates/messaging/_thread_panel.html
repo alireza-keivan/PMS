@@ -31,7 +31,7 @@ conversation's URL is opened directly (see ConversationDetailView.get()).
 </div>
 
 <div id="thread-messages" class="flex-1 overflow-y-auto px-6 pt-8 pb-5">
-  <div class="mx-auto flex max-w-[640px] flex-col gap-4">
+  <div id="thread-messages-list" class="mx-auto flex max-w-[640px] flex-col gap-4">
     {% for group in groups %}
       {% include "messaging/_message_group.html" %}
     {% empty %}
@@ -46,7 +46,7 @@ conversation's URL is opened directly (see ConversationDetailView.get()).
 
     {% if conversation.window_is_open %}
       <form
-        hx-post="{% url 'messaging:reply' conversation.pk %}" hx-target="#thread-messages" hx-swap="beforeend"
+        hx-post="{% url 'messaging:reply' conversation.pk %}" hx-target="#thread-messages-list" hx-swap="beforeend"
         class="flex items-center gap-2 rounded-full bg-sand-200 py-1.5 pl-4 pr-1.5"
         @submit="setTimeout(() => draft = '', 0)"
       >
@@ -69,7 +69,7 @@ conversation's URL is opened directly (see ConversationDetailView.get()).
         {% for tpl in templates %}
           <button
             type="button" class="card elev-sm cursor-pointer text-left hover:bg-sand-200"
-            hx-post="{% url 'messaging:reply' conversation.pk %}" hx-target="#thread-messages" hx-swap="beforeend"
+            hx-post="{% url 'messaging:reply' conversation.pk %}" hx-target="#thread-messages-list" hx-swap="beforeend"
             hx-vals='{{ tpl.vals_json }}'
           >
             <div class="card-kicker">{{ tpl.name }}</div>

@@ -51,14 +51,16 @@ through the shared confirmTarget dialog (mode "form") - see CLAUDE.md rule 5.
         </dl>
 
         <div class="flex items-center justify-between">
-          <button type="button" class="btn btn-ghost text-red-700"
+          <button type="button" class="btn btn-ghost whitespace-nowrap px-0 text-red-700"
                   @click="confirmTarget = { message: detail.removeMessage, url: detail.removeUrl, mode: 'form' }; detail = null">
             {% translate "Remove booking" %}
           </button>
-          <a x-show="detail.guestUrl" :href="detail.guestUrl" class="btn btn-ghost text-teal-700">
-            {% translate "View guest" %}
-          </a>
-          <button type="button" class="btn btn-secondary" @click="detail = null">{% translate "Close" %}</button>
+          <div class="flex items-center gap-2">
+            <a x-show="detail.guestUrl" :href="detail.guestUrl" class="btn border border-sand-300 text-orange-600 justify-center text-center hover:bg-sand-200 no-underline">
+              {% translate "Guest details" %}
+            </a>
+            <button type="button" class="btn btn-secondary" @click="detail = null">{% translate "Close" %}</button>
+          </div>
         </div>
       </div>
     </template>

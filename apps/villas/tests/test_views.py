@@ -608,7 +608,7 @@ def test_cannot_add_a_room_type_to_another_organizations_villa(owner_client, oth
 
 def test_an_operator_can_add_their_own_amenity_and_reuse_it(owner_client, org):
     response = _htmx(owner_client, reverse("villas:add_amenity"), {
-        "name_en": "Yoga deck", "field_name": "rooms-0-amenities", "category_pk": "1",
+        "new_amenity_1": "Yoga deck", "field_name": "rooms-0-amenities", "category_pk": "1",
     })
 
     assert response.status_code == 200
@@ -619,7 +619,7 @@ def test_an_operator_can_add_their_own_amenity_and_reuse_it(owner_client, org):
 
 
 def test_one_operators_own_amenity_is_never_offered_to_another(owner_client, org, other_org):
-    _htmx(owner_client, reverse("villas:add_amenity"), {"name_en": "Yoga deck"})
+    _htmx(owner_client, reverse("villas:add_amenity"), {"new_amenity_1": "Yoga deck", "category_pk": "1"})
     mine = Amenity.objects.get(name_en="Yoga deck")
 
     assert mine in Amenity.available_to(org)
@@ -633,7 +633,7 @@ def test_the_shared_amenities_are_offered_to_everyone(org, other_org, pool):
 
 
 def test_adding_an_amenity_that_already_exists_says_so(owner_client, org, pool):
-    response = _htmx(owner_client, reverse("villas:add_amenity"), {"name_en": "pool"})
+    response = _htmx(owner_client, reverse("villas:add_amenity"), {"new_amenity_1": "pool", "category_pk": "1"})
     assert response.status_code == 200
     assert "already on the list" in response.content.decode()
     assert Amenity.objects.filter(name_en__iexact="pool").count() == 1
