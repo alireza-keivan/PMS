@@ -16,7 +16,7 @@
     {% endfor %}
   </div>
 
-  <div class="flex flex-none items-center gap-0.5 whitespace-nowrap">
+  <div class="order-1 flex flex-none items-center gap-0.5 whitespace-nowrap md:order-none">
     <a href="{{ nav.today }}" hx-get="{{ nav.today }}" hx-target="#calendar-panel" hx-push-url="true"
        class="btn btn-ghost mr-1 h-[30px] px-s3 text-[13px] font-semibold">
       {% translate "Today" %}
@@ -48,7 +48,7 @@
     the links themselves, which HTMX replaces on every keystroke, so the index is
     reset whenever a fresh list arrives.
   {% endcomment %}
-  <div class="relative w-full flex-none md:w-auto md:min-w-[200px] md:max-w-[300px] md:flex-1"
+  <div class="relative order-3 w-full flex-none md:order-none md:w-auto md:min-w-[200px] md:max-w-[300px] md:flex-1"
        x-data="calendarSearch()"
        @click.outside="close()"
        @htmx:after-swap="reset()">
@@ -76,7 +76,7 @@
   <input type="hidden" name="days" value="{{ days }}">
   <input type="hidden" name="start" value="{{ start|date:'Y-m-d' }}">
 
-  <button type="button" class="btn btn-primary w-full flex-none whitespace-nowrap md:ml-auto md:w-auto"
+  <button type="button" class="btn btn-primary order-2 flex-none whitespace-nowrap md:order-none md:ml-auto md:w-auto"
           data-confirm-message="{% translate 'Start a new booking?' %}"
           data-confirm-url="{% url 'bookings:add' %}"
           @click="confirmTarget = { message: $el.dataset.confirmMessage, mode: 'navigate', url: $el.dataset.confirmUrl }">
@@ -119,7 +119,7 @@ so both languages go through the normal .po catalog like everywhere else.
   labels, different fonts, browser zoom) - see area/villa headers below,
   which stack under it using that same measurement.{% endcomment %}
   <div id="cal-date-header" class="sticky top-16 z-20 flex rounded-t-lg bg-sand-100">
-    <div class="cal-namecol flex-none bg-sand-100 md:w-[300px]"></div>
+    <div class="cal-namecol flex-none bg-sand-100 md:w-[210px]"></div>
     <div class="grid flex-1" style="grid-template-columns: repeat({{ days }}, minmax(0, 1fr));">
       {% for day in day_columns %}
         <div class="py-s2 text-center {% if day.is_today %}bg-teal-100{% endif %}">
@@ -136,7 +136,7 @@ so both languages go through the normal .po catalog like everywhere else.
       below it - see the id="cal-date-header" comment above for how the top
       offset is kept in sync with the date header's real height.{% endcomment %}
       <div class="cal-area-header sticky top-[calc(64px+var(--cal-date-h,49px))] z-[15] flex border-t border-sand-300/60 bg-sand-200">
-        <div class="cal-namecol flex-none bg-sand-200 px-s2 py-[5px] md:w-[300px] md:px-s4 text-[10.5px] font-bold uppercase tracking-[.07em] opacity-60">{{ row.label }}</div>
+        <div class="cal-namecol flex-none bg-sand-200 px-s2 py-[5px] md:w-[210px] md:px-s4 text-[10.5px] font-bold uppercase tracking-[.07em] opacity-60">{{ row.label }}</div>
         <div class="flex-1"></div>
       </div>
 
@@ -146,7 +146,7 @@ so both languages go through the normal .po catalog like everywhere else.
       leaves a room row on screen with its villa name hidden behind a header.
       --cal-area-h is 0px when a villa has no area group above it.{% endcomment %}
       <div class="cal-villa-header sticky top-[calc(64px+var(--cal-date-h,49px)+var(--cal-area-h,26px))] z-10 flex border-t border-sand-300/60 bg-sand-100">
-        <div class="cal-namecol flex flex-none items-center gap-1.5 overflow-hidden bg-sand-100 py-1 pl-s2 pr-s1 md:w-[300px] md:pl-s3 md:pr-s2">
+        <div class="cal-namecol flex flex-none items-center gap-1.5 overflow-hidden bg-sand-100 py-1 pl-s2 pr-s1 md:w-[210px] md:pl-s3 md:pr-s2">
           <button type="button" class="btn btn-icon btn-ghost h-[26px] w-[26px] flex-none"
                   @click="toggle({{ row.id }})"
                   :aria-expanded="isOpen({{ row.id }}) ? 'true' : 'false'"
@@ -156,9 +156,13 @@ so both languages go through the normal .po catalog like everywhere else.
               <polyline points="9 6 15 12 9 18"/>
             </svg>
           </button>
-          <span class="h-[30px] w-[30px] flex-none rounded-full" style="background:{{ row.swatch }};"></span>
+          <span class="hidden h-[30px] w-[30px] flex-none rounded-full md:block" style="background:{{ row.swatch }};"></span>
           <input
             type="text" value="{{ row.name }}"
+            x-data="{ full: '{{ row.name|escapejs }}', abbr: '{{ row.short_name|escapejs }}' }"
+            x-init="if (window.innerWidth < 768) $el.value = abbr"
+            @focus="$el.value = full"
+            @blur="if ($el.value === full && window.innerWidth < 768) $el.value = abbr"
             hx-post="{% url 'villas:rename' row.slug %}" hx-trigger="change" hx-swap="none"
             class="min-w-0 flex-1 truncate rounded-md border-0 bg-transparent px-1.5 py-[3px] text-[13.5px] font-semibold text-ink-900 outline-none hover:bg-sand-200 focus:bg-teal-50 focus:ring-2 focus:ring-teal-600"
           >
@@ -175,14 +179,22 @@ so both languages go through the normal .po catalog like everywhere else.
 
     {% elif row.kind == "room" %}
       <div class="flex border-t border-sand-300/60 bg-sand-50/60" x-show="isOpen({{ row.villa_id }})" x-cloak>
-        <div class="cal-namecol flex flex-none items-center gap-2 overflow-hidden bg-[#f1e5d0] py-1 pl-s2 pr-s1 md:w-[300px] md:pl-[44px] md:pr-s2">
+        {% comment %}The room type is shown as the stripe down the left edge of
+        this cell instead of a text tag, so the room name keeps the whole
+        (narrow, on a phone) name column. The type's name is still readable as
+        the cell's tooltip. See ROOM_CATEGORY_STRIPES in
+        apps/bookings/services.py.{% endcomment %}
+        <div class="cal-namecol flex flex-none items-center gap-1 overflow-hidden bg-[#f1e5d0] py-1 pl-s2 pr-s1 md:w-[210px] md:pl-[44px] md:pr-s2"
+             style="{{ row.category_style }}"
+             {% if row.category_label %}title="{% blocktranslate with name=row.category_label %}Room type: {{ name }}{% endblocktranslate %}"{% endif %}>
           <input
-            type="text" value="{{ row.name }}"
+            type="text" value="{{ row.name }}" maxlength="10"
+            {% if row.category_label %}aria-describedby="room-type-{{ row.id }}"{% endif %}
             hx-post="{% url 'villas:rename_room' row.villa_slug row.id %}" hx-trigger="change" hx-swap="none"
             class="min-w-0 flex-1 truncate rounded-md border-0 bg-transparent px-1.5 py-[2px] text-[12.5px] text-ink-900 outline-none hover:bg-sand-200 focus:bg-teal-50 focus:ring-2 focus:ring-teal-600"
           >
           {% if row.category_label %}
-            <span class="tag {{ row.tag_class }} flex-none px-2 py-0.5 text-[10px]">{{ row.category_label }}</span>
+            <span id="room-type-{{ row.id }}" class="sr-only">{% blocktranslate with name=row.category_label %}Room type: {{ name }}{% endblocktranslate %}</span>
           {% endif %}
           <button type="button" class="btn btn-icon btn-ghost h-[22px] w-[22px] flex-none opacity-55"
                   aria-label="{% blocktranslate with name=row.name %}Remove {{ name }}{% endblocktranslate %}"
@@ -239,7 +251,7 @@ so both languages go through the normal .po catalog like everywhere else.
       <div class="flex border-t border-sand-300/60 {% if forloop.last %}rounded-b-lg{% endif %}"
            x-show="isOpen({{ row.villa_id }})" x-cloak
            {% if row.categories|length > 1 %}x-data="{ addRoomOpen: false, addRoomCategory: null }"{% endif %}>
-        <div class="cal-namecol flex-none bg-sand-100 py-1 pl-s2 pr-s1 md:w-[300px] md:pl-[44px] md:pr-s2">
+        <div class="cal-namecol flex-none bg-sand-100 py-1 pl-s2 pr-s1 md:w-[210px] md:pl-[44px] md:pr-s2">
           {% if row.categories|length > 1 %}
             <button type="button" class="btn btn-ghost px-2.5 py-1 text-xs"
                     @click="addRoomOpen = true; addRoomCategory = null">

@@ -68,7 +68,7 @@ give one a different size or style; that was an earlier version's bug.{% endcomm
         {% for booking in bookings_today %}
           {% cycle "background:#ffe1d0;color:#643312;" "background:#e1eecc;color:#3d472b;" "background:#eee7db;color:#645c50;" as avatar_style silent %}
           {% blocktranslate asvar meta_text with n=booking.night_of_stay total=booking.nights %}Night {{ n }} of {{ total }}{% endblocktranslate %}
-          {% include "dashboard/_list_row.html" with initial=booking.guest.full_name|slice:":1"|upper|default:"?" name=booking.guest.full_name|default:not_available sub_line=booking.room_label meta=meta_text avatar_style=avatar_style %}
+          {% include "dashboard/_list_row.html" with initial=booking.guest.full_name|slice:":1"|upper|default:"?" name=booking.guest.full_name|default:not_available sub_line=booking.room_label meta=meta_text avatar_style=avatar_style guest_id=booking.guest.pk %}
         {% empty %}
           <div class="p-s4 text-[13px] opacity-60">{% translate "No one in-house tonight" %}</div>
         {% endfor %}
@@ -88,7 +88,7 @@ give one a different size or style; that was an earlier version's bug.{% endcomm
         {% for booking in arriving_today %}
           {% cycle "background:#ffe1d0;color:#643312;" "background:#e1eecc;color:#3d472b;" "background:#eee7db;color:#645c50;" as avatar_style silent %}
           {% blocktranslate asvar meta_text with time=booking.villa.check_in_time|time:"TIME_FORMAT" %}Check-in {{ time }}{% endblocktranslate %}
-          {% include "dashboard/_list_row.html" with initial=booking.guest.full_name|slice:":1"|upper|default:"?" name=booking.guest.full_name|default:not_available sub_line=booking.villa.name meta=meta_text avatar_style=avatar_style %}
+          {% include "dashboard/_list_row.html" with initial=booking.guest.full_name|slice:":1"|upper|default:"?" name=booking.guest.full_name|default:not_available sub_line=booking.villa.name meta=meta_text avatar_style=avatar_style guest_id=booking.guest.pk %}
         {% empty %}
           <div class="p-s4 text-[13px] opacity-60">{% translate "No one arriving today" %}</div>
         {% endfor %}
@@ -108,7 +108,7 @@ give one a different size or style; that was an earlier version's bug.{% endcomm
         {% for booking in departing_today %}
           {% cycle "background:#ffe1d0;color:#643312;" "background:#e1eecc;color:#3d472b;" "background:#eee7db;color:#645c50;" as avatar_style silent %}
           {% blocktranslate asvar meta_text with time=booking.villa.check_out_time|time:"TIME_FORMAT" %}Check-out {{ time }}{% endblocktranslate %}
-          {% include "dashboard/_list_row.html" with initial=booking.guest.full_name|slice:":1"|upper|default:"?" name=booking.guest.full_name|default:not_available sub_line=booking.villa.name meta=meta_text avatar_style=avatar_style %}
+          {% include "dashboard/_list_row.html" with initial=booking.guest.full_name|slice:":1"|upper|default:"?" name=booking.guest.full_name|default:not_available sub_line=booking.villa.name meta=meta_text avatar_style=avatar_style guest_id=booking.guest.pk %}
         {% empty %}
           <div class="p-s4 text-[13px] opacity-60">{% translate "No one leaving today" %}</div>
         {% endfor %}
@@ -128,7 +128,7 @@ give one a different size or style; that was an earlier version's bug.{% endcomm
         {% for payment in outstanding_payments %}
           {% cycle "background:#ffe1d0;color:#643312;" "background:#e1eecc;color:#3d472b;" "background:#eee7db;color:#645c50;" as avatar_style silent %}
           {% with formatted_amount=payment.amount|floatformat:0|intcomma %}
-          {% include "dashboard/_list_row.html" with initial=payment.booking.guest.full_name|slice:":1"|upper|default:"?" name=payment.booking.guest.full_name|default:not_available sub_line=payment.booking.villa.name meta=payment.currency|add:" "|add:formatted_amount avatar_style=avatar_style meta_accent=True %}
+          {% include "dashboard/_list_row.html" with initial=payment.booking.guest.full_name|slice:":1"|upper|default:"?" name=payment.booking.guest.full_name|default:not_available sub_line=payment.booking.villa.name meta=payment.currency|add:" "|add:formatted_amount avatar_style=avatar_style meta_accent=True guest_id=payment.booking.guest.pk %}
           {% endwith %}
         {% empty %}
           <div class="p-s4 text-[13px] opacity-60">{% translate "Everyone is paid up" %}</div>

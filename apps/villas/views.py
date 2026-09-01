@@ -953,7 +953,7 @@ class RoomRenameView(ManagerRequiredMixin, View):
     def post(self, request, slug, pk):
         villa = _get_org_villa(request, slug)
         room = get_object_or_404(Room.objects.filter(villa=villa), pk=pk)
-        name = request.POST.get("name", "").strip()
+        name = request.POST.get("name", "").strip()[:10]
         if name:
             room.name = name
             room.save(update_fields=["name"])

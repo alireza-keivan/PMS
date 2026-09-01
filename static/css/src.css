@@ -40,6 +40,24 @@
     accent-color: theme("colors.teal.600");
   }
 
+  /* Chrome/Safari tint autofilled email/password fields blue by default -
+     force the autofill background back to match the rest of the input. */
+  .input:-webkit-autofill,
+  .input:-webkit-autofill:hover,
+  .input:-webkit-autofill:focus {
+    -webkit-text-fill-color: theme("colors.ink.900");
+    -webkit-box-shadow: 0 0 0 1000px theme("colors.sand.100") inset;
+    box-shadow: 0 0 0 1000px theme("colors.sand.100") inset;
+    transition: background-color 9999s ease-in-out 0s;
+  }
+
+  .input.bg-sand-50:-webkit-autofill,
+  .input.bg-sand-50:-webkit-autofill:hover,
+  .input.bg-sand-50:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0 1000px theme("colors.sand.50") inset;
+    box-shadow: 0 0 0 1000px theme("colors.sand.50") inset;
+  }
+
   /* The native type=search "clear" button renders blue in some browsers,
      which clashes with the design palette - swap in a red one instead. */
   .input[type="search"]::-webkit-search-cancel-button {
@@ -95,7 +113,9 @@
   .seg-opt-active { @apply bg-teal-600 text-sand-50; }
   .seg-opt:not(.seg-opt-active):hover { @apply bg-sand-200; }
 
-  .nav-pill { @apply rounded-full px-3.5 py-1.5 text-sm font-medium text-ink-900/70 transition-colors; }
+  .seg-opt-nav { @apply text-xs; font-family: theme("fontFamily.display"); }
+
+  .nav-pill { @apply rounded-full px-3.5 py-1.5 text-xs text-ink-900/70 transition-colors; font-family: theme("fontFamily.display"); }
   .nav-pill:hover { @apply bg-teal-50 text-ink-900; }
   .nav-pill-active { @apply bg-teal-600 text-sand-50 shadow-sm; }
   .nav-pill-active:hover { @apply bg-teal-600; }
@@ -139,8 +159,8 @@
      Both sizes feed --cal-min-w on #calendar-grid, so the grid's total width
      always matches the columns it actually draws. */
   .cal-scroll {
-    --cal-name-w: 108px;
-    --cal-day-w: 40px;
+    --cal-name-w: 116px;
+    --cal-day-w: 38px;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
   }

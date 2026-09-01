@@ -5,8 +5,8 @@ from django.utils.translation import gettext_lazy as _
 from apps.compliance.models import ComplianceDocument, ComplianceDocumentType
 from apps.villas.models import Villa
 
-INPUT = "w-full rounded border border-sand-200 px-3 py-2 focus:border-teal-500 focus:outline-none"
-TEXTAREA = INPUT + " h-24"
+INPUT = "input"
+TEXTAREA = "input h-24 rounded-2xl py-2"
 
 
 class ComplianceDocumentForm(forms.ModelForm):

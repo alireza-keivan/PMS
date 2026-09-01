@@ -17,11 +17,11 @@ the bar, then the user and the language switch pushed right.
     <a href="{{ calendar_url }}" class="font-display text-[19px] text-ink-900">{% translate "Rumah" %}</a>
 
     <div class="seg hidden lg:inline-flex">
-      <a href="{{ calendar_url }}" class="seg-opt {% if request.path == calendar_url %}seg-opt-active{% endif %}">
+      <a href="{{ calendar_url }}" class="seg-opt seg-opt-nav {% if request.path == calendar_url %}seg-opt-active{% endif %}">
         {% translate "Calendar" %}
       </a>
       {% if is_manager %}
-      <a href="{{ today_url }}" class="seg-opt {% if request.path == today_url %}seg-opt-active{% endif %}">
+      <a href="{{ today_url }}" class="seg-opt seg-opt-nav {% if request.path == today_url %}seg-opt-active{% endif %}">
         {% translate "Today" %}
       </a>
       {% endif %}

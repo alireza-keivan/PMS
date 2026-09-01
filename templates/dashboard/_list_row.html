@@ -3,13 +3,14 @@ One row, shared by all four Today lists (Occupied/Arriving/Leaving/Owing) so
 they stay visual siblings instead of drifting into four almost-identical
 templates. Params: initial, name, sub_line (optional), meta, avatar_style
 (inline background/color from the cycling avatar palette), meta_accent
-(bool - Owing's amount is the one meta column that's bold + accent-colored).
+(bool - Owing's amount is the one meta column that's bold + accent-colored),
+guest_id (optional - when set, the row links to that guest's detail page).
 {% endcomment %}
-<div class="flex items-center gap-[10px] border-b border-ink-900/[.16] px-[14px] py-[10px] last:border-b-0">
+<{% if guest_id %}a href="{% url 'guests:detail' guest_id %}"{% else %}div{% endif %} class="flex items-center gap-[10px] border-b border-ink-900/[.16] px-[14px] py-[10px] last:border-b-0{% if guest_id %} hover:bg-ink-900/[.04]{% endif %}">
   <span class="flex h-[30px] w-[30px] flex-none items-center justify-center rounded-full font-display text-xs" style="{{ avatar_style }}">{{ initial }}</span>
   <div class="min-w-0 flex-1">
     <div class="text-[13px] font-semibold">{{ name }}</div>
     {% if sub_line %}<div class="text-[11.5px] opacity-65">{{ sub_line }}</div>{% endif %}
   </div>
   <div class="max-w-[100px] flex-none text-right text-[11px] opacity-65{% if meta_accent %} font-semibold{% endif %}"{% if meta_accent %} style="color:#8c491a"{% endif %}>{{ meta }}</div>
-</div>
+</{% if guest_id %}a{% else %}div{% endif %}>

@@ -22,6 +22,14 @@ from apps.organizations.permissions import can_see_money as _can_see_money
 from apps.organizations.scoping import scoped_villas
 from apps.villas.models import Room, RoomCategory
 
+def _villa_abbreviation(name: str) -> str:
+    """Short initials for narrow screens, e.g. "Bamboo Loft Canggu" -> "BLC"."""
+    words = [w for w in name.split() if w]
+    if len(words) >= 2:
+        return "".join(w[0] for w in words[:4]).upper()
+    return name[:3].upper()
+
+
 CALENDAR_STATUS_LABELS = {
     "confirmed": _("Confirmed"),
     "checked_in": _("Checked in"),
@@ -135,16 +143,24 @@ def build_calendar_data(request, start, days, q) -> dict:
 # system's accent-300 / accent-2-300 / neutral-300 steps.
 VILLA_SWATCHES = ["#ffc6a5", "#ccdbb2", "#dcd3c4"]
 
-# Room types are named per villa now, so a tag colour can't be looked up by
-# name. Cycled by the type's position within its own villa instead, which keeps
-# a villa's types visually distinct and stable as it is renamed.
-ROOM_CATEGORY_TAGS = ["tag-neutral", "tag-accent", "tag-accent-2"]
+# Room types are named per villa now, so a colour can't be looked up by name.
+# Cycled by the type's position within its own villa instead, which keeps a
+# villa's types visually distinct and stable as it is renamed.
+#
+# The type used to be printed as a text tag beside the room name, but that
+# column is only ~108px wide on a phone and the tag squeezed the room name
+# down to a few letters. The type is shown as colour alone now - a stripe down
+# the left edge of the name cell, the cell itself keeping the same background
+# as every other room - so the name gets the whole column back. The type's
+# name still rides along as the cell's tooltip and aria label, so the words
+# aren't lost for anyone who needs them.
+ROOM_CATEGORY_STRIPES = ["#c0b6a5", "#d67f48", "#8fa073"]  # sand / terracotta / sage
 
 
-def _category_tag(room) -> str:
-    if room.category_id is None:
-        return "tag-neutral"
-    return ROOM_CATEGORY_TAGS[room.category.sort_order % len(ROOM_CATEGORY_TAGS)]
+def _category_style(room) -> str:
+    index = room.category.sort_order if room.category_id is not None else 0
+    stripe = ROOM_CATEGORY_STRIPES[index % len(ROOM_CATEGORY_STRIPES)]
+    return f"box-shadow:inset 3px 0 0 {stripe};"
 
 # Bar fills, straight from the design handoff's status table. Blocked is a
 # hatch rather than a flat fill so "not available" never reads as a real stay.
@@ -200,6 +216,7 @@ def build_calendar_rows(request, start, days, q) -> dict:
                 "kind": "villa",
                 "id": villa.id,
                 "name": villa.name,
+                "short_name": _villa_abbreviation(villa.name),
                 "slug": villa.slug,
                 "swatch": VILLA_SWATCHES[swatch_index % len(VILLA_SWATCHES)],
                 "room_count": len(rooms),
@@ -213,7 +230,7 @@ def build_calendar_rows(request, start, days, q) -> dict:
                     "villa_slug": villa.slug,
                     "name": room.name,
                     "category_label": room.category.name if room.category_id else "",
-                    "tag_class": _category_tag(room),
+                    "category_style": _category_style(room),
                     "bars": [
                         _build_bar(b, today, payments.get(b.id, {}), can_see_money, start, days)
                         for b in bookings_by_room.get(room.id, [])

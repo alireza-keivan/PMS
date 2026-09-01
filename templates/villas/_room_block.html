@@ -18,7 +18,7 @@ nothing below loops over the form's fields.
 {% with category=form.instance %}
 <div
   class="card overflow-hidden !p-0"
-  x-data="{ open: true, sharePhotos: {{ form.use_first_category_photos.value|yesno:'true,false' }} }"
+  x-data="{ open: true, sharePhotos: {{ form.use_first_category_photos.value|yesno:'true,false' }}, nameAtLimit: false }"
 >
   <input type="hidden" name="{{ form.prefix }}-id" value="{{ category.pk }}">
 
@@ -33,7 +33,20 @@ nothing below loops over the form's fields.
       <span x-show="!open" x-cloak>&#9656;</span>
     </button>
 
-    {{ form.name }}
+    <div class="min-w-0 flex-1">
+      <div
+        @input="nameAtLimit = $event.target.value.length >= $event.target.maxLength"
+        @keydown="nameAtLimit = $event.target.value.length >= $event.target.maxLength && !['Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight'].includes($event.key)"
+      >
+        {{ form.name }}
+      </div>
+      <p x-show="nameAtLimit" x-cloak class="mt-1 text-sm text-teal-700">
+        {% translate "Room names can't be longer than 10 letters." %}
+      </p>
+      {% if form.name.errors and not hide_errors %}
+        <p class="mt-1 text-sm text-teal-700">{{ form.name.errors|join:" " }}</p>
+      {% endif %}
+    </div>
 
     <span class="whitespace-nowrap text-xs text-ink-600">
       {% blocktranslate count n=category.rooms.count %}{{ n }} room{% plural %}{{ n }} rooms{% endblocktranslate %}

@@ -227,7 +227,7 @@ class RoomCategoryForm(forms.ModelForm):
             # Looks like a plain bold title until it's touched - see the
             # .title-input rules in src.css - not a labeled boxed field like
             # everything else on the card.
-            "name": forms.TextInput(attrs={"class": "title-input", "placeholder": _("Standard")}),
+            "name": forms.TextInput(attrs={"class": "title-input", "placeholder": _("Standard"), "maxlength": 10}),
             "amenities": forms.CheckboxSelectMultiple(attrs={"class": CHECKBOX}),
             "size_sqm": forms.NumberInput(attrs={"class": INPUT, "min": 1, "placeholder": "35"}),
             "max_guests": forms.NumberInput(attrs={"class": INPUT, "min": 1}),
@@ -252,7 +252,10 @@ class RoomCategoryForm(forms.ModelForm):
             self.initial["room_count"] = self.instance.rooms.count() or 1
 
     def clean_name(self):
-        return self.cleaned_data["name"].strip()
+        name = self.cleaned_data["name"].strip()
+        if len(name) > 10:
+            raise forms.ValidationError(_("Keep the room name to 10 letters or fewer."))
+        return name
 
     def clean_max_guests(self):
         # Optional on the form, but the model column can't be empty - so a

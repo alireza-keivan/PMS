@@ -6,18 +6,18 @@
 {% block content %}
 <div class="mb-6 flex items-center justify-between">
   <h1 class="text-xl font-semibold text-ink-900">{% translate "Team" %}</h1>
-  <a href="{% url 'organizations:staff_add' %}" class="rounded bg-teal-600 px-4 py-2 text-sm font-medium text-white hover:bg-teal-700">
+  <a href="{% url 'organizations:staff_add' %}" class="btn bg-teal-600 text-xs text-white hover:bg-teal-700">
     {% translate "Add staff" %}
   </a>
 </div>
 
 {% if memberships %}
-  <div class="overflow-x-auto rounded-lg border border-sand-200 bg-white shadow-sm">
+  <div class="overflow-x-auto rounded-lg border border-sand-200 bg-sand-100 shadow-sm">
     <table class="w-full text-left text-sm">
       <thead class="border-b border-sand-200 text-xs uppercase text-ink-600">
         <tr>
           <th class="px-4 py-3 font-medium">{% translate "Name" %}</th>
-          <th class="px-4 py-3 font-medium">{% translate "Email" %}</th>
+          <th class="hidden px-4 py-3 font-medium sm:table-cell">{% translate "Email" %}</th>
           <th class="px-4 py-3 font-medium">{% translate "Role" %}</th>
           <th class="px-4 py-3 font-medium">{% translate "Villas" %}</th>
           <th class="px-4 py-3 font-medium"></th>
@@ -26,27 +26,28 @@
       <tbody class="divide-y divide-sand-100">
         {% for membership in memberships %}
           <tr class="hover:bg-sand-50">
-            <td class="px-4 py-3 text-ink-900">{{ membership.user.full_name|default:"-" }}</td>
-            <td class="px-4 py-3 text-ink-600">{{ membership.user.email }}</td>
+            <td class="px-4 py-3 text-sm text-ink-700">{{ membership.user.full_name|default:"-" }}</td>
+            <td class="hidden px-4 py-3 text-ink-600 sm:table-cell">{{ membership.user.email }}</td>
             <td class="px-4 py-3">
               {% if membership.is_manager_member %}
-                <span class="rounded-full bg-teal-50 px-2 py-0.5 text-xs text-teal-800">{% translate "Manager" %}</span>
+                <span class="rounded-full border border-teal-200 px-2 py-0.5 text-xs text-teal-800">{% translate "Manager" %}</span>
               {% else %}
-                <span class="rounded-full bg-sand-100 px-2 py-0.5 text-xs text-ink-600">{% translate "Staff" %}</span>
+                <span class="rounded-full border border-sky-200 px-2 py-0.5 text-xs text-sky-800">{% translate "Staff" %}</span>
               {% endif %}
             </td>
             <td class="px-4 py-3 text-ink-600">
               {% if membership.is_manager_member %}
                 {% translate "All villas" %}
               {% elif membership.villas.all %}
-                {{ membership.villas.all|join:", " }}
+                <span class="sm:hidden">{{ membership.villas.all|join:", "|truncatechars:20 }}</span>
+                <span class="hidden sm:inline">{{ membership.villas.all|join:", " }}</span>
               {% else %}
                 <span class="text-amber-700">{% translate "No villas yet" %}</span>
               {% endif %}
             </td>
-            <td class="px-4 py-3 text-right">
+            <td class="whitespace-nowrap px-4 py-3 text-right">
               {% if not membership.is_manager_member %}
-                <a href="{% url 'organizations:staff_villas' membership.pk %}" class="text-teal-700 underline">{% translate "Edit villas" %}</a>
+                <a href="{% url 'organizations:staff_villas' membership.pk %}" class="btn whitespace-nowrap bg-teal-600 text-xs text-white hover:bg-teal-700">{% translate "Edit villas" %}</a>
               {% endif %}
             </td>
           </tr>
@@ -55,7 +56,7 @@
     </table>
   </div>
 {% else %}
-  <div class="rounded-lg border border-sand-200 bg-white p-6 text-center shadow-sm">
+  <div class="rounded-lg border border-sand-200 bg-sand-100 p-6 text-center shadow-sm">
     <p class="text-ink-900">{% translate "No one on your team yet." %}</p>
   </div>
 {% endif %}

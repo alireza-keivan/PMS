@@ -5,10 +5,7 @@ from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
-INPUT_CLASSES = (
-    "w-full rounded border border-sand-200 px-3 py-2 "
-    "focus:border-teal-500 focus:outline-none"
-)
+INPUT_CLASSES = "input bg-sand-50"
 
 
 class StaffCreateForm(forms.Form):
