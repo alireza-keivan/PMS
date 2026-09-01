@@ -31,10 +31,11 @@ from apps.bookings.services import (
     STATUS_BAR_STYLE,
     build_calendar_rows,
     find_available_room,
-    scoped_villas,
 )
 from apps.core.utils import safe_next
 from apps.guests.services import find_or_create_guest
+from apps.organizations.permissions import can_see_money
+from apps.organizations.scoping import scoped_villas
 from apps.villas.models import Room, RoomCategory
 
 logger = logging.getLogger(__name__)
@@ -153,15 +154,16 @@ class ReservationCreateView(LoginRequiredMixin, View):
         if request.organization is None:
             return redirect("bookings:calendar")
         self.villas, self.membership = scoped_villas(request)
+        self.can_see_money = can_see_money(request.user)
         return super().dispatch(request, *args, **kwargs)
 
     def get(self, request):
-        form = ReservationForm(villas=self.villas, hide_money=not self.membership.can_see_money)
+        form = ReservationForm(villas=self.villas, hide_money=not self.can_see_money)
         return self._render(form)
 
     def post(self, request):
         form = ReservationForm(
-            request.POST, villas=self.villas, hide_money=not self.membership.can_see_money,
+            request.POST, villas=self.villas, hide_money=not self.can_see_money,
         )
         if not form.is_valid():
             return self._render(form)
@@ -209,7 +211,7 @@ class ReservationCreateView(LoginRequiredMixin, View):
         correctly on the calendar's "payment incomplete" status and the daily
         staff view without any special-casing.
         """
-        if not self.membership.can_see_money:
+        if not self.can_see_money:
             return
         total = data.get("total_amount")
         paid = data.get("amount_paid") or 0
@@ -260,7 +262,7 @@ class ReservationCreateView(LoginRequiredMixin, View):
             "form": form,
             "villas_json": villas_json,
             "reservation_config": reservation_config,
-            "can_see_money": self.membership.can_see_money,
+            "can_see_money": self.can_see_money,
             "nationality_pending": self.request.GET.get("nationality_pending") == "1",
         }
         # Re-shows the nights/availability preview after a rejected submit

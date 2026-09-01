@@ -1,0 +1,41 @@
+{% load i18n %}
+{% comment %}
+The one spinner for the whole app. Show it any time the app is waiting -
+a save, a form submit, a page piece loading.
+
+Include it like this:
+
+  {# next to a button, small, no words #}
+  {% include "partials/_spinner.html" %}
+
+  {# a size and a message #}
+  {% include "partials/_spinner.html" with size="md" label=_("Saving changes...") %}
+
+  {# covers the screen and dims it, for something you must wait for #}
+  {% include "partials/_spinner.html" with overlay=True size="lg" label=_("Saving changes...") %}
+
+  {# only visible while an HTMX request on the parent is running #}
+  {% include "partials/_spinner.html" with indicator=True id="save-spinner" %}
+
+Options (all optional):
+  size      "sm" (default), "md", "lg"
+  label     words shown next to / under the spinner
+  overlay   True = full screen, dimmed background
+  indicator True = hidden until HTMX starts a request (see hx-indicator)
+  id        an id, so hx-indicator="#that-id" can point at it
+  class     extra classes on the wrapper
+{% endcomment %}
+<div
+  {% if id %}id="{{ id }}"{% endif %}
+  role="status"
+  aria-busy="true"
+  aria-live="polite"
+  class="{% if overlay %}spinner-overlay{% elif indicator %}spinner-indicator{% else %}inline-flex items-center gap-2{% endif %}{% if class %} {{ class }}{% endif %}"
+>
+  <span class="spinner spinner-{{ size|default:'sm' }}" aria-hidden="true"></span>
+  {% if label %}
+    <span class="text-sm {% if overlay %}text-sand-50{% else %}text-ink-700{% endif %}">{{ label }}</span>
+  {% else %}
+    <span class="sr-only">{% translate "Loading" %}</span>
+  {% endif %}
+</div>

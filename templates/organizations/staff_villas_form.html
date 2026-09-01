@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% translate "Edit villa access" %}{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-2xl rounded-lg border border-sand-200 bg-white p-4 shadow-sm sm:p-6">
+  <h1 class="mb-4 text-lg font-semibold text-ink-900">
+    {% blocktranslate with name=membership.user.full_name|default:membership.user.email %}Villa access for {{ name }}{% endblocktranslate %}
+  </h1>
+
+  <form method="post">
+    {% csrf_token %}
+    <p class="mb-1 text-sm text-ink-600">{{ form.villas.label }}</p>
+    <div class="space-y-1 rounded border border-sand-200 p-3">
+      {% for checkbox in form.villas %}
+        <label class="flex items-center gap-2 text-sm text-ink-900">
+          {{ checkbox.tag }} {{ checkbox.choice_label }}
+        </label>
+      {% empty %}
+        <p class="text-sm text-ink-600">{% translate "No villas to assign yet." %}</p>
+      {% endfor %}
+    </div>
+    <p class="mt-1 text-xs text-ink-600">{{ form.villas.help_text }}</p>
+
+    <div class="mt-6 flex items-center gap-3">
+      <button type="submit" class="rounded bg-teal-600 px-4 py-2 text-sm font-medium text-white hover:bg-teal-700">
+        {% translate "Save" %}
+      </button>
+      <a href="{% url 'organizations:staff_list' %}" class="text-sm text-ink-600 underline">{% translate "Cancel" %}</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

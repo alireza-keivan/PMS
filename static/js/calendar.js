@@ -314,6 +314,13 @@
     return y + "-" + m + "-" + day;
   }
 
+  function daysBetween(fromIso, toIso) {
+    var a = new Date(fromIso + "T00:00:00");
+    var b = new Date(toIso + "T00:00:00");
+    if (isNaN(a) || isNaN(b)) return null;
+    return Math.round((b - a) / 86400000);
+  }
+
   function fillTemplate(str, values) {
     Object.keys(values).forEach(function (key) {
       str = str.split("%(" + key + ")s").join(values[key]);
@@ -339,11 +346,29 @@
 
     var days = parseInt(grid.dataset.days, 10) || 14;
     var rowRect = homeRow.getBoundingClientRect();
-    var barRect = bar.getBoundingClientRect();
     var dayWidth = rowRect.width / days;
-    var origLeftPx = barRect.left - rowRect.left;
-    var origWidthPx = barRect.width;
     var origStyle = bar.getAttribute("style");
+
+    // A stay that runs past either edge of the visible window is drawn
+    // clipped to that edge (see _build_bar server-side). Dragging that clipped
+    // shape would show a two-day box for a week-long stay, so for the duration
+    // of the drag the bar is re-laid-out at its true length - it can now stick
+    // out past the window edges, which is exactly the point.
+    var windowStart = grid.dataset.start;
+    var trueStart = windowStart ? daysBetween(windowStart, bar.dataset.checkIn) : null;
+    var trueEnd = windowStart ? daysBetween(windowStart, bar.dataset.checkOut) : null;
+    var origLeftPx, origWidthPx;
+    if (trueStart === null || trueEnd === null) {
+      var barRect = bar.getBoundingClientRect();
+      origLeftPx = barRect.left - rowRect.left;
+      origWidthPx = barRect.width;
+    } else {
+      origLeftPx = trueStart * dayWidth + 3;
+      origWidthPx = Math.max(1, trueEnd - trueStart) * dayWidth - 6;
+      bar.style.left = origLeftPx + "px";
+      bar.style.width = origWidthPx + "px";
+      bar.style.zIndex = "5"; // sits above neighbouring bars while it overhangs
+    }
 
     var startX = downEvent.clientX;
     var moved = false;
@@ -377,8 +402,7 @@
       var dayDelta = Math.round(dx / dayWidth);
 
       if (mode === "move") {
-        var offset = Math.max(-origLeftPx, Math.min(rowRect.width - origWidthPx - origLeftPx, dayDelta * dayWidth));
-        finalDays = Math.round(offset / dayWidth);
+        finalDays = dayDelta;
 
         var hovered = document.elementFromPoint(moveEvent.clientX, moveEvent.clientY);
         var hoveredRow = hovered && hovered.closest("[data-room-row-id]");
@@ -393,13 +417,12 @@
         bar.style.transform = "translate(" + finalDays * dayWidth + "px, " + offsetY + "px)";
       } else if (mode === "start") {
         var maxLeft = origLeftPx + origWidthPx - dayWidth;
-        var newLeft = Math.max(0, Math.min(maxLeft, origLeftPx + dayDelta * dayWidth));
+        var newLeft = Math.min(maxLeft, origLeftPx + dayDelta * dayWidth);
         finalDays = Math.round((newLeft - origLeftPx) / dayWidth);
         bar.style.left = newLeft + "px";
         bar.style.width = origLeftPx + origWidthPx - newLeft + "px";
       } else if (mode === "end") {
-        var maxWidth = rowRect.width - origLeftPx;
-        var newWidth = Math.max(dayWidth, Math.min(maxWidth, origWidthPx + dayDelta * dayWidth));
+        var newWidth = Math.max(dayWidth, origWidthPx + dayDelta * dayWidth);
         finalDays = Math.round((newWidth - origWidthPx) / dayWidth);
         bar.style.width = newWidth + "px";
       }

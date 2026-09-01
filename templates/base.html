@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caprasimo&family=Figtree:wght@400;600;700&display=swap">
   <link rel="stylesheet" href="{% static 'css/tailwind.css' %}">
   <script src="{% static 'js/htmx.min.js' %}" defer></script>
+  <script src="{% static 'js/scroll_restore.js' %}" defer></script>
   {% comment %}
   Any page-specific script that defines an Alpine component (window.X, or an
   alpine:init listener) MUST run before alpine.min.js's own <script> tag, not
@@ -63,6 +64,45 @@
       </div>
     {% endblock %}
   </main>
+
+  {% comment %}
+  One page-wide "please wait" screen, available everywhere. Turn it on from
+  any script with:
+
+      window.showLoading("Saving changes...")   // words are optional
+      window.hideLoading()                      // always call this, even
+                                                // when the save failed
+
+  For HTMX requests you don't need this at all - put hx-indicator on the
+  element and include partials/_spinner.html with indicator=True.
+  {% endcomment %}
+  <div id="app-loading" hidden class="spinner-overlay" role="status" aria-busy="true" aria-live="polite">
+    <span class="spinner spinner-lg" aria-hidden="true"></span>
+    <span id="app-loading-label" class="text-sm text-sand-50">{% translate "Loading" %}</span>
+  </div>
+  <script>
+    // Plain JS on purpose: this must never depend on Alpine having started,
+    // otherwise a broken component on the page can leave the screen covered.
+    (function () {
+      var box = document.getElementById("app-loading");
+      var label = document.getElementById("app-loading-label");
+      window.showLoading = function (text) {
+        label.textContent = text || "{% translate "Loading" %}";
+        box.hidden = false;
+      };
+      window.hideLoading = function () { box.hidden = true; };
+      // A page leaving (back button, bfcache) must never come back covered.
+      window.addEventListener("pageshow", window.hideLoading);
+      // Any form marked data-loading="..." covers the screen while it saves.
+      // The words come from the attribute, so each page says its own thing.
+      document.addEventListener("submit", function (e) {
+        var form = e.target;
+        if (form.hasAttribute && form.hasAttribute("data-loading")) {
+          window.showLoading(form.getAttribute("data-loading"));
+        }
+      });
+    })();
+  </script>
 
   {% block extra_js %}{% endblock %}
 </body>

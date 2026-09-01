@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% translate "Add staff" %}{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-2xl rounded-lg border border-sand-200 bg-white p-4 shadow-sm sm:p-6">
+  <h1 class="mb-1 text-lg font-semibold text-ink-900">{% translate "Add staff" %}</h1>
+  <p class="mb-4 text-sm text-ink-600">
+    {% translate "This creates a brand new login for them - it can't be linked to an email that already has an account." %}
+  </p>
+
+  {% if form.non_field_errors %}
+    <p class="mb-4 rounded bg-red-50 p-3 text-sm text-red-700">{{ form.non_field_errors|join:" " }}</p>
+  {% endif %}
+
+  <form method="post">
+    {% csrf_token %}
+    <div class="space-y-4">
+      <div>
+        <label class="mb-1 block text-sm text-ink-600" for="{{ form.full_name.id_for_label }}">{{ form.full_name.label }}</label>
+        {{ form.full_name }}
+      </div>
+      <div>
+        <label class="mb-1 block text-sm text-ink-600" for="{{ form.email.id_for_label }}">{{ form.email.label }}</label>
+        {{ form.email }}
+        {% if form.email.errors %}<p class="mt-1 text-sm text-red-700">{{ form.email.errors|join:" " }}</p>{% endif %}
+      </div>
+      <div>
+        <label class="mb-1 block text-sm text-ink-600" for="{{ form.password.id_for_label }}">{{ form.password.label }}</label>
+        {{ form.password }}
+        <p class="mt-1 text-xs text-ink-600">{{ form.password.help_text }}</p>
+        {% if form.password.errors %}<p class="mt-1 text-sm text-red-700">{{ form.password.errors|join:" " }}</p>{% endif %}
+      </div>
+      <div>
+        <p class="mb-1 text-sm text-ink-600">{{ form.villas.label }}</p>
+        <div class="space-y-1 rounded border border-sand-200 p-3">
+          {% for checkbox in form.villas %}
+            <label class="flex items-center gap-2 text-sm text-ink-900">
+              {{ checkbox.tag }} {{ checkbox.choice_label }}
+            </label>
+          {% empty %}
+            <p class="text-sm text-ink-600">{% translate "No villas to assign yet." %}</p>
+          {% endfor %}
+        </div>
+        <p class="mt-1 text-xs text-ink-600">{{ form.villas.help_text }}</p>
+      </div>
+    </div>
+
+    <div class="mt-6 flex items-center gap-3">
+      <button type="submit" class="rounded bg-teal-600 px-4 py-2 text-sm font-medium text-white hover:bg-teal-700">
+        {% translate "Add staff" %}
+      </button>
+      <a href="{% url 'organizations:staff_list' %}" class="text-sm text-ink-600 underline">{% translate "Cancel" %}</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

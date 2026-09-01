@@ -35,7 +35,7 @@
     <section class="rounded-lg border border-sand-200 bg-white p-4 shadow-sm sm:p-6">
       <h2 class="mb-3 font-semibold text-ink-900">{% translate "Documents expiring soon" %}</h2>
       {% if documents_needing_attention %}
-        <ul class="divide-y divide-sand-100">
+        <ul class="max-h-96 divide-y divide-sand-100 overflow-y-auto">
           {% for doc in documents_needing_attention %}
             <li class="py-2">
               <p class="text-ink-900">
@@ -63,7 +63,7 @@
         {% translate "A reminder only - the report itself is still filed in person at the police station." %}
       </p>
       {% if police_reports %}
-        <ul class="divide-y divide-sand-100">
+        <ul class="max-h-96 divide-y divide-sand-100 overflow-y-auto">
           {% for report in police_reports %}
             <li class="flex items-center justify-between py-2" id="police-report-{{ report.pk }}">
               <div>

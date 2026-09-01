@@ -8,12 +8,11 @@ from datetime import date
 import pytest
 from django.urls import reverse
 
-from apps.organizations.models import Membership
 
 
 @pytest.fixture
-def owner_client(client, org, user):
-    Membership.objects.create(user=user, organization=org, role=Membership.Role.OWNER)
+def owner_client(client, org, user, make_membership):
+    make_membership(user, org, manager=True)
     client.force_login(user)
     return client
 
@@ -23,8 +22,8 @@ def test_requires_login(client, db):
     assert response.status_code == 302
 
 
-def test_no_organization_shows_the_placeholder_state(client, user):
-    client.force_login(user)
+def test_no_organization_shows_the_placeholder_state(client, user_without_active_organization):
+    client.force_login(user_without_active_organization)
     response = client.get(reverse("bookings:calendar"))
     assert response.context["no_organization"] is True
 

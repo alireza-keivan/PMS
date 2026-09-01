@@ -77,6 +77,7 @@
               {{ n }} rooms - sleeps {{ guests }}
             {% endblocktranslate %}
           </p>
+          {% if is_manager %}
           <div class="mt-4 flex items-stretch gap-2 text-xs">
             <a
               href="{% url 'villas:edit' villa.slug %}"
@@ -94,10 +95,11 @@
               {% translate "Delete" %}
             </button>
           </div>
+          {% endif %}
         </div>
       {% endfor %}
 
-      {% if can_add_villa %}
+      {% if is_manager and can_add_villa %}
         <a
           href="{% url 'villas:add' %}"
           class="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-sand-300 p-4 text-center text-ink-600 hover:border-teal-500 hover:text-teal-700 sm:p-6"
@@ -122,12 +124,14 @@
     <div class="rounded-lg border border-sand-200 bg-sand-100 p-6 text-center shadow-sm">
       <p class="text-ink-900">{% translate "You haven't added a villa yet." %}</p>
       <p class="mt-1 text-sm text-ink-600">{% translate "Add your first one to get started." %}</p>
-      <a
-        href="{% url 'villas:add' %}"
-        class="mt-4 inline-flex items-center justify-center rounded bg-teal-600 px-4 py-2 text-sm font-medium text-white hover:bg-teal-500"
-      >
-        {% translate "Add your first villa" %}
-      </a>
+      {% if is_manager %}
+        <a
+          href="{% url 'villas:add' %}"
+          class="mt-4 inline-flex items-center justify-center rounded bg-teal-600 px-4 py-2 text-sm font-medium text-white hover:bg-teal-500"
+        >
+          {% translate "Add your first villa" %}
+        </a>
+      {% endif %}
     </div>
   {% endif %}
 

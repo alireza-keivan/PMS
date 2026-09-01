@@ -77,12 +77,12 @@ class Organization(TimeStampedModel):
 
 
 class Membership(TimeStampedModel):
-    """Which people can see which operator's data, and in what capacity."""
+    """Which people can see which operator's data.
 
-    class Role(models.TextChoices):
-        OWNER = "owner", _("Owner")        # sees money, reports, all villas
-        MANAGER = "manager", _("Manager")  # day-to-day ops, all villas
-        STAFF = "staff", _("Staff")        # daily task view, assigned villas only
+    Manager vs. Staff is a Django Group (see apps.organizations.permissions),
+    not a field here - this model only ties a user to an organization and,
+    for Staff, to the specific villas they're allowed to see.
+    """
 
     user = models.ForeignKey(
         "accounts.User", on_delete=models.CASCADE, related_name="memberships"
@@ -90,7 +90,6 @@ class Membership(TimeStampedModel):
     organization = models.ForeignKey(
         Organization, on_delete=models.CASCADE, related_name="memberships"
     )
-    role = models.CharField(max_length=20, choices=Role.choices, default=Role.STAFF)
     villas = models.ManyToManyField(
         "villas.Villa",
         blank=True,
@@ -102,8 +101,4 @@ class Membership(TimeStampedModel):
         unique_together = [("user", "organization")]
 
     def __str__(self):
-        return f"{self.user} @ {self.organization} ({self.get_role_display()})"
-
-    @property
-    def can_see_money(self) -> bool:
-        return self.role in {self.Role.OWNER, self.Role.MANAGER}
+        return f"{self.user} @ {self.organization}"

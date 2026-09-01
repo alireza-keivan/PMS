@@ -12,12 +12,11 @@ from django.utils import timezone
 from apps.bookings.models import Booking, BookingPayment
 from apps.compliance.models import PoliceReport
 from apps.guests.models import Guest, GuestActivity, GuestFeedback, GuestRequest
-from apps.organizations.models import Membership
 
 
 @pytest.fixture
-def owner_client(client, org, user):
-    Membership.objects.create(user=user, organization=org, role=Membership.Role.OWNER)
+def owner_client(client, org, user, make_membership):
+    make_membership(user, org, manager=True)
     client.force_login(user)
     return client
 
@@ -76,10 +75,10 @@ def test_guest_detail_shows_total_expenditure_and_amount_due_to_owners(owner_cli
     assert response.context["amount_due"] == "Rp 500,000"
 
 
-def test_guest_detail_hides_money_from_staff_without_money_permission(org, user, villa, guest):
+def test_guest_detail_hides_money_from_staff_without_money_permission(org, user, villa, guest, make_membership):
     from django.test import Client
 
-    Membership.objects.create(user=user, organization=org, role=Membership.Role.STAFF)
+    make_membership(user, org, manager=False)
     today = timezone.localdate()
     booking = Booking.objects.create(
         organization=org, villa=villa, guest=guest,

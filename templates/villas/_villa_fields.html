@@ -50,7 +50,7 @@ extra homework instead of what it is - genuinely fine to skip.
       <span class="text-xs text-ink-500">({% translate "optional" %})</span>
     </label>
     <div id="photos-villa">
-      {% include "villas/_photo_grid.html" with photos=villa.photos.all remove_url_name="villas:remove_villa_photo" %}
+      {% include "villas/_photo_grid.html" with photos=villa.photos.on_the_form remove_url_name="villas:remove_villa_photo" %}
     </div>
   </div>
 </div>

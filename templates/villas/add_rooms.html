@@ -23,7 +23,7 @@
     {% endif %}
   </p>
 
-  <form method="post" action="{% url 'villas:rooms' villa.slug %}" id="room-form" novalidate{% if not villa.is_draft %} data-dirty-guard{% endif %}>
+  <form method="post" action="{% url 'villas:rooms' villa.slug %}" id="room-form" novalidate data-loading="{% translate 'Saving changes...' %}"{% if not villa.is_draft %} data-dirty-guard{% endif %}>
     {% csrf_token %}
     <div id="room-blocks">
       {% include "villas/_room_blocks.html" %}

@@ -22,7 +22,7 @@ Lives inside the form with id="room-form".
 
 <div class="space-y-4">
   {% for form in formset %}
-    {% include "villas/_room_block.html" with form=form %}
+    {% include "villas/_room_block.html" with form=form is_first_category=forloop.first %}
   {% endfor %}
 </div>
 
@@ -33,7 +33,10 @@ Lives inside the form with id="room-form".
   hx-include="#room-form"
   hx-target="#room-blocks"
   hx-swap="innerHTML"
->+ {% translate "Add another kind of room" %}</button>
+  hx-indicator="#add-room-spinner"
+>+ {% translate "Add another kind of room" %}
+  {% include "partials/_spinner.html" with indicator=True id="add-room-spinner" %}
+</button>
 
 <p class="mt-2 text-xs text-ink-600">
   {% translate "Only if this villa has rooms that differ - a bigger one, or one with its own price. Renting the whole villa out as one? One kind of room is all you need." %}

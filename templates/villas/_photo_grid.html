@@ -12,10 +12,17 @@ Include with:
   category         - only for a room type's pictures
   error            - optional, something that went wrong while uploading
 
-The add tile uploads the moment a file is picked, same as the rest of this
-page - except on a villa that doesn't exist yet (the very first step 1, before
-anything is saved), where there is no row yet to attach a photo to. There, the
-tile is a plain field that rides along with the whole form when it is
+Picking a file still uploads it there and then - the file has to go somewhere -
+but the picture is only held aside until the page is saved, and taking one off
+only marks it. Nothing on this row is real until Save is pressed; leaving the
+page instead puts everything back. See PhotoQuerySet in apps/villas/models.py.
+
+So a held-aside picture is drawn plainly as "Not saved yet" with its own Undo,
+rather than looking identical to the ones that are really there.
+
+The add tile is the one exception: on a villa that doesn't exist yet (the very
+first step 1, before anything is saved) there is no row to attach a photo to,
+so the tile is a plain field that rides along with the whole form when it is
 submitted, and static/js/villa_form.js gives it a local preview so it doesn't
 look inert in the meantime.
 {% endcomment %}
@@ -24,9 +31,13 @@ look inert in the meantime.
   <p class="mb-2 rounded-md bg-red-50 p-2 text-sm text-red-700">{{ error }}</p>
 {% endif %}
 
+<p class="mb-1.5 text-xs text-ink-500">
+  {% blocktranslate %}Up to 20 pictures, 2 MB or smaller each.{% endblocktranslate %}
+</p>
+
 <div class="flex flex-wrap gap-2">
   {% for photo in photos %}
-    <div class="group relative h-[74px] w-[74px] flex-none overflow-hidden rounded-sm border border-sand-300">
+    <div class="group relative h-[74px] w-[74px] flex-none overflow-hidden rounded-sm border {% if photo.is_pending %}border-teal-600 ring-1 ring-teal-600{% else %}border-sand-300{% endif %}">
       <img src="{{ photo.image.url }}" alt="" class="h-full w-full object-cover" loading="lazy">
       <button
         type="button"
@@ -44,6 +55,23 @@ look inert in the meantime.
       >
         <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
       </button>
+
+      {% if photo.is_pending %}
+        <div class="absolute inset-x-0 bottom-0 flex items-center justify-between gap-1 bg-teal-700/90 px-1 py-0.5 text-[10px] text-sand-50">
+          <span>{% translate "Not saved" %}</span>
+          <button
+            type="button" class="font-semibold underline"
+            {% if category %}
+              hx-post="{% url remove_url_name villa.slug category.pk photo.pk %}"
+              hx-target="#photos-room-{{ category.pk }}"
+            {% else %}
+              hx-post="{% url remove_url_name villa.slug photo.pk %}"
+              hx-target="#photos-villa"
+            {% endif %}
+            hx-swap="innerHTML"
+          >{% translate "Undo" %}</button>
+        </div>
+      {% endif %}
     </div>
   {% endfor %}
 
@@ -70,3 +98,9 @@ look inert in the meantime.
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
   </label>
 </div>
+
+{% if photos %}
+  <p class="mt-1.5 text-xs text-ink-500">
+    {% translate "Picture changes are kept when you save this page." %}
+  </p>
+{% endif %}

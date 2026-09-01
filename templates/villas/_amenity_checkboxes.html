@@ -38,6 +38,7 @@ turns up ready to pick on every villa they add afterwards.
       hx-vals='{"field_name": "{{ field.html_name }}", "category_pk": "{{ category.pk }}"}'
       hx-target="#amenity-note-{{ category.pk }}"
       hx-swap="innerHTML"
+      hx-indicator="#amenity-spinner-{{ category.pk }}"
       hx-trigger="keydown[key=='Enter'] consume"
       onkeydown="if (event.key === 'Enter') event.preventDefault();"
     >
@@ -48,7 +49,11 @@ turns up ready to pick on every villa they add afterwards.
       hx-vals='{"field_name": "{{ field.html_name }}", "category_pk": "{{ category.pk }}"}'
       hx-target="#amenity-note-{{ category.pk }}"
       hx-swap="innerHTML"
+      hx-indicator="#amenity-spinner-{{ category.pk }}"
     >+</button>
+    {% with cid=category.pk|stringformat:"s" %}
+      {% include "partials/_spinner.html" with indicator=True id="amenity-spinner-"|add:cid %}
+    {% endwith %}
   </div>
   <div id="amenity-note-{{ category.pk }}"></div>
 </div>

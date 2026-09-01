@@ -18,9 +18,11 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import CreateView, ListView, TemplateView, View
 
-from apps.bookings.services import scoped_villas
 from apps.compliance.forms import ComplianceDocumentForm
 from apps.compliance.models import ComplianceDocument, ComplianceDocumentType, PoliceReport
+from apps.organizations.mixins import ManagerRequiredMixin
+from apps.organizations.permissions import is_manager
+from apps.organizations.scoping import scoped_villas
 
 # STM deadlines are 24 hours after check-in, so "upcoming" is naturally a
 # short window - this keeps the action-needed count matching feature #16's
@@ -70,10 +72,11 @@ class DocumentListView(LoginRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["no_organization"] = self.request.organization is None
+        context["is_manager"] = is_manager(self.request.user)
         return context
 
 
-class DocumentCreateView(LoginRequiredMixin, CreateView):
+class DocumentCreateView(ManagerRequiredMixin, CreateView):
     model = ComplianceDocument
     form_class = ComplianceDocumentForm
     template_name = "compliance/document_form.html"

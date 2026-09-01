@@ -41,6 +41,12 @@ DEFAULT_ROOM_TYPE = "Standard"
 # like 300 from filling a villa with hundreds of rooms nobody asked for.
 MAX_ROOMS_PER_TYPE = 60
 
+# Keeps the picture row usable and the villa's storage bill sane - a villa or
+# room type never needs more than this many pictures to show what it looks
+# like, and a picture this big is almost always an accidental full-res upload.
+MAX_PHOTOS_PER_OWNER = 20
+MAX_PHOTO_SIZE_MB = 2
+
 # What almost every Bali villa uses. Named here rather than written straight
 # into the field, because the add form falls back to them when the operator
 # leaves those boxes empty - and both places have to mean the same thing.
@@ -186,6 +192,14 @@ class RoomCategory(TenantOwnedModel):
     )
     minimum_nights = models.PositiveSmallIntegerField(default=1)
 
+    # Lets the second and later room types skip their own photo shoot and
+    # just show the villa's first room type's pictures instead. Meaningless
+    # on the first room type itself - there is nothing before it to copy.
+    use_first_category_photos = models.BooleanField(
+        default=False,
+        help_text=_("Show the first room type's photos here instead of its own."),
+    )
+
     class Meta:
         ordering = ["sort_order", "name"]
         unique_together = [("villa", "name")]
@@ -198,6 +212,19 @@ class RoomCategory(TenantOwnedModel):
     def room_count(self) -> int:
         """How many rooms of this type the villa has. Counted, never stored."""
         return self.rooms.count()
+
+    @property
+    def display_photos(self):
+        """The photos to actually show for this room type.
+
+        Its own, unless it's opted into showing the first room type's
+        instead - in which case its own upload box is never used at all.
+        """
+        if self.use_first_category_photos:
+            first = self.villa.room_categories.first()
+            if first is not None and first.pk != self.pk:
+                return first.photos.live()
+        return self.photos.live()
 
 
 class Room(TenantOwnedModel):
@@ -236,7 +263,51 @@ class Room(TenantOwnedModel):
             raise ValidationError({"category": _("Pick a room type that belongs to this villa.")})
 
 
-class VillaPhoto(TenantOwnedModel):
+class PhotoQuerySet(TenantQuerySet):
+    """Pictures on the villa form are staged, not saved the second they're picked.
+
+    An upload is written to storage right away - the bytes have to go
+    somewhere - but it is written as `is_pending`, and a removal only sets
+    `pending_delete`. Neither counts as real until the operator presses Save
+    on the page, which is when commit_photos in views.py turns pending into
+    live and really deletes what was marked. Walking away instead leaves the
+    villa exactly as it was, and prune_staged_photos sweeps the leftovers.
+
+      .live()         - what the villa really has, for everywhere else. A
+                        picture marked for removal is still in here: until
+                        Save it is still one of the villa's pictures, so an
+                        abandoned edit changes nothing anyone else can see.
+      .on_the_form()  - what the person editing should see right now:
+                        live pictures plus their own not-yet-saved additions,
+                        minus the ones they just took off
+    """
+
+    def live(self):
+        return self.filter(is_pending=False)
+
+    def on_the_form(self):
+        return self.filter(pending_delete=False)
+
+
+class StagedPhotoFields(models.Model):
+    """The two staging flags, shared by villa and room-type pictures."""
+
+    is_pending = models.BooleanField(
+        default=False,
+        help_text=_("Uploaded but not saved yet - discarded if the page is left."),
+    )
+    pending_delete = models.BooleanField(
+        default=False,
+        help_text=_("Taken off the form but not saved yet - kept until Save."),
+    )
+
+    objects = PhotoQuerySet.as_manager()
+
+    class Meta:
+        abstract = True
+
+
+class VillaPhoto(StagedPhotoFields, TenantOwnedModel):
     """Stored as WebP. Conversion happens on upload - see apps/villas/images.py."""
 
     villa = models.ForeignKey(Villa, on_delete=models.CASCADE, related_name="photos")
@@ -249,8 +320,11 @@ class VillaPhoto(TenantOwnedModel):
     class Meta:
         ordering = ["sort_order", "id"]
 
+    def __str__(self):
+        return f"Photo {self.pk} of {self.villa}"
 
-class RoomCategoryPhoto(TenantOwnedModel):
+
+class RoomCategoryPhoto(StagedPhotoFields, TenantOwnedModel):
     """Photos of one kind of room, as opposed to the property as a whole.
 
     Same rules as VillaPhoto: stored as WebP, converted on upload.
@@ -267,6 +341,9 @@ class RoomCategoryPhoto(TenantOwnedModel):
 
     class Meta:
         ordering = ["sort_order", "id"]
+
+    def __str__(self):
+        return f"Photo {self.pk} of {self.category}"
 
 
 class Amenity(models.Model):

@@ -3,7 +3,12 @@
 One kind of room. A villa rented out whole is one of these with a single room
 in it, so this same block covers both cases.
 
-Include with `form` - one of the formset's forms.
+Include with `form` - one of the formset's forms - and `is_first_category`,
+true only for the villa's first room type. Every room type after the first
+can tick "use the first room type's photos" instead of uploading its own -
+see use_first_category_photos on RoomCategory in apps/villas/models.py. While
+that's ticked, this block's own photo box is dimmed to 60% opacity and can't
+be used, since its own pictures wouldn't be shown anyway.
 
 The hidden id is written out by hand rather than through {{ form.id }},
 because a block appended by HTMX is built on its own, outside the formset, and
@@ -11,7 +16,10 @@ still has to say which room type it stands for. It is never rendered twice -
 nothing below loops over the form's fields.
 {% endcomment %}
 {% with category=form.instance %}
-<div class="card overflow-hidden !p-0" x-data="{ open: true }">
+<div
+  class="card overflow-hidden !p-0"
+  x-data="{ open: true, sharePhotos: {{ form.use_first_category_photos.value|yesno:'true,false' }} }"
+>
   <input type="hidden" name="{{ form.prefix }}-id" value="{{ category.pk }}">
 
   <div class="flex items-center gap-2 bg-sand-200 px-s6 py-s3">
@@ -95,8 +103,25 @@ nothing below loops over the form's fields.
         <span>{% translate "Photos" %}</span>
         <span class="text-xs text-ink-500">({% translate "optional" %})</span>
       </label>
-      <div id="photos-room-{{ category.pk }}">
-        {% include "villas/_photo_grid.html" with photos=category.photos.all remove_url_name="villas:remove_room_photo" %}
+
+      {% if not is_first_category %}
+        <label class="mb-2 flex items-center gap-2 text-sm text-ink-700">
+          <input
+            type="checkbox" x-model="sharePhotos" class="h-4 w-4 rounded border-sand-400 text-teal-600"
+            name="{{ form.use_first_category_photos.html_name }}"
+            {% if form.use_first_category_photos.value %}checked{% endif %}
+          >
+          <span>{% translate "Use the first room type's photos" %}</span>
+        </label>
+      {% endif %}
+
+      <div
+        id="photos-room-{{ category.pk }}"
+        {% if not is_first_category %}
+          :class="sharePhotos && 'pointer-events-none opacity-60'"
+        {% endif %}
+      >
+        {% include "villas/_photo_grid.html" with photos=category.photos.on_the_form remove_url_name="villas:remove_room_photo" %}
       </div>
     </div>
   </div>

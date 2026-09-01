@@ -1,4 +1,4 @@
-/* Three small jobs on the villa form, all of which need real JavaScript.
+/* A few small jobs on the villa form, all of which need real JavaScript.
  *
  *   1. Re-bind Alpine to markup HTMX has just swapped in - a room block, or a
  *      photo grid. Alpine only walks the page once, when it starts, so
@@ -105,6 +105,13 @@
   // The comparison is on the whole form's values at once, so it also catches
   // a block HTMX swapped in or out - and it goes back off by itself if the
   // values are put back the way they were.
+  //
+  // Pictures are the one thing this comparison cannot see: they are uploaded
+  // to the server and held aside there rather than sitting in a form field
+  // (see PhotoQuerySet in apps/villas/models.py), so the row comes back with
+  // no change to any value here. The server says so instead, by sending
+  // "photos-changed" back with the new row, and that latches the button on -
+  // the change is on the server now, and only Save settles it either way.
 
   function snapshot(form) {
     var pairs = [];
@@ -121,9 +128,14 @@
     var button = form.querySelector("[data-dirty-submit]");
     if (!button) return;
     var clean = snapshot(form);
+    var photosChanged = false;
+
+    function isDirty() {
+      return photosChanged || snapshot(form) !== clean;
+    }
 
     function refresh() {
-      button.disabled = snapshot(form) === clean;
+      button.disabled = !isDirty();
     }
     refresh();
 
@@ -131,6 +143,10 @@
     form.addEventListener("change", refresh);
     document.body.addEventListener("htmx:afterSwap", function (evt) {
       if (evt.detail && evt.detail.target && form.contains(evt.detail.target)) refresh();
+    });
+    document.body.addEventListener("photos-changed", function () {
+      photosChanged = true;
+      refresh();
     });
   }
 

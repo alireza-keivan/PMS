@@ -25,6 +25,9 @@ from django.views.generic import DetailView, TemplateView, View
 
 from apps.bookings.models import Booking
 from apps.core.utils import safe_next
+from apps.organizations.mixins import ManagerRequiredMixin
+from apps.organizations.permissions import is_manager
+from apps.organizations.scoping import scoped_villas
 from apps.villas.forms import (
     BALI_AREAS,
     CustomAmenityForm,
@@ -34,6 +37,8 @@ from apps.villas.forms import (
 from apps.villas.images import WebPUnavailable, to_webp
 from apps.villas.models import (
     DEFAULT_ROOM_TYPE,
+    MAX_PHOTO_SIZE_MB,
+    MAX_PHOTOS_PER_OWNER,
     MAX_ROOMS_PER_TYPE,
     Amenity,
     Room,
@@ -73,8 +78,9 @@ class VillaListView(LoginRequiredMixin, TemplateView):
         # Counted from the Room table rather than read off Villa.bedrooms, so
         # this card and the booking calendar can never show different numbers
         # of rooms for the same villa.
+        scoped, _membership = scoped_villas(self.request)
         villas = list(
-            org.villas.live()
+            Villa.objects.filter(id__in=[v.id for v in scoped])
             .annotate(room_count=Count("rooms", filter=Q(rooms__is_active=True)))
             .prefetch_related("room_categories")
             .order_by("name")
@@ -99,14 +105,19 @@ class VillaListView(LoginRequiredMixin, TemplateView):
         for villa in villas:
             villa.available_from = available_from.get(villa.id)  # None = available now
 
+        manager = is_manager(self.request.user)
         context.update(
             villas=villas,
-            # Villas somebody started adding and never finished. Shown here so
-            # an unfinished one can be picked up again instead of sitting
-            # invisible in the database forever.
-            drafts=list(org.villas.filter(is_draft=True, is_active=True).order_by("-updated_at")),
+            # Villas somebody started adding and never finished. Half-created
+            # villas have no assigned staff yet, and finishing/discarding one
+            # is a structural action, so this list is Manager-only.
+            drafts=(
+                list(org.villas.filter(is_draft=True, is_active=True).order_by("-updated_at"))
+                if manager else []
+            ),
             can_add_villa=org.can_add_villa,
             villa_limit=org.villa_limit,
+            is_manager=manager,
         )
         return context
 
@@ -134,6 +145,38 @@ def _unique_slug(org, name: str) -> str:
     return slug
 
 
+def _villa_photo_count(villa):
+    """How many pictures already count against a villa's shared 20-photo limit.
+
+    The limit is per villa, not per room - it adds up the villa's own photos
+    and every room type's photos underneath it.
+    """
+    if villa is None or villa.pk is None:
+        return 0
+    room_total = RoomCategoryPhoto.objects.filter(
+        category__villa=villa,
+    ).on_the_form().count()
+    return villa.photos.on_the_form().count() + room_total
+
+
+def _check_photo_limits(files, existing_count):
+    """Catch too-many or too-big pictures before any conversion is attempted.
+
+    Checked ahead of _convert_photos so a violation is reported plainly
+    instead of surfacing as a WebP conversion failure.
+    """
+    if existing_count + len(files) > MAX_PHOTOS_PER_OWNER:
+        return _("You can only have up to %(max)s pictures. Remove some before adding more.") % {
+            "max": MAX_PHOTOS_PER_OWNER,
+        }
+    oversized = [f.name for f in files if f.size > MAX_PHOTO_SIZE_MB * 1024 * 1024]
+    if oversized:
+        return _("These pictures are bigger than %(max)s MB: %(names)s. Use smaller files.") % {
+            "max": MAX_PHOTO_SIZE_MB, "names": ", ".join(oversized),
+        }
+    return None
+
+
 def _convert_photos(files):
     """Turn what was uploaded into WebP, before anything at all is written.
 
@@ -145,21 +188,93 @@ def _convert_photos(files):
     return [to_webp(uploaded) for uploaded in files]
 
 
-def _store_photos(organization, owner, webp_files, photo_model, owner_field):
-    """File already-converted pictures against a villa or a room type."""
+def _store_photos(organization, owner, webp_files, photo_model, owner_field, pending=False):
+    """File already-converted pictures against a villa or a room type.
+
+    `pending=True` means these were picked on a form that hasn't been saved
+    yet: the file is written now, but the row is marked as not-yet-real and
+    only counts once commit_photos runs. See PhotoQuerySet in models.py.
+
+    Order and cover are worked out here for the straight-to-live case, and
+    re-worked by _resequence_photos at commit time for the staged one.
+    """
     start = photo_model.objects.filter(**{owner_field: owner}).count()
     saved = [
         photo_model.objects.create(
             organization=organization, image=webp, sort_order=start + offset,
-            is_cover=(start + offset == 0), **{owner_field: owner},
+            is_cover=(start + offset == 0), is_pending=pending, **{owner_field: owner},
         )
         for offset, webp in enumerate(webp_files)
     ]
     if saved:
         logger.info(
-            "Stored %s photo(s) as WebP for %s %s", len(saved), owner_field, owner.pk,
+            "Stored %s photo(s) as WebP for %s %s - pending=%s",
+            len(saved), owner_field, owner.pk, pending,
         )
     return saved
+
+
+def _resequence_photos(photos):
+    """Put the surviving pictures back in a clean 0, 1, 2 order, first as cover.
+
+    Needed after a commit, because staged rows were numbered as they arrived
+    and the cover may well have been one of the pictures just removed.
+    """
+    for position, photo in enumerate(photos):
+        wanted_cover = position == 0
+        if photo.sort_order != position or photo.is_cover != wanted_cover:
+            photo.sort_order = position
+            photo.is_cover = wanted_cover
+            photo.save(update_fields=["sort_order", "is_cover", "updated_at"])
+
+
+def _stage_removal(photo, owner_label, owner_pk):
+    """Take a picture off the form without really deleting it yet.
+
+    One exception: a picture that was only added a moment ago and never saved
+    is thrown away for real, because there is nothing behind it to go back to.
+    """
+    if photo.is_pending:
+        photo.delete()
+        logger.info("Discarded a not-yet-saved photo on %s %s", owner_label, owner_pk)
+        return
+    photo.pending_delete = True
+    photo.save(update_fields=["pending_delete", "updated_at"])
+    logger.info("Photo %s marked for removal on %s %s - waiting on Save", photo.pk, owner_label, owner_pk)
+
+
+def _photo_grid(request, context):
+    """Hand the picture row back to HTMX, and tell the page it changed.
+
+    The HX-Trigger is what wakes the Save button up: the pictures live outside
+    the form's own fields, so nothing else on the page would notice.
+    """
+    response = render(request, "villas/_photo_grid.html", context)
+    response["HX-Trigger"] = "photos-changed"
+    return response
+
+
+def commit_photos(owner, photo_model, owner_field):
+    """Make this villa's or room type's staged picture changes real.
+
+    Called from the Save on the page the pictures were picked on, inside that
+    save's own transaction, so pressing Save applies the picture changes and
+    the typed changes together or not at all.
+    """
+    rows = photo_model.objects.filter(**{owner_field: owner})
+
+    going = list(rows.filter(pending_delete=True))
+    for photo in going:
+        photo.delete()
+    arriving = rows.filter(is_pending=True).update(is_pending=False)
+
+    if going or arriving:
+        _resequence_photos(list(rows.live()))
+        logger.info(
+            "Committed photo changes on %s %s - %s added, %s removed",
+            owner_field, owner.pk, arriving, len(going),
+        )
+    return arriving, len(going)
 
 
 def _blocks_from_post(post, drop_index=None):
@@ -243,7 +358,7 @@ def _next_type_name(villa) -> str:
 # ---------------------------------------------------------------------------
 
 
-class VillaDetailsView(LoginRequiredMixin, View):
+class VillaDetailsView(ManagerRequiredMixin, View):
     """Step 1. Also the "Back" destination from step 2, where it loads the
     draft's saved answers so nothing typed earlier is lost.
     """
@@ -281,10 +396,16 @@ class VillaDetailsView(LoginRequiredMixin, View):
         if not form.is_valid():
             return self._render(form)
 
-        # Converted before a single row is written, so a picture that can't be
-        # turned into WebP stops this while there is still nothing to undo.
+        # Checked and converted before a single row is written, so a picture
+        # that breaks a limit or can't be turned into WebP stops this while
+        # there is still nothing to undo.
+        photo_files = request.FILES.getlist("photos")
+        limit_error = _check_photo_limits(photo_files, _villa_photo_count(self.villa))
+        if limit_error:
+            form.add_error(None, limit_error)
+            return self._render(form)
         try:
-            webp_photos = _convert_photos(request.FILES.getlist("photos"))
+            webp_photos = _convert_photos(photo_files)
         except WebPUnavailable:
             logger.exception("WebP conversion is unavailable - villa form for %s", self.organization.pk)
             form.add_error(None, _(
@@ -308,7 +429,14 @@ class VillaDetailsView(LoginRequiredMixin, View):
             if not villa.room_categories.exists():
                 create_room_type(villa, DEFAULT_ROOM_TYPE, how_many=1)
             if webp_photos:
+                # The very first save of a brand-new villa: these rode along
+                # with the form because there was no villa to attach them to
+                # when they were picked, so they are already what was asked
+                # for and go straight in.
                 _store_photos(self.organization, villa, webp_photos, VillaPhoto, "villa")
+            # Anything picked or taken off through the picture row on this
+            # page has been waiting for exactly this moment.
+            commit_photos(villa, VillaPhoto, "villa")
 
         logger.info(
             "Villa %s (%s) saved at step 1 by user %s - draft=%s",
@@ -334,7 +462,7 @@ class VillaDetailsView(LoginRequiredMixin, View):
 # ---------------------------------------------------------------------------
 
 
-class VillaRoomsView(LoginRequiredMixin, View):
+class VillaRoomsView(ManagerRequiredMixin, View):
     """The room blocks - step 2 when adding, and step 2 of editing too once
     the villa is real. One view either way, because it is the same work.
     """
@@ -378,6 +506,11 @@ class VillaRoomsView(LoginRequiredMixin, View):
                 had = category.rooms.count()
                 _added, removed = set_room_count(self.villa, category, wanted)
                 kept_anywhere += max((had - wanted) - removed, 0)
+
+            # Pictures picked or removed on this page are only staged until
+            # now - this is the press of Save they were waiting for.
+            for category in self.villa.room_categories.all():
+                commit_photos(category, RoomCategoryPhoto, "category")
 
             if was_draft:
                 self.villa.is_draft = False
@@ -428,7 +561,7 @@ class RoomBlocksPartialMixin:
         return render(request, "villas/_room_blocks.html", context)
 
 
-class RoomCategoryCreateView(LoginRequiredMixin, RoomBlocksPartialMixin, View):
+class RoomCategoryCreateView(ManagerRequiredMixin, RoomBlocksPartialMixin, View):
     """"Add another room type" - creates a real room type straight away.
 
     Real rather than a blank block on the page, so its photos have somewhere
@@ -472,7 +605,7 @@ class RoomCategoryCreateView(LoginRequiredMixin, RoomBlocksPartialMixin, View):
         return redirect("villas:edit", slug=villa.slug)
 
 
-class RoomCategoryDeleteView(LoginRequiredMixin, RoomBlocksPartialMixin, View):
+class RoomCategoryDeleteView(ManagerRequiredMixin, RoomBlocksPartialMixin, View):
     """Remove a room type.
 
     Its rooms move to another one of the villa's types rather than being
@@ -543,12 +676,14 @@ class RoomCategoryDeleteView(LoginRequiredMixin, RoomBlocksPartialMixin, View):
 # ---------------------------------------------------------------------------
 
 
-class RoomPhotoUploadView(LoginRequiredMixin, View):
-    """Pictures of one kind of room, saved the moment they are picked.
+class RoomPhotoUploadView(ManagerRequiredMixin, View):
+    """Pictures of one kind of room, held aside until the page is saved.
 
-    They can go straight to storage because the block they belong to is
-    already a real room type - which is the whole reason step 1 saves a draft
-    instead of holding everything in memory.
+    The file itself is written straight away - the bytes have to go somewhere,
+    and the block they belong to is already a real room type, which is the
+    whole reason step 1 saves a draft instead of holding everything in memory.
+    But the row is marked pending, so it only becomes one of the room's real
+    pictures when Save is pressed. See PhotoQuerySet in models.py.
     """
 
     def post(self, request, slug, pk):
@@ -558,17 +693,19 @@ class RoomPhotoUploadView(LoginRequiredMixin, View):
 
         error = None
         if files:
-            try:
-                _store_photos(
-                    request.organization, category, _convert_photos(files),
-                    RoomCategoryPhoto, "category",
-                )
-            except WebPUnavailable:
-                logger.exception("WebP conversion is unavailable - room type %s", category.pk)
-                error = _("Those pictures couldn't be processed. Try different ones.")
+            error = _check_photo_limits(files, _villa_photo_count(villa))
+            if not error:
+                try:
+                    _store_photos(
+                        request.organization, category, _convert_photos(files),
+                        RoomCategoryPhoto, "category", pending=True,
+                    )
+                except WebPUnavailable:
+                    logger.exception("WebP conversion is unavailable - room type %s", category.pk)
+                    error = _("Those pictures couldn't be processed. Try different ones.")
 
-        return render(request, "villas/_photo_grid.html", {
-            "photos": category.photos.all(),
+        return _photo_grid(request, {
+            "photos": category.photos.on_the_form(),
             "remove_url_name": "villas:remove_room_photo",
             "villa": villa,
             "category": category,
@@ -576,22 +713,27 @@ class RoomPhotoUploadView(LoginRequiredMixin, View):
         })
 
 
-class RoomPhotoDeleteView(LoginRequiredMixin, View):
+class RoomPhotoDeleteView(ManagerRequiredMixin, View):
+    """Takes a picture off the form. Nothing is really gone until Save."""
+
     def post(self, request, slug, pk, photo_pk):
         villa = _get_org_villa(request, slug)
         category = get_object_or_404(RoomCategory.objects.filter(villa=villa), pk=pk)
-        get_object_or_404(category.photos, pk=photo_pk).delete()
-        logger.info("Removed photo %s from room type %s", photo_pk, category.pk)
-        return render(request, "villas/_photo_grid.html", {
-            "photos": category.photos.all(),
+        _stage_removal(get_object_or_404(category.photos, pk=photo_pk), "room type", category.pk)
+        return _photo_grid(request, {
+            "photos": category.photos.on_the_form(),
             "remove_url_name": "villas:remove_room_photo",
             "villa": villa,
             "category": category,
         })
 
 
-class VillaPhotoUploadView(LoginRequiredMixin, View):
-    """Pictures of the property itself, saved the moment they are picked.
+class VillaPhotoUploadView(ManagerRequiredMixin, View):
+    """Pictures of the property itself, held aside until the page is saved.
+
+    The file is written straight away but the row is marked pending, exactly
+    as for a room type above - it becomes one of the villa's real pictures
+    when Save is pressed, and is swept away if the page is simply left.
 
     Only reachable once a villa row exists - on the edit page, or when going
     back to step 1 on a draft. The very first time through step 1, before
@@ -605,27 +747,33 @@ class VillaPhotoUploadView(LoginRequiredMixin, View):
 
         error = None
         if files:
-            try:
-                _store_photos(request.organization, villa, _convert_photos(files), VillaPhoto, "villa")
-            except WebPUnavailable:
-                logger.exception("WebP conversion is unavailable - villa %s", villa.pk)
-                error = _("Those pictures couldn't be processed. Try different ones.")
+            error = _check_photo_limits(files, _villa_photo_count(villa))
+            if not error:
+                try:
+                    _store_photos(
+                        request.organization, villa, _convert_photos(files),
+                        VillaPhoto, "villa", pending=True,
+                    )
+                except WebPUnavailable:
+                    logger.exception("WebP conversion is unavailable - villa %s", villa.pk)
+                    error = _("Those pictures couldn't be processed. Try different ones.")
 
-        return render(request, "villas/_photo_grid.html", {
-            "photos": villa.photos.all(),
+        return _photo_grid(request, {
+            "photos": villa.photos.on_the_form(),
             "remove_url_name": "villas:remove_villa_photo",
             "villa": villa,
             "error": error,
         })
 
 
-class VillaPhotoDeleteView(LoginRequiredMixin, View):
+class VillaPhotoDeleteView(ManagerRequiredMixin, View):
+    """Takes a picture off the form. Nothing is really gone until Save."""
+
     def post(self, request, slug, pk):
         villa = _get_org_villa(request, slug)
-        get_object_or_404(villa.photos, pk=pk).delete()
-        logger.info("Removed photo %s from villa %s", pk, villa.pk)
-        return render(request, "villas/_photo_grid.html", {
-            "photos": villa.photos.all(),
+        _stage_removal(get_object_or_404(villa.photos, pk=pk), "villa", villa.pk)
+        return _photo_grid(request, {
+            "photos": villa.photos.on_the_form(),
             "remove_url_name": "villas:remove_villa_photo",
             "villa": villa,
         })
@@ -636,7 +784,7 @@ class VillaPhotoDeleteView(LoginRequiredMixin, View):
 # ---------------------------------------------------------------------------
 
 
-class AmenityCreateView(LoginRequiredMixin, View):
+class AmenityCreateView(ManagerRequiredMixin, View):
     """Adds something the built-in list doesn't cover.
 
     It is kept against the operator's own account, so it turns up as a
@@ -666,7 +814,7 @@ class AmenityCreateView(LoginRequiredMixin, View):
         return render(request, "villas/_amenity_new.html", context)
 
 
-class AmenityDeleteView(LoginRequiredMixin, View):
+class AmenityDeleteView(ManagerRequiredMixin, View):
     """Drops one of the operator's own custom amenities from their list.
 
     Scoped to `organization` so an operator can never touch another
@@ -694,7 +842,7 @@ class VillaUpdateView(VillaDetailsView):
     """
 
 
-class VillaDeleteView(LoginRequiredMixin, DetailView):
+class VillaDeleteView(ManagerRequiredMixin, DetailView):
     """Removing a villa here doesn't erase its history - bookings and
     documents point back at it, so this just marks it inactive, the same
     flag the picker already filters on. A confirmation page rather than a
@@ -725,7 +873,7 @@ class VillaDeleteView(LoginRequiredMixin, DetailView):
 # ---------------------------------------------------------------------------
 
 
-class RoomQuickAddView(LoginRequiredMixin, View):
+class RoomQuickAddView(ManagerRequiredMixin, View):
     """One-click, no-form room add. No longer called from the calendar -
     "+ Add room" there now confirms then sends the operator to villas:add_room
     instead, since a room needs a real form (type, size, rate). Left in place
@@ -739,7 +887,7 @@ class RoomQuickAddView(LoginRequiredMixin, View):
         return redirect(safe_next(request, fallback))
 
 
-class RoomAddView(LoginRequiredMixin, View):
+class RoomAddView(ManagerRequiredMixin, View):
     """The calendar's "+ Add room" button.
 
     A villa with only one room type has nothing to ask - the new room goes
@@ -768,7 +916,7 @@ class RoomAddView(LoginRequiredMixin, View):
         return redirect(next_url)
 
 
-class RoomDeleteView(LoginRequiredMixin, View):
+class RoomDeleteView(ManagerRequiredMixin, View):
     def post(self, request, slug, pk):
         villa = _get_org_villa(request, slug)
         room = get_object_or_404(Room.objects.filter(villa=villa), pk=pk)
@@ -786,7 +934,7 @@ class RoomDeleteView(LoginRequiredMixin, View):
         return redirect(next_url)
 
 
-class VillaRenameView(LoginRequiredMixin, View):
+class VillaRenameView(ManagerRequiredMixin, View):
     """Inline rename from the calendar row: commits on change, no save
     button, per the design handoff's inline-editing behavior. Blank names
     are ignored rather than saved, since there's no separate validation step.
@@ -801,7 +949,7 @@ class VillaRenameView(LoginRequiredMixin, View):
         return HttpResponse(status=204)
 
 
-class RoomRenameView(LoginRequiredMixin, View):
+class RoomRenameView(ManagerRequiredMixin, View):
     def post(self, request, slug, pk):
         villa = _get_org_villa(request, slug)
         room = get_object_or_404(Room.objects.filter(villa=villa), pk=pk)

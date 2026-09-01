@@ -5,12 +5,11 @@ once wired into config/api.py.
 
 import pytest
 
-from apps.organizations.models import Membership
 
 
 @pytest.fixture
-def owner_client(client, org, user):
-    Membership.objects.create(user=user, organization=org, role=Membership.Role.OWNER)
+def owner_client(client, org, user, make_membership):
+    make_membership(user, org, manager=True)
     client.force_login(user)
     return client
 

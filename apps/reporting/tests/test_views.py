@@ -10,16 +10,14 @@ import pytest
 from django.urls import reverse
 from django.utils import timezone
 
-from apps.accounts.models import User
 from apps.bookings.models import Booking, BookingPayment
-from apps.organizations.models import Membership
 from apps.reporting.fx import ExchangeRate
 from apps.villas.models import Villa
 
 
 @pytest.fixture
-def owner_client(client, org, user):
-    Membership.objects.create(user=user, organization=org, role=Membership.Role.OWNER)
+def owner_client(client, org, user, make_membership):
+    make_membership(user, org, manager=True)
     client.force_login(user)
     return client
 
@@ -30,9 +28,24 @@ def test_dashboard_requires_login(client, db):
     assert "login" in response.url
 
 
-def test_user_with_no_membership_sees_the_no_organization_state(client, db):
-    lonely_user = User.objects.create_user(email="nobody@example.com", password="testpass123")
-    client.force_login(lonely_user)
+def test_user_whose_organization_is_switched_off_sees_the_no_organization_state(
+    client, user_without_active_organization
+):
+    """A brand new account is sent to the welcome form instead - see
+    apps.organizations.middleware. This state is what is left: somebody who does
+    belong to a business, but one that has been switched off.
+
+    The dashboard is Manager-only, so this exercises a Manager whose org
+    happens to be off - not the "logged in but not a Manager" 403 case,
+    which is a different thing to test.
+    """
+    from django.contrib.auth.models import Group
+
+    from apps.organizations.permissions import MANAGER_GROUP
+
+    manager_group, _created = Group.objects.get_or_create(name=MANAGER_GROUP)
+    user_without_active_organization.groups.add(manager_group)
+    client.force_login(user_without_active_organization)
     response = client.get(reverse("reporting:dashboard"))
     assert response.status_code == 200
     assert response.context["no_organization"] is True

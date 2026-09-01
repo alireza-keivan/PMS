@@ -34,6 +34,7 @@ from datetime import date, datetime
 from datetime import time as dt_time
 from io import BytesIO
 
+from django.contrib.auth.models import Group
 from django.core.files.base import ContentFile
 from django.core.management.base import BaseCommand
 from django.utils import timezone
@@ -49,6 +50,7 @@ from apps.guests.services import find_or_create_guest
 from apps.marketing.models import Experience, RateSnapshot
 from apps.messaging.models import Conversation, InboundMessage, MessageTemplate, OutboundMessage
 from apps.organizations.models import Membership, Organization
+from apps.organizations.permissions import MANAGER_GROUP, STAFF_GROUP
 from apps.reporting.fx import ExchangeRate
 from apps.sync.models import RawPayload, SyncAccount, SyncRun
 from apps.villas.models import Amenity, Room, Villa, VillaPhoto, create_room_type
@@ -216,12 +218,22 @@ class Command(BaseCommand):
         self.owner2 = user("john.owner@ubudgreen.example", "John Sutherland", "+6281222000001")
         self.staff3 = user("wayan.staff@ubudgreen.example", "Wayan Sujana", "+6281222000002", "id")
 
-        Membership.objects.get_or_create(user=self.owner1, organization=self.canggu, defaults={"role": Membership.Role.OWNER})
-        Membership.objects.get_or_create(user=self.manager1, organization=self.canggu, defaults={"role": Membership.Role.MANAGER})
-        m1, _ = Membership.objects.get_or_create(user=self.staff1, organization=self.canggu, defaults={"role": Membership.Role.STAFF})
-        m2, _ = Membership.objects.get_or_create(user=self.staff2, organization=self.canggu, defaults={"role": Membership.Role.STAFF})
-        Membership.objects.get_or_create(user=self.owner2, organization=self.ubud, defaults={"role": Membership.Role.OWNER})
-        Membership.objects.get_or_create(user=self.staff3, organization=self.ubud, defaults={"role": Membership.Role.STAFF})
+        manager_group, _created = Group.objects.get_or_create(name=MANAGER_GROUP)
+        staff_group, _created = Group.objects.get_or_create(name=STAFF_GROUP)
+
+        Membership.objects.get_or_create(user=self.owner1, organization=self.canggu)
+        Membership.objects.get_or_create(user=self.manager1, organization=self.canggu)
+        m1, _ = Membership.objects.get_or_create(user=self.staff1, organization=self.canggu)
+        m2, _ = Membership.objects.get_or_create(user=self.staff2, organization=self.canggu)
+        Membership.objects.get_or_create(user=self.owner2, organization=self.ubud)
+        Membership.objects.get_or_create(user=self.staff3, organization=self.ubud)
+
+        self.owner1.groups.add(manager_group)
+        self.manager1.groups.add(manager_group)
+        self.staff1.groups.add(staff_group)
+        self.staff2.groups.add(staff_group)
+        self.owner2.groups.add(manager_group)
+        self.staff3.groups.add(staff_group)
         self._staff_membership_villas = (m1, m2)  # villas assigned after villas exist
 
     # ------------------------------------------------------------ villas
@@ -318,7 +330,7 @@ class Command(BaseCommand):
             (self.villa_hutan, (60, 110, 70)),
             (self.villa_padi, (200, 180, 60)),
         ]:
-            if not villa_obj.photos.exists():
+            if not villa_obj.photos.live().exists():
                 VillaPhoto.objects.create(
                     organization=villa_obj.organization, villa=villa_obj,
                     image=_placeholder_photo(villa_obj.name, color),
@@ -1003,9 +1015,9 @@ class Command(BaseCommand):
         owner_user, _created = User.objects.get_or_create(
             email=REAL_OWNER_EMAIL, defaults={"full_name": "Alireza Keyvan"},
         )
-        Membership.objects.get_or_create(
-            user=owner_user, organization=org, defaults={"role": Membership.Role.OWNER},
-        )
+        Membership.objects.get_or_create(user=owner_user, organization=org)
+        manager_group, _created = Group.objects.get_or_create(name=MANAGER_GROUP)
+        owner_user.groups.add(manager_group)
 
         # ---- villas ----
         villas = []
@@ -1031,7 +1043,7 @@ class Command(BaseCommand):
                 category.amenities.set(
                     self.rng.sample(list(self.amenities.values()), k=self.rng.randint(3, 5))
                 )
-            if not villa.photos.exists():
+            if not villa.photos.live().exists():
                 VillaPhoto.objects.create(
                     organization=org, villa=villa,
                     image=_placeholder_photo(name, PHOTO_COLORS[i % len(PHOTO_COLORS)]),

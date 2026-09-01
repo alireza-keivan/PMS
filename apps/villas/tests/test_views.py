@@ -20,13 +20,21 @@ from django.utils import timezone
 from PIL import Image
 
 from apps.bookings.models import Booking
-from apps.organizations.models import Membership, Organization
-from apps.villas.models import Amenity, Villa, VillaPhoto
+from apps.organizations.models import Organization
+from apps.villas.models import (
+    MAX_PHOTO_SIZE_MB,
+    MAX_PHOTOS_PER_OWNER,
+    Amenity,
+    RoomCategoryPhoto,
+    Villa,
+    VillaPhoto,
+)
+from apps.villas.tasks import STALE_AFTER, prune_staged_photos
 
 
 @pytest.fixture
-def owner_client(client, org, user):
-    Membership.objects.create(user=user, organization=org, role=Membership.Role.OWNER)
+def owner_client(client, org, user, make_membership):
+    make_membership(user, org, manager=True)
     client.force_login(user)
     return client
 
@@ -678,13 +686,138 @@ def test_adding_a_photo_to_the_edit_page_keeps_the_ones_already_there(owner_clie
     assert villa.photos.filter(is_cover=True).count() == 1
 
 
-def test_a_photo_can_be_removed_on_its_own(owner_client, org, villa):
+# Pictures on the villa form are held aside until the page is saved - see
+# PhotoQuerySet in models.py. These check both halves of that: nothing counts
+# before Save, and everything counts after it.
+
+
+def test_removing_a_photo_only_takes_it_off_the_form_until_the_page_is_saved(
+    owner_client, org, villa,
+):
     photo = VillaPhoto.objects.create(organization=org, villa=villa, image=_test_image())
     response = _htmx(
         owner_client, reverse("villas:remove_villa_photo", args=[villa.slug, photo.pk]), {},
     )
     assert response.status_code == 200
+    assert response["HX-Trigger"] == "photos-changed"   # wakes the Save button up
+
+    photo.refresh_from_db()
+    assert photo.pending_delete is True
+    assert villa.photos.live().count() == 1        # the villa still has it
+    assert villa.photos.on_the_form().count() == 0  # but the form no longer shows it
+
+
+def test_saving_the_villa_really_removes_a_photo_that_was_taken_off(owner_client, org, villa):
+    photo = VillaPhoto.objects.create(organization=org, villa=villa, image=_test_image())
+    _htmx(owner_client, reverse("villas:remove_villa_photo", args=[villa.slug, photo.pk]), {})
+
+    owner_client.post(reverse("villas:edit", args=[villa.slug]), _details(name=villa.name))
+
     assert villa.photos.count() == 0
+
+
+def test_a_photo_added_but_not_saved_is_not_one_of_the_villas_photos(owner_client, villa):
+    response = _htmx(
+        owner_client, reverse("villas:add_villa_photos", args=[villa.slug]),
+        {"photos": [_test_image()]},
+    )
+    assert response.status_code == 200
+    assert response["HX-Trigger"] == "photos-changed"
+    assert villa.photos.live().count() == 0
+    assert villa.photos.on_the_form().count() == 1
+
+    owner_client.post(reverse("villas:edit", args=[villa.slug]), _details(name=villa.name))
+
+    assert villa.photos.live().count() == 1
+    assert villa.photos.filter(is_cover=True).count() == 1
+
+
+def test_undoing_a_photo_that_was_never_saved_throws_it_away(owner_client, villa):
+    _htmx(
+        owner_client, reverse("villas:add_villa_photos", args=[villa.slug]),
+        {"photos": [_test_image()]},
+    )
+    photo = villa.photos.get()
+    _htmx(owner_client, reverse("villas:remove_villa_photo", args=[villa.slug, photo.pk]), {})
+
+    assert villa.photos.count() == 0
+
+
+def test_a_room_types_photo_only_counts_once_the_rooms_page_is_saved(owner_client, villa):
+    category = villa.room_categories.first()
+    _htmx(
+        owner_client,
+        reverse("villas:add_room_photos", args=[villa.slug, category.pk]),
+        {"photos": [_test_image()]},
+    )
+    assert category.photos.live().count() == 0
+
+    owner_client.post(reverse("villas:rooms", args=[villa.slug]), _finish(villa))
+
+    assert category.photos.live().count() == 1
+
+
+def test_a_room_type_cannot_go_past_the_photo_limit(owner_client, org, villa):
+    category = villa.room_categories.first()
+    RoomCategoryPhoto.objects.bulk_create(
+        RoomCategoryPhoto(organization=org, category=category, image=_test_image())
+        for _ in range(MAX_PHOTOS_PER_OWNER)
+    )
+
+    response = _htmx(
+        owner_client,
+        reverse("villas:add_room_photos", args=[villa.slug, category.pk]),
+        {"photos": [_test_image()]},
+    )
+
+    assert str(MAX_PHOTOS_PER_OWNER) in response.content.decode()
+    assert category.photos.count() == MAX_PHOTOS_PER_OWNER
+
+
+def test_a_room_photo_over_the_size_limit_is_rejected(owner_client, villa):
+    category = villa.room_categories.first()
+    oversized = SimpleUploadedFile(
+        "big.png", b"0" * (MAX_PHOTO_SIZE_MB * 1024 * 1024 + 1), content_type="image/png",
+    )
+
+    response = _htmx(
+        owner_client,
+        reverse("villas:add_room_photos", args=[villa.slug, category.pk]),
+        {"photos": [oversized]},
+    )
+
+    assert str(MAX_PHOTO_SIZE_MB) in response.content.decode()
+    assert category.photos.count() == 0
+
+
+def test_leaving_the_rooms_page_without_saving_leaves_the_photos_alone(owner_client, org, villa):
+    category = villa.room_categories.first()
+    kept = RoomCategoryPhoto.objects.create(
+        organization=org, category=category, image=_test_image(), is_cover=True,
+    )
+    _htmx(
+        owner_client,
+        reverse("villas:remove_room_photo", args=[villa.slug, category.pk, kept.pk]),
+        {},
+    )
+
+    assert list(category.photos.on_the_form()) == []  # gone from the form
+    assert list(category.photos.live()) == [kept]     # but still the room's picture
+
+    # Nothing else happens - the page is simply left. The sweep that runs a day
+    # later is what clears the mark for good.
+    prune_staged_photos()
+    kept.refresh_from_db()
+    assert kept.pending_delete is True  # too recent to sweep yet
+
+    RoomCategoryPhoto.objects.filter(pk=kept.pk).update(
+        updated_at=timezone.now() - STALE_AFTER - timedelta(minutes=1),
+    )
+    prune_staged_photos()
+
+    kept.refresh_from_db()
+    assert kept.pending_delete is False
+    assert list(category.photos.live()) == [kept]
 
 
 def test_cannot_edit_another_organizations_villa(owner_client, other_org):

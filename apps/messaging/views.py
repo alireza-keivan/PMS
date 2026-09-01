@@ -30,7 +30,7 @@ from django.views.generic import DetailView, ListView, View
 
 from apps.bookings.models import Booking
 from apps.messaging.models import Conversation, MessageTemplate, OutboundMessage
-from apps.villas.models import Villa
+from apps.organizations.scoping import scoped_villas
 
 
 class ConversationListView(LoginRequiredMixin, ListView):
@@ -57,11 +57,7 @@ class ConversationDetailView(LoginRequiredMixin, DetailView):
     context_object_name = "conversation"
 
     def get_queryset(self):
-        org = self.request.organization
-        return (
-            Conversation.objects.filter(organization=org, guest__isnull=False).select_related("guest")
-            if org else Conversation.objects.none()
-        )
+        return _scoped_conversations(self.request)
 
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
@@ -102,10 +98,7 @@ class SendReplyView(LoginRequiredMixin, View):
 
     def post(self, request, pk):
         org = request.organization
-        conversation = get_object_or_404(
-            Conversation.objects.filter(organization=org, guest__isnull=False) if org else Conversation.objects.none(),
-            pk=pk,
-        )
+        conversation = get_object_or_404(_scoped_conversations(request), pk=pk)
 
         template = None
         template_id = request.POST.get("template")
@@ -150,15 +143,51 @@ _STATUS_TAG_CLASS = {
 }
 
 
+def _scoped_conversations(request):
+    """Conversations for guests whose *current* stay - the same one
+    `_guest_status_by_guest` picks to show in the thread header - is at a
+    villa this user may see.
+
+    Deliberately not "any booking this guest has ever had at a scoped
+    villa": a repeat guest can have stayed at several of an operator's
+    villas over time, and one WhatsApp number is one Conversation for their
+    whole history with the business (see Conversation.phone). Scoping by any
+    past villa would hand a Bamboo Loft Canggu staff member a guest's entire
+    thread - including messages about a stay at a villa they have nothing to
+    do with - just because that guest happened to stay at Bamboo Loft Canggu
+    once. Scoping by the current/next/most-recent booking instead keeps
+    staff seeing exactly the guest relationship the UI already shows them.
+    """
+    org = request.organization
+    if org is None:
+        return Conversation.objects.none()
+    villas, _membership = scoped_villas(request)
+    villa_ids = {v.id for v in villas}
+
+    all_guest_ids = list(
+        Conversation.objects.filter(organization=org, guest__isnull=False)
+        .values_list("guest_id", flat=True)
+        .distinct()
+    )
+    status_by_guest = _guest_status_by_guest(org, all_guest_ids)
+    visible_guest_ids = [
+        guest_id
+        for guest_id, (_status, booking) in status_by_guest.items()
+        if booking and booking.villa_id in villa_ids
+    ]
+    return (
+        Conversation.objects.filter(organization=org, guest_id__in=visible_guest_ids)
+        .select_related("guest")
+    )
+
+
 def _visible_conversations(request):
     org = request.organization
     if org is None:
         return []
 
     conversations = list(
-        Conversation.objects.filter(organization=org, guest__isnull=False)
-        .select_related("guest")
-        .prefetch_related("messages", "inbound_messages")
+        _scoped_conversations(request).prefetch_related("messages", "inbound_messages")
     )
 
     guest_ids = [c.guest_id for c in conversations]
@@ -215,10 +244,7 @@ def _list_panel_context(request):
     filter_value = request.GET.get("filter", "all")
     query = request.GET.get("q", "")
 
-    villas = (
-        Villa.objects.filter(organization=org).live().order_by("name")
-        if org else Villa.objects.none()
-    )
+    villas = scoped_villas(request)[0] if org else []
     return {
         "no_organization": org is None,
         "filter_value": filter_value,

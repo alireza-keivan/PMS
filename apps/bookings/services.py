@@ -18,8 +18,9 @@ from django.utils.translation import gettext, ngettext
 from django.utils.translation import gettext_lazy as _
 
 from apps.bookings.models import Booking, BookingPayment
-from apps.organizations.models import Membership
-from apps.villas.models import Room, RoomCategory, Villa
+from apps.organizations.permissions import can_see_money as _can_see_money
+from apps.organizations.scoping import scoped_villas
+from apps.villas.models import Room, RoomCategory
 
 CALENDAR_STATUS_LABELS = {
     "confirmed": _("Confirmed"),
@@ -84,21 +85,6 @@ def payment_summary_by_booking(org, booking_ids: list) -> dict:
     return {row["booking_id"]: row for row in rows}
 
 
-def scoped_villas(request):
-    """Active villas the logged-in user may see. Staff scoped to specific
-    villas (Membership.villas) only see those; an empty M2M for staff means
-    unrestricted, per that field's own help text. Owners/managers always see
-    every active villa. Nothing in the codebase enforced Membership.villas
-    before this - it's implemented fresh here.
-    """
-    org = request.organization
-    membership = request.user.memberships.get(organization=org)
-    villas = Villa.objects.filter(organization=org).live()
-    if membership.role == Membership.Role.STAFF and membership.villas.exists():
-        villas = villas.filter(id__in=membership.villas.values_list("id", flat=True))
-    return list(villas.order_by("name")), membership
-
-
 def _calendar_query(request, start, days, q):
     """The one query behind both presenters: which villas/rooms are visible,
     and which bookings fall inside the window.
@@ -133,11 +119,12 @@ def _calendar_query(request, start, days, q):
 
 def build_calendar_data(request, start, days, q) -> dict:
     today = timezone.localdate()
-    villas, bookings, payments, rooms_by_villa, membership = _calendar_query(request, start, days, q)
+    villas, bookings, payments, rooms_by_villa, _membership = _calendar_query(request, start, days, q)
 
     groups = _build_groups(villas, bookings, rooms_by_villa)
+    can_see_money = _can_see_money(request.user)
     items = [
-        _build_item(b, today, payments.get(b.id, {}), membership.can_see_money, rooms_by_villa)
+        _build_item(b, today, payments.get(b.id, {}), can_see_money, rooms_by_villa)
         for b in bookings
     ]
     return {"groups": groups, "items": items}
@@ -179,8 +166,9 @@ def build_calendar_rows(request, start, days, q) -> dict:
     Flat rather than nested so the template stays a single simple loop.
     """
     today = timezone.localdate()
-    villas, bookings, payments, rooms_by_villa, membership = _calendar_query(request, start, days, q)
+    villas, bookings, payments, rooms_by_villa, _membership = _calendar_query(request, start, days, q)
     categories_by_villa = _room_categories_by_villa([v.id for v in villas])
+    can_see_money = _can_see_money(request.user)
 
     day_columns = [
         {
@@ -227,7 +215,7 @@ def build_calendar_rows(request, start, days, q) -> dict:
                     "category_label": room.category.name if room.category_id else "",
                     "tag_class": _category_tag(room),
                     "bars": [
-                        _build_bar(b, today, payments.get(b.id, {}), membership.can_see_money, start, days)
+                        _build_bar(b, today, payments.get(b.id, {}), can_see_money, start, days)
                         for b in bookings_by_room.get(room.id, [])
                     ],
                 })

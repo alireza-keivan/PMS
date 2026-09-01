@@ -8,6 +8,8 @@ from django.views.generic import DetailView
 
 from apps.guests.models import Guest
 from apps.guests.services import guest_spend_summary
+from apps.organizations.permissions import can_see_money as _can_see_money
+from apps.organizations.scoping import scoped_villas
 
 
 class GuestDetailView(LoginRequiredMixin, DetailView):
@@ -16,7 +18,12 @@ class GuestDetailView(LoginRequiredMixin, DetailView):
 
     def get_queryset(self):
         org = self.request.organization
-        return Guest.objects.filter(organization=org) if org else Guest.objects.none()
+        if org is None:
+            return Guest.objects.none()
+        villas, _membership = scoped_villas(self.request)
+        return Guest.objects.filter(
+            organization=org, bookings__villa_id__in=[v.id for v in villas]
+        ).distinct()
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -27,15 +34,15 @@ class GuestDetailView(LoginRequiredMixin, DetailView):
         context["police_reports"] = guest.police_reports.select_related("booking").order_by("-deadline")
         context["recent_activity"] = guest.activity.order_by("-occurred_at")[:20]
 
-        membership = self.request.user.memberships.get(organization=guest.organization)
-        if membership.can_see_money:
+        can_see_money = _can_see_money(self.request.user)
+        if can_see_money:
             summary = guest_spend_summary(guest)
             context["total_expenditure"] = _format_money(summary.get("total_amount"), summary.get("currency"))
             context["amount_due"] = _format_money(summary.get("amount_owed"), summary.get("currency"))
         else:
             context["total_expenditure"] = None
             context["amount_due"] = None
-        context["can_see_money"] = membership.can_see_money
+        context["can_see_money"] = can_see_money
         return context
 
 

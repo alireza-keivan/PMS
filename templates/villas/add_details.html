@@ -16,7 +16,7 @@
   {% include "villas/_step_indicator.html" with step=1 villa=villa %}
 
   <div class="card">
-    <form method="post" enctype="multipart/form-data" novalidate>
+    <form method="post" enctype="multipart/form-data" novalidate data-loading="{% translate 'Saving changes...' %}"{% if villa and not villa.is_draft %} data-dirty-guard{% endif %}>
       {% csrf_token %}
       {% include "villas/_villa_fields.html" %}
 
@@ -30,7 +30,7 @@
               {% translate "Edit rooms" %} &rarr;
             </a>
           {% endif %}
-          <button type="submit" class="btn btn-primary">
+          <button type="submit" class="btn btn-primary"{% if villa and not villa.is_draft %} data-dirty-submit{% endif %}>
             {% if villa and not villa.is_draft %}{% translate "Save" %}{% else %}{% translate "Continue to rooms" %} &rarr;{% endif %}
           </button>
         </div>
@@ -39,11 +39,6 @@
   </div>
 
   {% if villa and not villa.is_draft %}
-    <p class="mt-4 text-center text-sm">
-      <a href="{% url 'villas:delete' villa.slug %}" class="text-sm text-ink-600 underline hover:text-teal-700">
-        {% translate "Remove this villa" %}
-      </a>
-    </p>
   {% elif villa %}
     <p class="mt-4 text-center text-sm text-ink-600">
       {% translate "Everything here is already saved. You can close this and come back to it." %}

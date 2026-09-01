@@ -209,6 +209,7 @@ class RoomCategoryForm(forms.ModelForm):
         fields = [
             "name", "room_count", "amenities",
             "size_sqm", "max_guests", "nightly_rate", "monthly_rate", "minimum_nights",
+            "use_first_category_photos",
         ]
         labels = {
             # "name" carries no label of its own - it IS the card's title, see
@@ -220,6 +221,7 @@ class RoomCategoryForm(forms.ModelForm):
             "nightly_rate": _("Nightly rate (IDR)"),
             "monthly_rate": _("Monthly rate (IDR)"),
             "minimum_nights": _("Minimum nights"),
+            "use_first_category_photos": _("Use the first room type's photos"),
         }
         widgets = {
             # Looks like a plain bold title until it's touched - see the

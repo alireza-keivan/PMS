@@ -10,51 +10,89 @@ the bar, then the user and the language switch pushed right.
 {% url 'compliance:action_needed' as compliance_url %}
 {% url 'messaging:inbox' as messages_url %}
 {% url 'marketing_admin:overview' as marketing_url %}
+{% url 'organizations:staff_list' as team_url %}
 
-<header class="sticky top-0 z-30 flex h-16 flex-shrink-0 items-center gap-s4 border-b border-sand-300 bg-sand-100 px-s6">
-  <a href="{{ calendar_url }}" class="font-display text-[19px] text-ink-900">{% translate "Rumah" %}</a>
+<header x-data="{ mobileOpen: false }" class="sticky top-0 z-30 flex-shrink-0 border-b border-sand-300 bg-sand-100 relative">
+  <div class="flex h-16 items-center gap-s4 px-s4 sm:px-s6">
+    <a href="{{ calendar_url }}" class="font-display text-[19px] text-ink-900">{% translate "Rumah" %}</a>
 
-  <div class="seg">
-    <a href="{{ calendar_url }}" class="seg-opt {% if request.path == calendar_url %}seg-opt-active{% endif %}">
-      {% translate "Calendar" %}
-    </a>
-    <a href="{{ today_url }}" class="seg-opt {% if request.path == today_url %}seg-opt-active{% endif %}">
-      {% translate "Today" %}
-    </a>
-  </div>
+    <div class="seg hidden lg:inline-flex">
+      <a href="{{ calendar_url }}" class="seg-opt {% if request.path == calendar_url %}seg-opt-active{% endif %}">
+        {% translate "Calendar" %}
+      </a>
+      {% if is_manager %}
+      <a href="{{ today_url }}" class="seg-opt {% if request.path == today_url %}seg-opt-active{% endif %}">
+        {% translate "Today" %}
+      </a>
+      {% endif %}
+    </div>
 
-  <nav class="flex flex-1 items-center justify-center gap-s4">
-    <a href="{{ villas_url }}" class="text-sm text-ink-900/75 hover:text-ink-900 {% if request.path == villas_url %}text-ink-900 font-medium{% endif %}">{% translate "Villas" %}</a>
-    <a href="{{ compliance_url }}" class="text-sm text-ink-900/75 hover:text-ink-900 {% if request.path == compliance_url %}text-ink-900 font-medium{% endif %}">{% translate "Compliance" %}</a>
-    <a href="{{ messages_url }}" class="text-sm text-ink-900/75 hover:text-ink-900 {% if request.path == messages_url %}text-ink-900 font-medium{% endif %}">{% translate "Messages" %}</a>
-    <a href="{{ marketing_url }}" class="text-sm text-ink-900/75 hover:text-ink-900 {% if request.path == marketing_url %}text-ink-900 font-medium{% endif %}">{% translate "Marketing" %}</a>
-  </nav>
+    <nav class="hidden flex-1 items-center justify-center lg:flex">
+    <div class="inline-flex items-center gap-1 rounded-full border border-sand-300 bg-sand-100 p-1">
+      <a href="{{ villas_url }}" class="nav-pill {% if request.path == villas_url %}nav-pill-active{% endif %}">{% translate "Villas" %}</a>
+      <a href="{{ compliance_url }}" class="nav-pill {% if request.path == compliance_url %}nav-pill-active{% endif %}">{% translate "Compliance" %}</a>
+      <a href="{{ messages_url }}" class="nav-pill {% if request.path == messages_url %}nav-pill-active{% endif %}">{% translate "Messages" %}</a>
+      <a href="{{ marketing_url }}" class="nav-pill {% if request.path == marketing_url %}nav-pill-active{% endif %}">{% translate "Marketing" %}</a>
+      {% if is_manager %}
+      <a href="{{ team_url }}" class="nav-pill {% if request.path == team_url %}nav-pill-active{% endif %}">{% translate "Team" %}</a>
+      {% endif %}
+    </div>
+    </nav>
 
-  <div class="flex items-center gap-2">
-    <span class="flex h-7 w-7 flex-none items-center justify-center rounded-full bg-teal-200 font-display text-xs text-teal-900">
-      {% if user.full_name %}{{ user.full_name|slice:":1"|upper }}{% else %}{{ user.email|slice:":1"|upper }}{% endif %}
-    </span>
-    <span class="whitespace-nowrap text-[12.5px] text-ink-900/75">
-      {% if user.full_name %}{{ user.full_name }}{% else %}{{ user.email }}{% endif %}
-    </span>
-  </div>
+    <div class="ml-auto flex items-center gap-s4">
+      <div class="flex items-center gap-2">
+        <span class="flex h-7 w-7 flex-none items-center justify-center rounded-full bg-teal-200 font-display text-xs text-teal-900">
+          {% if user.full_name %}{{ user.full_name|slice:":1"|upper }}{% else %}{{ user.email|slice:":1"|upper }}{% endif %}
+        </span>
+        <span class="hidden max-w-[140px] truncate whitespace-nowrap text-[12.5px] text-ink-900/75 sm:inline">
+          {% if user.full_name %}{{ user.full_name }}{% else %}{{ user.email }}{% endif %}
+        </span>
+      </div>
 
-  <div class="seg">
-    {% get_current_language as LANGUAGE_CODE %}
-    {% for code, label in LANGUAGES %}
-      <form method="post" action="{% url 'set_language' %}" class="contents">
+      <div class="seg">
+        {% get_current_language as LANGUAGE_CODE %}
+        {% for code, label in LANGUAGES %}
+          <form method="post" action="{% url 'set_language' %}" class="contents">
+            {% csrf_token %}
+            <input type="hidden" name="language" value="{{ code }}">
+            <input type="hidden" name="next" value="{% language_url code %}">
+            <button type="submit" class="seg-opt {% if LANGUAGE_CODE == code %}seg-opt-active{% endif %}">
+              {{ code|upper }}
+            </button>
+          </form>
+        {% endfor %}
+      </div>
+
+      <form method="post" action="{% url 'accounts:logout' %}" class="hidden lg:block">
         {% csrf_token %}
-        <input type="hidden" name="language" value="{{ code }}">
-        <input type="hidden" name="next" value="{% language_url code %}">
-        <button type="submit" class="seg-opt {% if LANGUAGE_CODE == code %}seg-opt-active{% endif %}">
-          {{ code|upper }}
-        </button>
+        <button type="submit" class="btn btn-ghost text-sm">{% translate "Log out" %}</button>
       </form>
-    {% endfor %}
+
+      <button type="button" @click="mobileOpen = !mobileOpen" class="flex h-9 w-9 flex-none items-center justify-center rounded-full text-ink-900 hover:bg-sand-200 lg:hidden" :aria-expanded="mobileOpen" aria-label="{% translate 'Open menu' %}">
+        <svg x-show="!mobileOpen" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+        <svg x-show="mobileOpen" x-cloak xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
   </div>
 
-  <form method="post" action="{% url 'accounts:logout' %}">
-    {% csrf_token %}
-    <button type="submit" class="btn btn-ghost text-sm">{% translate "Log out" %}</button>
-  </form>
+  <div x-show="mobileOpen" x-cloak x-transition @click.outside="mobileOpen = false" class="absolute right-0 top-16 z-40 w-1/2 border-l border-t border-sand-300 bg-sand-100 px-s4 pb-s4 pt-s2 shadow-lg lg:hidden">
+    <div class="flex flex-col items-start gap-1">
+      <a href="{{ calendar_url }}" class="nav-pill w-full {% if request.path == calendar_url %}nav-pill-active{% endif %}">{% translate "Calendar" %}</a>
+      {% if is_manager %}
+      <a href="{{ today_url }}" class="nav-pill w-full {% if request.path == today_url %}nav-pill-active{% endif %}">{% translate "Today" %}</a>
+      {% endif %}
+      <a href="{{ villas_url }}" class="nav-pill w-full {% if request.path == villas_url %}nav-pill-active{% endif %}">{% translate "Villas" %}</a>
+      <a href="{{ compliance_url }}" class="nav-pill w-full {% if request.path == compliance_url %}nav-pill-active{% endif %}">{% translate "Compliance" %}</a>
+      <a href="{{ messages_url }}" class="nav-pill w-full {% if request.path == messages_url %}nav-pill-active{% endif %}">{% translate "Messages" %}</a>
+      <a href="{{ marketing_url }}" class="nav-pill w-full {% if request.path == marketing_url %}nav-pill-active{% endif %}">{% translate "Marketing" %}</a>
+      {% if is_manager %}
+      <a href="{{ team_url }}" class="nav-pill w-full {% if request.path == team_url %}nav-pill-active{% endif %}">{% translate "Team" %}</a>
+      {% endif %}
+
+      <form method="post" action="{% url 'accounts:logout' %}" class="w-full border-t border-sand-300 pt-1 mt-1">
+        {% csrf_token %}
+        <button type="submit" class="nav-pill w-full text-left">{% translate "Log out" %}</button>
+      </form>
+    </div>
+  </div>
 </header>

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-08-30 14:58+0800\n"
+"POT-Creation-Date: 2026-08-31 23:32+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -28,6 +28,14 @@ msgstr ""
 
 #: apps/accounts/admin.py:17
 msgid "Dates"
+msgstr ""
+
+#: apps/accounts/forms.py:21
+msgid "What is your business called?"
+msgstr ""
+
+#: apps/accounts/forms.py:26
+msgid "For example: Canggu Coastal Villas"
 msgstr ""
 
 #: apps/accounts/models.py:44
@@ -50,160 +58,156 @@ msgstr ""
 msgid "language"
 msgstr ""
 
-#: apps/bookings/forms.py:25 apps/bookings/models.py:28
-#: apps/bookings/services.py:24
+#: apps/bookings/forms.py:26 apps/bookings/models.py:28
+#: apps/bookings/services.py:25
 msgid "Confirmed"
 msgstr ""
 
-#: apps/bookings/forms.py:26 apps/bookings/models.py:29
+#: apps/bookings/forms.py:27 apps/bookings/models.py:29
 #: apps/guests/models.py:149
 msgid "Cancelled"
 msgstr ""
 
-#: apps/bookings/forms.py:40 apps/villas/models.py:66
+#: apps/bookings/forms.py:41 apps/villas/models.py:66
 #: templates/compliance/document_form.html:42
-#: templates/compliance/documents.html:31 templates/guests/list.html:43
-#: templates/guests/list.html:111
+#: templates/compliance/documents.html:31
 msgid "Villa"
 msgstr ""
 
-#: apps/bookings/forms.py:41
+#: apps/bookings/forms.py:42
 msgid "Choose a villa"
 msgstr ""
 
-#: apps/bookings/forms.py:43
+#: apps/bookings/forms.py:44
 msgid "Choose which villa this booking is for."
 msgstr ""
 
-#: apps/bookings/forms.py:51
+#: apps/bookings/forms.py:52
 msgid "Room type"
 msgstr ""
 
-#: apps/bookings/forms.py:52 apps/bookings/views.py:208
+#: apps/bookings/forms.py:53 apps/bookings/views.py:257
 msgid "Choose a room type"
 msgstr ""
 
-#: apps/bookings/forms.py:53
+#: apps/bookings/forms.py:54
 msgid "Choose which room type this booking is for."
 msgstr ""
 
-#: apps/bookings/forms.py:56
+#: apps/bookings/forms.py:57
 msgid "Check-in date"
 msgstr ""
 
-#: apps/bookings/forms.py:58
+#: apps/bookings/forms.py:59
 msgid "Say when the guest checks in."
 msgstr ""
 
-#: apps/bookings/forms.py:61
+#: apps/bookings/forms.py:62
 msgid "Check-out date"
 msgstr ""
 
-#: apps/bookings/forms.py:63
+#: apps/bookings/forms.py:64
 msgid "Say when the guest checks out."
 msgstr ""
 
-#: apps/bookings/forms.py:66
+#: apps/bookings/forms.py:67
 msgid "Number of guests"
 msgstr ""
 
-#: apps/bookings/forms.py:68
+#: apps/bookings/forms.py:69
 msgid "Say how many guests are staying."
 msgstr ""
 
-#: apps/bookings/forms.py:72
+#: apps/bookings/forms.py:73
 msgid "Guest full name"
 msgstr ""
 
-#: apps/bookings/forms.py:73
+#: apps/bookings/forms.py:74
 msgid "e.g. Sarah Mitchell"
 msgstr ""
 
-#: apps/bookings/forms.py:74
+#: apps/bookings/forms.py:75
 msgid "Give the guest's name."
 msgstr ""
 
-#: apps/bookings/forms.py:77
+#: apps/bookings/forms.py:78
 msgid "Phone number"
 msgstr ""
 
-#: apps/bookings/forms.py:81 templates/registration/login.html:18
+#: apps/bookings/forms.py:82 templates/guests/detail.html:78
+#: templates/registration/login.html:39
 msgid "Email"
 msgstr ""
 
-#: apps/bookings/forms.py:85
+#: apps/bookings/forms.py:86 templates/guests/detail.html:82
 msgid "Nationality"
 msgstr ""
 
-#: apps/bookings/forms.py:86
+#: apps/bookings/forms.py:87
 msgid "Choose a nationality"
 msgstr ""
 
-#: apps/bookings/forms.py:90
+#: apps/bookings/forms.py:91 templates/guests/detail.html:86
 msgid "Preferred language"
 msgstr ""
 
-#: apps/bookings/forms.py:91
+#: apps/bookings/forms.py:92
 msgid "Choose a language"
 msgstr ""
 
-#: apps/bookings/forms.py:96 templates/guests/list.html:78
+#: apps/bookings/forms.py:97
 msgid "Booked through"
 msgstr ""
 
-#: apps/bookings/forms.py:97
+#: apps/bookings/forms.py:98
 msgid "Choose one"
 msgstr ""
 
-#: apps/bookings/forms.py:99
+#: apps/bookings/forms.py:100
 msgid "Say how this booking came in."
 msgstr ""
 
-#: apps/bookings/forms.py:102 templates/compliance/documents.html:34
-#: templates/guests/list.html:59
+#: apps/bookings/forms.py:103 templates/compliance/documents.html:34
+#: templates/messaging/_conversation_list.html:23
 msgid "Status"
 msgstr ""
 
-#: apps/bookings/forms.py:107 apps/villas/forms.py:199 apps/villas/forms.py:220
+#: apps/bookings/forms.py:108 apps/villas/forms.py:199 apps/villas/forms.py:220
 msgid "Nightly rate (IDR)"
 msgstr ""
 
-#: apps/bookings/forms.py:112
+#: apps/bookings/forms.py:113
 msgid "Total amount (IDR)"
 msgstr ""
 
-#: apps/bookings/forms.py:116
+#: apps/bookings/forms.py:117
 msgid "Amount paid (IDR)"
 msgstr ""
 
-#: apps/bookings/forms.py:121 templates/compliance/document_form.html:72
+#: apps/bookings/forms.py:122 templates/compliance/document_form.html:72
 msgid "Notes"
 msgstr ""
 
-#: apps/bookings/forms.py:124
+#: apps/bookings/forms.py:125
 msgid "Anything else worth knowing about this booking"
 msgstr ""
 
-#: apps/bookings/forms.py:158
+#: apps/bookings/forms.py:159
 msgid "Choose a room type that belongs to the selected villa."
 msgstr ""
 
-#: apps/bookings/forms.py:164
+#: apps/bookings/forms.py:165
 msgid "Check-out has to be after check-in."
 msgstr ""
 
-#: apps/bookings/forms.py:172
+#: apps/bookings/forms.py:173
 #, python-format
 msgid ""
-"Already booked by %(name)s, %(check_in)s to %(check_out)s. Check before "
-"saving."
+"All %(room_type)s rooms in this period are booked. The next free time starts "
+"at %(date)s. Please check the calendar."
 msgstr ""
 
-#: apps/bookings/forms.py:175 apps/bookings/views.py:245
-msgid "a guest"
-msgstr ""
-
-#: apps/bookings/forms.py:183
+#: apps/bookings/forms.py:184
 msgid "Add a phone number or email so staff can reach the guest."
 msgstr ""
 
@@ -215,15 +219,13 @@ msgstr ""
 msgid "Walk-in"
 msgstr ""
 
-#: apps/bookings/models.py:25 apps/bookings/services.py:200
-#: apps/bookings/services.py:369
+#: apps/bookings/models.py:25 apps/bookings/services.py:201
+#: apps/bookings/services.py:376
 msgid "Other"
 msgstr ""
 
 #: apps/bookings/models.py:30 apps/bookings/models.py:98
-#: apps/bookings/services.py:27 templates/dashboard/dashboard.html:70
-#: templates/dashboard/dashboard.html:100
-#: templates/dashboard/dashboard.html:130
+#: apps/bookings/services.py:28 templates/dashboard/dashboard.html:7
 msgid "Not available"
 msgstr ""
 
@@ -259,53 +261,52 @@ msgstr ""
 msgid "That room doesn't belong to this booking's villa."
 msgstr ""
 
-#: apps/bookings/models.py:123
+#: apps/bookings/models.py:126
 msgid "Paid by the booking site"
 msgstr ""
 
-#: apps/bookings/models.py:124
+#: apps/bookings/models.py:127
 msgid "Paid directly"
 msgstr ""
 
-#: apps/bookings/models.py:125
+#: apps/bookings/models.py:128
 msgid "Deposit"
 msgstr ""
 
-#: apps/bookings/models.py:126
+#: apps/bookings/models.py:129
 msgid "Refund"
 msgstr ""
 
-#: apps/bookings/models.py:132
+#: apps/bookings/models.py:135
 msgid "Still owed - shows on the daily staff view."
 msgstr ""
 
-#: apps/bookings/services.py:25 apps/messaging/views.py:110
+#: apps/bookings/services.py:26 apps/messaging/views.py:143
 msgid "Checked in"
 msgstr ""
 
-#: apps/bookings/services.py:26 apps/messaging/views.py:112
+#: apps/bookings/services.py:27 apps/messaging/views.py:144
 msgid "Checked out"
 msgstr ""
 
-#: apps/bookings/services.py:28
+#: apps/bookings/services.py:29
 msgid "Payment incomplete"
 msgstr ""
 
-#: apps/bookings/services.py:251 apps/bookings/services.py:407
-#: templates/guests/list.html:133
+#: apps/bookings/services.py:252 apps/bookings/services.py:414
 msgid "Booked"
 msgstr ""
 
-#: apps/bookings/services.py:400
+#: apps/bookings/services.py:407
 msgid "Unassigned"
 msgstr ""
 
-#: apps/bookings/services.py:413
+#: apps/bookings/services.py:420
 #, python-format
 msgid "%(start)s – %(end)s"
 msgstr ""
 
-#: apps/bookings/services.py:417
+#: apps/bookings/services.py:424
 #: templates/bookings/_reservation_availability.html:19
 #, python-format
 msgid "%(n)s night"
@@ -313,23 +314,23 @@ msgid_plural "%(n)s nights"
 msgstr[0] ""
 msgstr[1] ""
 
-#: apps/bookings/views.py:149
+#: apps/bookings/views.py:198
 msgid "Reservation saved."
 msgstr ""
 
-#: apps/bookings/views.py:207
+#: apps/bookings/views.py:256
 msgid "Choose a villa first"
 msgstr ""
 
-#: apps/bookings/views.py:296
+#: apps/bookings/views.py:344
 msgid "Booking removed."
 msgstr ""
 
-#: apps/bookings/views.py:315
+#: apps/bookings/views.py:363
 msgid "Invalid dates."
 msgstr ""
 
-#: apps/bookings/views.py:333
+#: apps/bookings/views.py:381
 msgid "That room is already booked for part of those dates."
 msgstr ""
 
@@ -695,8 +696,8 @@ msgstr ""
 msgid "What the local operator pays the villa owner."
 msgstr ""
 
-#: apps/marketing/staff_urls.py:16 templates/partials/_sidebar.html:70
-#: templates/partials/_topnav.html:44
+#: apps/marketing/staff_urls.py:16 templates/partials/_sidebar.html:62
+#: templates/partials/_topnav.html:30
 msgid "Marketing"
 msgstr ""
 
@@ -720,26 +721,18 @@ msgstr ""
 msgid "Failed"
 msgstr ""
 
-#: apps/messaging/views.py:99 templates/guests/list.html:45
-msgid "All villas"
-msgstr ""
-
-#: apps/messaging/views.py:115
-msgid "All guests"
-msgstr ""
-
-#: apps/messaging/views.py:118
-msgid "Last 24 hours"
-msgstr ""
-
-#: apps/messaging/views.py:173
+#: apps/messaging/views.py:119
 msgid ""
 "More than 24 hours since they last messaged - pick an approved template "
 "first."
 msgstr ""
 
-#: apps/messaging/views.py:175
+#: apps/messaging/views.py:121
 msgid "Write a message before sending."
+msgstr ""
+
+#: apps/messaging/views.py:142
+msgid "Arriving"
 msgstr ""
 
 #: apps/organizations/models.py:17
@@ -1018,74 +1011,90 @@ msgstr ""
 msgid "amenities"
 msgstr ""
 
-#: apps/villas/views.py:263
+#: apps/villas/views.py:270
 #, python-format
 msgid ""
 "You've reached your plan's limit of %(limit)s villas. Contact us to add more."
 msgstr ""
 
-#: apps/villas/views.py:284
+#: apps/villas/views.py:291
 msgid ""
 "Those pictures couldn't be processed. Try different ones, or carry on "
 "without them and add them later."
 msgstr ""
 
-#: apps/villas/views.py:312 apps/villas/views.py:398
+#: apps/villas/views.py:319 apps/villas/views.py:401
 msgid "Saved"
 msgstr ""
 
-#: apps/villas/views.py:387
+#: apps/villas/views.py:390
 #, python-format
 msgid "%(count)s room(s) were kept because they still have bookings on them."
 msgstr ""
 
-#: apps/villas/views.py:396
+#: apps/villas/views.py:399
 #, python-format
 msgid "%(name)s is ready."
 msgstr ""
 
-#: apps/villas/views.py:490
+#: apps/villas/views.py:493
 msgid ""
 "A villa needs at least one room type - add another before removing this one."
 msgstr ""
 
-#: apps/villas/views.py:512
+#: apps/villas/views.py:515
 #, python-format
 msgid "%(count)s room(s) moved to %(name)s."
 msgstr ""
 
-#: apps/villas/views.py:565 apps/villas/views.py:609
+#: apps/villas/views.py:568 apps/villas/views.py:612
 msgid "Those pictures couldn't be processed. Try different ones."
 msgstr ""
 
-#: apps/villas/views.py:709
+#: apps/villas/views.py:719
 #, python-format
 msgid "%(name)s was removed from your villas."
 msgstr ""
 
-#: apps/villas/views.py:754
+#: apps/villas/views.py:764
 msgid "Pick a room type first."
 msgstr ""
 
-#: apps/villas/views.py:769
+#: apps/villas/views.py:779
 msgid "A villa needs at least one room - add another before removing this one."
 msgstr ""
 
-#: apps/villas/views.py:775
+#: apps/villas/views.py:785
 msgid "This room still has bookings - move or remove those first."
 msgstr ""
 
+#: templates/accounts/onboarding.html:4 templates/accounts/onboarding.html:8
+msgid "Welcome"
+msgstr ""
+
+#: templates/accounts/onboarding.html:10
+msgid "One thing before you start, so your villas have somewhere to live."
+msgstr ""
+
+#: templates/accounts/onboarding.html:23
+msgid "You can change this later."
+msgstr ""
+
+#: templates/accounts/onboarding.html:26
+#: templates/bookings/_calendar_panel.html:354
+msgid "Continue"
+msgstr ""
+
 #: templates/base.html:6 templates/base_auth.html:6
-#: templates/partials/_sidebar.html:12 templates/partials/_topnav.html:13
+#: templates/partials/_sidebar.html:12 templates/partials/_topnav.html:15
 msgid "Rumah"
 msgstr ""
 
 #: templates/bookings/_calendar_panel.html:4
 #: templates/bookings/calendar.html:10
 #: templates/compliance/action_needed.html:10
-#: templates/compliance/documents.html:10 templates/dashboard/dashboard.html:9
-#: templates/guests/list.html:10 templates/messaging/inbox.html:10
-#: templates/villas/list.html:10
+#: templates/compliance/documents.html:10 templates/dashboard/dashboard.html:10
+#: templates/messaging/inbox.html:10 templates/villas/list.html:10
 msgid "Your account isn't linked to a property yet."
 msgstr ""
 
@@ -1095,8 +1104,8 @@ msgid "%(n)s days"
 msgstr ""
 
 #: templates/bookings/_calendar_panel.html:22
-#: templates/dashboard/dashboard.html:4 templates/dashboard/dashboard.html:16
-#: templates/partials/_sidebar.html:28 templates/partials/_topnav.html:20
+#: templates/dashboard/dashboard.html:4 templates/dashboard/dashboard.html:17
+#: templates/partials/_sidebar.html:27 templates/partials/_topnav.html:22
 msgid "Today"
 msgstr ""
 
@@ -1116,129 +1125,118 @@ msgstr ""
 msgid "Forward one range"
 msgstr ""
 
-#: templates/bookings/_calendar_panel.html:50
+#: templates/bookings/_calendar_panel.html:60
 msgid "Search bookings or guests"
 msgstr ""
 
-#: templates/bookings/_calendar_panel.html:63
+#: templates/bookings/_calendar_panel.html:83
 msgid "Start a new booking?"
 msgstr ""
 
-#: templates/bookings/_calendar_panel.html:66
+#: templates/bookings/_calendar_panel.html:86
 msgid "New booking"
 msgstr ""
 
-#: templates/bookings/_calendar_panel.html:88
+#: templates/bookings/_calendar_panel.html:109
 #, python-format
 msgid "Move %%(guest)s's booking to %%(dates)s?"
 msgstr ""
 
-#: templates/bookings/_calendar_panel.html:89
+#: templates/bookings/_calendar_panel.html:110
 #, python-format
 msgid "Move %%(guest)s's booking to %%(room)s, %%(dates)s?"
 msgstr ""
 
-#: templates/bookings/_calendar_panel.html:90
+#: templates/bookings/_calendar_panel.html:111
 #, python-format
 msgid "Change %%(guest)s's stay to %%(dates)s?"
 msgstr ""
 
-#: templates/bookings/_calendar_panel.html:91
+#: templates/bookings/_calendar_panel.html:112
 #, python-format
 msgid ""
 "This booking is synced from %%(channel)s - changes here may be overwritten "
 "by the next sync."
 msgstr ""
 
-#: templates/bookings/_calendar_panel.html:92
+#: templates/bookings/_calendar_panel.html:113
 msgid "Couldn't save that change. Try again."
 msgstr ""
 
-#: templates/bookings/_calendar_panel.html:135
+#: templates/bookings/_calendar_panel.html:156
 #, python-format
 msgid "Show or hide rooms in %(name)s"
 msgstr ""
 
-#: templates/bookings/_calendar_panel.html:148
-#: templates/bookings/_calendar_panel.html:170
+#: templates/bookings/_calendar_panel.html:169
+#: templates/bookings/_calendar_panel.html:191
 #, python-format
 msgid "Remove %(name)s"
 msgstr ""
 
-#: templates/bookings/_calendar_panel.html:149
+#: templates/bookings/_calendar_panel.html:170
 #, python-format
 msgid "Remove %(name)s? This can't be undone."
 msgstr ""
 
-#: templates/bookings/_calendar_panel.html:171
+#: templates/bookings/_calendar_panel.html:192
 #, python-format
 msgid "Remove room %(name)s? This can't be undone."
 msgstr ""
 
-#: templates/bookings/_calendar_panel.html:194
+#: templates/bookings/_calendar_panel.html:216
 #, python-format
 msgid "Remove %(name)s's booking? This can't be undone."
 msgstr ""
 
-#: templates/bookings/_calendar_panel.html:226
-#: templates/bookings/_calendar_panel.html:233
+#: templates/bookings/_calendar_panel.html:249
+#: templates/bookings/_calendar_panel.html:256
 msgid "Add room"
 msgstr ""
 
-#: templates/bookings/_calendar_panel.html:255
+#: templates/bookings/_calendar_panel.html:278
 msgid "Which room type is the new room?"
 msgstr ""
 
-#: templates/bookings/_calendar_panel.html:272
+#: templates/bookings/_calendar_panel.html:295
 #, python-format
 msgid "%(n)s room of this type so far"
 msgid_plural "%(n)s rooms of this type so far"
 msgstr[0] ""
 msgstr[1] ""
 
-#: templates/bookings/_calendar_panel.html:274
+#: templates/bookings/_calendar_panel.html:297
 #, python-format
 msgid "Sleeps up to %(n)s"
 msgstr ""
 
-#: templates/bookings/_calendar_panel.html:277
+#: templates/bookings/_calendar_panel.html:300
 #, python-format
 msgid "Rp %(amount)s a night"
 msgstr ""
 
-#: templates/bookings/_calendar_panel.html:284
-#: templates/bookings/_calendar_panel.html:335 templates/bookings/add.html:191
+#: templates/bookings/_calendar_panel.html:307
+#: templates/bookings/_calendar_panel.html:351 templates/bookings/add.html:188
 #: templates/compliance/document_form.html:81
-#: templates/villas/add_details.html:19 templates/villas/confirm_delete.html:20
+#: templates/villas/add_details.html:25 templates/villas/confirm_delete.html:20
+#: templates/villas/list.html:153
 msgid "Cancel"
 msgstr ""
 
-#: templates/bookings/_calendar_panel.html:289
-#: templates/villas/_amenity_checkboxes.html:41
+#: templates/bookings/_calendar_panel.html:312
+#: templates/villas/_amenity_checkboxes.html:46
 msgid "Add"
 msgstr ""
 
-#: templates/bookings/_calendar_panel.html:299
+#: templates/bookings/_calendar_panel.html:322
 msgid "No villas match what you searched for."
 msgstr ""
 
-#: templates/bookings/_calendar_panel.html:307
-msgid "Add a new villa?"
-msgstr ""
-
-#: templates/bookings/_calendar_panel.html:310
-msgid "Add villa"
-msgstr ""
-
-#: templates/bookings/_calendar_panel.html:338
-msgid "Continue"
-msgstr ""
-
-#: templates/bookings/_calendar_panel.html:342
+#: templates/bookings/_calendar_panel.html:358
 msgid "Confirm"
 msgstr ""
 
-#: templates/bookings/_calendar_panel.html:349
+#: templates/bookings/_calendar_panel.html:365
 msgid "Remove"
 msgstr ""
 
@@ -1246,13 +1244,23 @@ msgstr ""
 msgid "This room is free for these dates."
 msgstr ""
 
-#: templates/bookings/_reservation_availability.html:32
+#: templates/bookings/_reservation_availability.html:33
 #, python-format
 msgid ""
-"\n"
-"          Already booked by %(name)s, %(check_in)s to %(check_out)s. Check "
-"before saving.\n"
-"        "
+"All %(room_type)s rooms in this period are booked. The next free time starts "
+"at %(date)s."
+msgstr ""
+
+#: templates/bookings/_reservation_availability.html:36
+msgid "Please check the"
+msgstr ""
+
+#: templates/bookings/_reservation_availability.html:37
+msgid "calendar"
+msgstr ""
+
+#: templates/bookings/_search_suggestions.html:19
+msgid "No guests or bookings match."
 msgstr ""
 
 #: templates/bookings/_side_panel.html:29
@@ -1265,12 +1273,11 @@ msgid ""
 "only the dates."
 msgstr ""
 
-#: templates/bookings/_side_panel.html:38 templates/guests/list.html:106
-#: templates/partials/_sidebar.html:49 templates/partials/_topnav.html:41
+#: templates/bookings/_side_panel.html:38
 msgid "Guests"
 msgstr ""
 
-#: templates/bookings/_side_panel.html:42 templates/guests/list.html:105
+#: templates/bookings/_side_panel.html:42
 msgid "Booked via"
 msgstr ""
 
@@ -1282,7 +1289,11 @@ msgstr ""
 msgid "Remove booking"
 msgstr ""
 
-#: templates/bookings/_side_panel.html:58
+#: templates/bookings/_side_panel.html:60
+msgid "Guest details"
+msgstr ""
+
+#: templates/bookings/_side_panel.html:62
 msgid "Close"
 msgstr ""
 
@@ -1307,57 +1318,45 @@ msgid "Got it"
 msgstr ""
 
 #: templates/bookings/add.html:46
-msgid "1. The stay"
-msgstr ""
-
-#: templates/bookings/add.html:47
 msgid "The stay"
 msgstr ""
 
-#: templates/bookings/add.html:84
-msgid "2. The guest"
-msgstr ""
-
-#: templates/bookings/add.html:85
+#: templates/bookings/add.html:83
 msgid "The guest"
 msgstr ""
 
-#: templates/bookings/add.html:100 templates/bookings/add.html:137
-#: templates/bookings/add.html:148 templates/bookings/add.html:159
+#: templates/bookings/add.html:98 templates/bookings/add.html:134
+#: templates/bookings/add.html:145 templates/bookings/add.html:156
 #: templates/villas/_field.html:21 templates/villas/_room_block.html:70
 #: templates/villas/_room_block.html:81 templates/villas/_room_block.html:96
 #: templates/villas/_villa_fields.html:50
 msgid "optional"
 msgstr ""
 
-#: templates/bookings/add.html:114
+#: templates/bookings/add.html:112
 msgid ""
 "This guest is foreign — a police report will be needed within 24 hours of "
 "check-in."
 msgstr ""
 
-#: templates/bookings/add.html:122
-msgid "3. Booking details"
-msgstr ""
-
-#: templates/bookings/add.html:123
+#: templates/bookings/add.html:120
 msgid "Booking details"
 msgstr ""
 
-#: templates/bookings/add.html:170
+#: templates/bookings/add.html:167
 #, python-format
 msgid "Rp %(amount)s still owed"
 msgstr ""
 
-#: templates/bookings/add.html:177
+#: templates/bookings/add.html:174
 msgid "Paid in full"
 msgstr ""
 
-#: templates/bookings/add.html:182
+#: templates/bookings/add.html:179
 msgid "Pricing is only visible to owners and managers."
 msgstr ""
 
-#: templates/bookings/add.html:190
+#: templates/bookings/add.html:187
 msgid "Save reservation"
 msgstr ""
 
@@ -1367,8 +1366,8 @@ msgstr ""
 
 #: templates/bookings/calendar.html:12
 #: templates/compliance/action_needed.html:13
-#: templates/dashboard/dashboard.html:11 templates/guests/list.html:13
-#: templates/messaging/inbox.html:13 templates/villas/list.html:13
+#: templates/dashboard/dashboard.html:12 templates/messaging/inbox.html:12
+#: templates/villas/list.html:13
 msgid "Ask an owner to add you, or use the admin panel to set this up."
 msgstr ""
 
@@ -1378,7 +1377,7 @@ msgstr ""
 
 #: templates/compliance/action_needed.html:4
 #: templates/compliance/action_needed.html:20
-#: templates/partials/_sidebar.html:56 templates/partials/_topnav.html:42
+#: templates/partials/_sidebar.html:48 templates/partials/_topnav.html:28
 msgid "Compliance"
 msgstr ""
 
@@ -1426,7 +1425,7 @@ msgid ""
 "station."
 msgstr ""
 
-#: templates/compliance/action_needed.html:75 templates/guests/detail.html:108
+#: templates/compliance/action_needed.html:75 templates/guests/detail.html:157
 msgid "Overdue"
 msgstr ""
 
@@ -1472,6 +1471,7 @@ msgstr ""
 
 #: templates/compliance/document_form.html:51
 #: templates/compliance/documents.html:35
+#: venv/lib/python3.12/site-packages/django/db/models/fields/files.py:244
 msgid "File"
 msgstr ""
 
@@ -1491,7 +1491,7 @@ msgstr ""
 msgid "Back to compliance"
 msgstr ""
 
-#: templates/compliance/documents.html:32 templates/guests/list.html:104
+#: templates/compliance/documents.html:32
 msgid "Reference"
 msgstr ""
 
@@ -1515,325 +1515,239 @@ msgstr ""
 msgid "This part of the dashboard isn't built yet."
 msgstr ""
 
-#: templates/dashboard/dashboard.html:63
-msgid "Occupied today"
-msgstr ""
-
-#: templates/dashboard/dashboard.html:70
-#, python-format
-msgid "Night %(n)s of %(total)s"
-msgstr ""
-
-#: templates/dashboard/dashboard.html:73
-msgid "No one in-house tonight"
-msgstr ""
-
-#: templates/dashboard/dashboard.html:27
-msgid "of"
-msgstr ""
-
-#: templates/dashboard/dashboard.html:30
+#: templates/dashboard/dashboard.html:31
 msgid "Revenue this month"
 msgstr ""
 
-#: templates/dashboard/dashboard.html:36
+#: templates/dashboard/dashboard.html:35
 #, python-format
 msgid ""
 "\n"
-"          %(n)s payment left out - no exchange rate on file\n"
-"        "
+"            %(n)s payment left out - no exchange rate on file\n"
+"          "
 msgid_plural ""
 "\n"
-"          %(n)s payments left out - no exchange rate on file\n"
-"        "
+"            %(n)s payments left out - no exchange rate on file\n"
+"          "
 msgstr[0] ""
 msgstr[1] ""
 
-#: templates/dashboard/dashboard.html:45
+#: templates/dashboard/dashboard.html:49
 msgid "Needs doing"
 msgstr ""
 
-#: templates/dashboard/dashboard.html:49
+#: templates/dashboard/dashboard.html:50
 #, python-format
 msgid "%(n)s task"
 msgid_plural "%(n)s tasks"
 msgstr[0] ""
 msgstr[1] ""
 
-#: templates/dashboard/dashboard.html:59
+#: templates/dashboard/dashboard.html:66
+msgid "Occupied today"
+msgstr ""
+
+#: templates/dashboard/dashboard.html:73
+#, python-format
+msgid "Night %(n)s of %(total)s"
+msgstr ""
+
+#: templates/dashboard/dashboard.html:76
+msgid "No one in-house tonight"
+msgstr ""
+
+#: templates/dashboard/dashboard.html:87
 msgid "Arriving today"
 msgstr ""
 
-#: templates/dashboard/dashboard.html:75
+#: templates/dashboard/dashboard.html:94
 #, python-format
 msgid "Check-in %(time)s"
 msgstr ""
 
-#: templates/dashboard/dashboard.html:79
+#: templates/dashboard/dashboard.html:97
 msgid "No one arriving today"
 msgstr ""
 
-#: templates/dashboard/dashboard.html:89
+#: templates/dashboard/dashboard.html:108
 msgid "Leaving today"
 msgstr ""
 
-#: templates/dashboard/dashboard.html:105
+#: templates/dashboard/dashboard.html:115
 #, python-format
 msgid "Check-out %(time)s"
 msgstr ""
 
-#: templates/dashboard/dashboard.html:109
+#: templates/dashboard/dashboard.html:118
 msgid "No one leaving today"
 msgstr ""
 
-#: templates/dashboard/dashboard.html:119
+#: templates/dashboard/dashboard.html:129
 msgid "Still owe money"
 msgstr ""
 
-#: templates/dashboard/dashboard.html:139
+#: templates/dashboard/dashboard.html:140
 msgid "Everyone is paid up"
 msgstr ""
 
 #: templates/guests/detail.html:8
-msgid "Back to guests"
+msgid "← Back to calendar"
 msgstr ""
 
-#: templates/guests/detail.html:18
-msgid "No contact details on file"
-msgstr ""
-
-#: templates/guests/detail.html:24
+#: templates/guests/detail.html:16
 #, python-format
 msgid "%(n)s stay"
 msgid_plural "%(n)s stays"
 msgstr[0] ""
 msgstr[1] ""
 
-#: templates/guests/detail.html:36 templates/partials/_sidebar.html:35
+#: templates/guests/detail.html:27 templates/partials/_sidebar.html:34
 msgid "Bookings"
 msgstr ""
 
-#: templates/guests/detail.html:43
+#: templates/guests/detail.html:33
 msgid "to"
 msgstr ""
 
-#: templates/guests/detail.html:47
-msgid "dates only, no further detail"
-msgstr ""
-
-#: templates/guests/detail.html:53
+#: templates/guests/detail.html:39
 msgid "No bookings on file."
 msgstr ""
 
-#: templates/guests/detail.html:58
+#: templates/guests/detail.html:48
 msgid "Requests"
 msgstr ""
 
-#: templates/guests/detail.html:73
+#: templates/guests/detail.html:58
 msgid "No requests yet."
 msgstr ""
 
-#: templates/guests/detail.html:78
-msgid "Private feedback"
+#: templates/guests/detail.html:67
+msgid "Guest info"
 msgstr ""
 
-#: templates/guests/detail.html:86
-msgid "Sent to owner"
+#: templates/guests/detail.html:70
+msgid "Full name"
+msgstr ""
+
+#: templates/guests/detail.html:74
+msgid "Phone"
+msgstr ""
+
+#: templates/guests/detail.html:91
+msgid "Total expenditure"
 msgstr ""
 
 #: templates/guests/detail.html:95
-msgid "No feedback yet."
+msgid "Amount due"
 msgstr ""
 
-#: templates/guests/detail.html:100
-msgid "Police report reminders"
+#: templates/guests/detail.html:106
+msgid "Private feedback"
 msgstr ""
 
 #: templates/guests/detail.html:113
-msgid "Deadline"
+msgid "Sent to owner"
 msgstr ""
 
-#: templates/guests/detail.html:118
-msgid "None on file."
+#: templates/guests/detail.html:119
+msgid "No feedback yet."
 msgstr ""
 
-#: templates/guests/detail.html:123
+#: templates/guests/detail.html:128
 msgid "Recent activity"
 msgstr ""
 
-#: templates/guests/detail.html:137
+#: templates/guests/detail.html:140
 msgid "Nothing recorded yet."
 msgstr ""
 
-#: templates/guests/detail.html:143
+#: templates/guests/detail.html:149
+msgid "Police report reminders"
+msgstr ""
+
+#: templates/guests/detail.html:162
+msgid "Deadline"
+msgstr ""
+
+#: templates/guests/detail.html:166
+msgid "None on file."
+msgstr ""
+
+#: templates/guests/detail.html:176
 msgid "Internal notes"
 msgstr ""
 
-#: templates/guests/detail.html:144
+#: templates/guests/detail.html:177
 msgid "Staff only - never shown to the guest."
 msgstr ""
 
-#: templates/guests/list.html:4 templates/guests/list.html:19
-msgid "Reservations"
-msgstr ""
-
-#: templates/guests/list.html:21
-msgid "Create reservation"
-msgstr ""
-
-#: templates/guests/list.html:28
-msgid "Guest name"
-msgstr ""
-
-#: templates/guests/list.html:33
-msgid "Booking reference"
-msgstr ""
-
-#: templates/guests/list.html:34 templates/guests/list.html:39
-msgid "Not available yet"
-msgstr ""
-
-#: templates/guests/list.html:38
-msgid "Invoice number"
-msgstr ""
-
-#: templates/guests/list.html:52
-msgid "Date type"
-msgstr ""
-
-#: templates/guests/list.html:54 templates/guests/list.html:107
-msgid "Check-in"
-msgstr ""
-
-#: templates/guests/list.html:55 templates/guests/list.html:108
-msgid "Check-out"
-msgstr ""
-
-#: templates/guests/list.html:61
-msgid "All statuses"
-msgstr ""
-
-#: templates/guests/list.html:68
-msgid "Date from"
-msgstr ""
-
-#: templates/guests/list.html:73
-msgid "Date to"
-msgstr ""
-
-#: templates/guests/list.html:80
-msgid "All sources"
-msgstr ""
-
-#: templates/guests/list.html:89
-msgid "Search"
-msgstr ""
-
-#: templates/guests/list.html:95
-#, python-format
-msgid "%(n)s reservation found"
-msgid_plural "%(n)s reservations found"
-msgstr[0] ""
-msgstr[1] ""
-
-#: templates/guests/list.html:103
-msgid "Guest"
-msgstr ""
-
-#: templates/guests/list.html:109
-msgid "Booked on"
-msgstr ""
-
-#: templates/guests/list.html:110
-msgid "ETA"
-msgstr ""
-
-#: templates/guests/list.html:112
-msgid "Total"
-msgstr ""
-
-#: templates/guests/list.html:113
-msgid "Outstanding"
-msgstr ""
-
-#: templates/guests/list.html:114
-msgid "Invoice"
-msgstr ""
-
-#: templates/guests/list.html:160
-msgid "No reservations match this search."
-msgstr ""
-
-#: templates/messaging/inbox.html:4 templates/messaging/inbox.html:19
-#: templates/partials/_sidebar.html:63 templates/partials/_topnav.html:43
+#: templates/messaging/_conversation_list.html:3
+#: templates/messaging/inbox.html:4 templates/partials/_sidebar.html:55
+#: templates/partials/_topnav.html:29
+#: venv/lib/python3.12/site-packages/django/contrib/messages/apps.py:16
 msgid "Messages"
 msgstr ""
 
-#: templates/messaging/inbox.html:21
-#, python-format
-msgid ""
-"\n"
-"        %(n)s conversation\n"
-"      "
-msgid_plural ""
-"\n"
-"        %(n)s conversations\n"
-"      "
-msgstr[0] ""
-msgstr[1] ""
+#: templates/messaging/_conversation_list.html:11
+msgid "Search guests or messages…"
+msgstr ""
 
-#: templates/messaging/inbox.html:62
+#: templates/messaging/_conversation_list.html:22
+msgid "All"
+msgstr ""
+
+#: templates/messaging/_conversation_list.html:28
+#: templates/partials/_sidebar.html:41 templates/partials/_topnav.html:27
+msgid "Villas"
+msgstr ""
+
+#: templates/messaging/_conversation_list.html:41
+msgid "No conversations match your search."
+msgstr ""
+
+#: templates/messaging/_conversation_row.html:27
 msgid "You:"
 msgstr ""
 
-#: templates/messaging/inbox.html:65
+#: templates/messaging/_conversation_row.html:29
 msgid "No messages yet"
 msgstr ""
 
-#: templates/messaging/inbox.html:77
-msgid "No conversations match these filters."
+#: templates/messaging/_empty_state.html:8
+msgid "Select a conversation"
 msgstr ""
 
-#: templates/messaging/inbox.html:79
-msgid "Show all conversations"
+#: templates/messaging/_empty_state.html:10
+msgid "Pick a guest on the left to read and reply to their messages."
 msgstr ""
 
-#: templates/messaging/inbox.html:84
-msgid "No conversations yet."
+#: templates/messaging/_thread_panel.html:11
+msgid "Back to conversations"
 msgstr ""
 
-#: templates/messaging/inbox.html:86
-msgid "Conversations show up here once a guest messages you on WhatsApp."
-msgstr ""
-
-#: templates/messaging/thread.html:8
-msgid "Back to messages"
-msgstr ""
-
-#: templates/messaging/thread.html:25
+#: templates/messaging/_thread_panel.html:38
 msgid "No messages yet."
 msgstr ""
 
-#: templates/messaging/thread.html:46
-msgid "No template - write freely"
+#: templates/messaging/_thread_panel.html:55
+msgid "Write a message…"
 msgstr ""
 
-#: templates/messaging/thread.html:54
-msgid ""
-"No approved template on file yet - nothing can be sent until one is "
-"approved, or they message you again."
-msgstr ""
-
-#: templates/messaging/thread.html:62
-msgid "Type a message"
-msgstr ""
-
-#: templates/messaging/thread.html:70
+#: templates/messaging/_thread_panel.html:58
 msgid "Send"
 msgstr ""
 
-#: templates/partials/_sidebar.html:42 templates/partials/_topnav.html:40
-msgid "Villas"
+#: templates/messaging/_thread_panel.html:66
+#, python-format
+msgid ""
+"It's been more than 24 hours since %(name)s messaged, so WhatsApp only "
+"allows approved templates. Pick one to send."
+msgstr ""
+
+#: templates/messaging/_thread_panel.html:82
+msgid ""
+"No approved template on file yet - nothing can be sent until one is "
+"approved, or they message you again."
 msgstr ""
 
 #: templates/partials/_sync_badge.html:5
@@ -1848,20 +1762,16 @@ msgstr ""
 msgid "Open menu"
 msgstr ""
 
-#: templates/partials/_topbar.html:20 templates/partials/_topnav.html:73
+#: templates/partials/_topbar.html:20 templates/partials/_topnav.html:58
 msgid "Log out"
 msgstr ""
 
-#: templates/partials/_topnav.html:17
+#: templates/partials/_topnav.html:19
 msgid "Calendar"
 msgstr ""
 
-#: templates/partials/_topnav.html:26
-msgid "More"
-msgstr ""
-
 #: templates/registration/login.html:4 templates/registration/login.html:8
-#: templates/registration/login.html:30
+#: templates/registration/login.html:51
 msgid "Log in"
 msgstr ""
 
@@ -1869,17 +1779,40 @@ msgstr ""
 msgid "That email or password isn't right. Try again."
 msgstr ""
 
-#: templates/registration/login.html:23
+#: templates/registration/login.html:27
+msgid "Continue with Google"
+msgstr ""
+
+#: templates/registration/login.html:32
+#: venv/lib/python3.12/site-packages/django/utils/text.py:282
+msgid "or"
+msgstr ""
+
+#: templates/registration/login.html:44
 msgid "Password"
 msgstr ""
 
-#: templates/villas/_amenity_checkboxes.html:36
+#: templates/villas/_amenity_checkboxes.html:35
 msgid "Add your own"
 msgstr ""
 
 #: templates/villas/_amenity_new.html:19
 #, python-format
 msgid "Added %(name)s. It'll be on the list next time too."
+msgstr ""
+
+#: templates/villas/_amenity_pill.html:23
+msgid "Remove this amenity"
+msgstr ""
+
+#: templates/villas/_amenity_pill.html:24
+#, python-format
+msgid "Remove %(label)s"
+msgstr ""
+
+#: templates/villas/_amenity_pill.html:28
+#, python-format
+msgid "Remove %(label)s from your amenity list?"
 msgstr ""
 
 #: templates/villas/_photo_grid.html:34 templates/villas/_photo_grid.html:35
@@ -1931,12 +1864,13 @@ msgid ""
 "price. Renting the whole villa out as one? One kind of room is all you need."
 msgstr ""
 
-#: templates/villas/_step_indicator.html:14 templates/villas/edit.html:20
+#: templates/villas/_step_indicator.html:23
+#: templates/villas/_step_indicator.html:27
 msgid "About the villa"
 msgstr ""
 
-#: templates/villas/_step_indicator.html:24 templates/villas/add_rooms.html:4
-#: templates/villas/edit.html:31
+#: templates/villas/_step_indicator.html:39
+#: templates/villas/_step_indicator.html:43 templates/villas/add_rooms.html:4
 msgid "Rooms"
 msgstr ""
 
@@ -1948,25 +1882,45 @@ msgstr ""
 msgid "Left empty, this is 11:00 AM."
 msgstr ""
 
-#: templates/villas/add_details.html:4 templates/villas/add_details.html:8
-#: templates/villas/add_rooms.html:8 templates/villas/list.html:100
+#: templates/villas/add_details.html:4 templates/villas/add_details.html:12
+#: templates/villas/add_rooms.html:9 templates/villas/list.html:109
 msgid "Add a villa"
 msgstr ""
 
-#: templates/villas/add_details.html:9 templates/villas/add_rooms.html:9
+#: templates/villas/add_details.html:10
+msgid "Details for this villa."
+msgstr ""
+
+#: templates/villas/add_details.html:13 templates/villas/add_rooms.html:10
 msgid "General details, then room types."
 msgstr ""
 
-#: templates/villas/add_details.html:20
+#: templates/villas/add_details.html:25
+msgid "Back to villas"
+msgstr ""
+
+#: templates/villas/add_details.html:30
+msgid "Edit rooms"
+msgstr ""
+
+#: templates/villas/add_details.html:34
+msgid "Save"
+msgstr ""
+
+#: templates/villas/add_details.html:34
 msgid "Continue to rooms"
 msgstr ""
 
-#: templates/villas/add_details.html:27
+#: templates/villas/add_details.html:44
+msgid "Remove this villa"
+msgstr ""
+
+#: templates/villas/add_details.html:49
 msgid ""
 "Everything here is already saved. You can close this and come back to it."
 msgstr ""
 
-#: templates/villas/add_details.html:31
+#: templates/villas/add_details.html:53
 #, python-format
 msgid ""
 "\n"
@@ -1974,21 +1928,35 @@ msgid ""
 "      "
 msgstr ""
 
-#: templates/villas/add_rooms.html:14
+#: templates/villas/add_rooms.html:13
+msgid "Each kind of room, and how many there are."
+msgstr ""
+
+#: templates/villas/add_rooms.html:20
 msgid ""
 "Add one kind of room for every kind this villa has. Renting the whole place "
 "out as one is fine - that's a single kind of room with one room in it."
 msgstr ""
 
-#: templates/villas/add_rooms.html:25
+#: templates/villas/add_rooms.html:22
+msgid ""
+"Change a number to add or take away rooms. A room with bookings on it is "
+"always kept, even if you lower the number - move those bookings first."
+msgstr ""
+
+#: templates/villas/add_rooms.html:34
 msgid "Back to villa details"
 msgstr ""
 
-#: templates/villas/add_rooms.html:27
+#: templates/villas/add_rooms.html:37
 msgid "Save villa"
 msgstr ""
 
-#: templates/villas/add_rooms.html:32
+#: templates/villas/add_rooms.html:37
+msgid "Save the rooms"
+msgstr ""
+
+#: templates/villas/add_rooms.html:44
 msgid ""
 "Everything you've typed is already saved. You can close this and come back "
 "to it."
@@ -1998,58 +1966,26 @@ msgstr ""
 msgid "Delete villa"
 msgstr ""
 
-#: templates/villas/confirm_delete.html:9
+#: templates/villas/confirm_delete.html:9 templates/villas/list.html:91
 #, python-format
 msgid "Delete %(name)s?"
 msgstr ""
 
-#: templates/villas/confirm_delete.html:12
+#: templates/villas/confirm_delete.html:12 templates/villas/list.html:144
 msgid ""
 "This takes it off your villa list. Its bookings, guests, and documents are "
 "kept, not deleted."
 msgstr ""
 
-#: templates/villas/confirm_delete.html:18
+#: templates/villas/confirm_delete.html:18 templates/villas/list.html:150
 msgid "Yes, delete it"
 msgstr ""
 
-#: templates/villas/edit.html:9
-msgid "Everything on file about this villa."
-msgstr ""
-
-#: templates/villas/edit.html:25
-msgid "Save these details"
-msgstr ""
-
-#: templates/villas/edit.html:33
-msgid ""
-"Each kind of room, and how many there are. Change a number to add or take "
-"away rooms."
-msgstr ""
-
-#: templates/villas/edit.html:42
-msgid "Save the rooms"
-msgstr ""
-
-#: templates/villas/edit.html:47
-msgid ""
-"A room with bookings on it is always kept, even if you lower the number - "
-"move those bookings first."
-msgstr ""
-
-#: templates/villas/edit.html:52
-msgid "Back to villas"
-msgstr ""
-
-#: templates/villas/edit.html:54
-msgid "Remove this villa"
-msgstr ""
-
-#: templates/villas/list.html:4 templates/villas/list.html:19
+#: templates/villas/list.html:4 templates/villas/list.html:21
 msgid "Your villas"
 msgstr ""
 
-#: templates/villas/list.html:21
+#: templates/villas/list.html:23
 #, python-format
 msgid ""
 "\n"
@@ -2062,28 +1998,28 @@ msgid_plural ""
 msgstr[0] ""
 msgstr[1] ""
 
-#: templates/villas/list.html:38
+#: templates/villas/list.html:40
 msgid "Not finished yet"
 msgstr ""
 
-#: templates/villas/list.html:45
+#: templates/villas/list.html:47
 msgid "Finish setting it up"
 msgstr ""
 
-#: templates/villas/list.html:48
+#: templates/villas/list.html:50
 msgid "Discard"
 msgstr ""
 
-#: templates/villas/list.html:65
+#: templates/villas/list.html:67
 #, python-format
 msgid "Available %(date)s"
 msgstr ""
 
-#: templates/villas/list.html:68
+#: templates/villas/list.html:70
 msgid "Available now"
 msgstr ""
 
-#: templates/villas/list.html:73
+#: templates/villas/list.html:75
 #, python-format
 msgid ""
 "\n"
@@ -2096,19 +2032,16 @@ msgid_plural ""
 msgstr[0] ""
 msgstr[1] ""
 
-#: templates/villas/list.html:83
-msgid "Open dashboard"
-msgstr ""
-
 #: templates/villas/list.html:86
 msgid "Edit"
 msgstr ""
 
-#: templates/villas/list.html:87
+#: templates/villas/list.html:95
+#: venv/lib/python3.12/site-packages/django/forms/formsets.py:499
 msgid "Delete"
 msgstr ""
 
-#: templates/villas/list.html:107
+#: templates/villas/list.html:116
 #, python-format
 msgid ""
 "\n"
@@ -2117,14 +2050,1587 @@ msgid ""
 "        "
 msgstr ""
 
-#: templates/villas/list.html:115
+#: templates/villas/list.html:124
 msgid "You haven't added a villa yet."
 msgstr ""
 
-#: templates/villas/list.html:116
+#: templates/villas/list.html:125
 msgid "Add your first one to get started."
 msgstr ""
 
-#: templates/villas/list.html:121
+#: templates/villas/list.html:130
 msgid "Add your first villa"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/_pytest/config/argparsing.py:474
+#, python-format
+msgid "ambiguous option: %(option)s could match %(matches)s"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/click/_termui_impl.py:186
+msgid "d"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/click/_termui_impl.py:736
+#, python-brace-format
+msgid "{editor}: Editing failed"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/click/_termui_impl.py:740
+#, python-brace-format
+msgid "{editor}: Editing failed: {e}"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/click/_winconsole.py:156
+#: venv/lib/python3.12/site-packages/click/_winconsole.py:173
+#, python-brace-format
+msgid "Windows error: {error}"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/click/core.py:104
+msgid "deprecated"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/click/core.py:1304
+msgid "Options"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/click/core.py:1316
+msgid "Positional arguments"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/click/core.py:1391
+#, python-brace-format
+msgid "Got unexpected extra argument ({args})"
+msgid_plural "Got unexpected extra arguments ({args})"
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.12/site-packages/click/core.py:1407
+msgid "DeprecationWarning: The command {name!r} is deprecated.{extra_message}"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/click/core.py:1594
+msgid "Aborted!"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/click/core.py:1981
+msgid "Commands"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/click/core.py:2012
+msgid "Missing command."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/click/core.py:2547
+msgid "Value must be an iterable."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/click/core.py:2570
+#, python-brace-format
+msgid "Takes {nargs} values but 1 was given."
+msgid_plural "Takes {nargs} values but {len} were given."
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.12/site-packages/click/core.py:2767
+msgid ""
+"DeprecationWarning: The {param_type} {name!r} is deprecated.{extra_message}"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/click/core.py:3246
+#, python-brace-format
+msgid "Name '{name}' defined twice"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/click/core.py:3262
+msgid "Boolean option {decl!r} cannot use the same flag for true/false."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/click/core.py:3281
+msgid "Could not determine name for option with declarations {decls!r}"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/click/core.py:3288
+#, python-brace-format
+msgid ""
+"No options defined but a name was passed ({name}). Did you mean to declare "
+"an argument instead? Did you mean to pass '--{name}'?"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/click/core.py:3368
+#, python-brace-format
+msgid "env var: {var}"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/click/core.py:3371
+#, python-brace-format
+msgid "default: {default}"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/click/core.py:3435
+msgid "(dynamic)"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/click/core.py:3754
+#, python-brace-format
+msgid ""
+"Arguments take exactly one parameter declaration, got {length}: {decls}."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/click/decorators.py:399
+msgid "Do you want to continue?"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/click/decorators.py:400
+msgid "Confirm the action without prompting."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/click/decorators.py:482
+#, python-format
+msgid "%(prog)s, version %(version)s"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/click/decorators.py:556
+#: venv/lib/python3.12/site-packages/click/decorators.py:598
+msgid "Show the version and exit."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/click/decorators.py:624
+msgid "Show this message and exit."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/click/exceptions.py:29
+#, python-brace-format
+msgid "Did you mean {possibility}?"
+msgid_plural "(Did you mean one of: {possibilities}?)"
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.12/site-packages/click/exceptions.py:62
+#: venv/lib/python3.12/site-packages/click/exceptions.py:108
+#: venv/lib/python3.12/site-packages/click/termui.py:275
+#, python-brace-format
+msgid "Error: {message}"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/click/exceptions.py:99
+#, python-brace-format
+msgid "Try '{command} {option}' for help."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/click/exceptions.py:152
+#, python-brace-format
+msgid "Invalid value: {message}"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/click/exceptions.py:154
+#, python-brace-format
+msgid "Invalid value for {param_hint}: {message}"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/click/exceptions.py:214
+msgid "Missing argument"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/click/exceptions.py:216
+msgid "Missing option"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/click/exceptions.py:218
+msgid "Missing parameter"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/click/exceptions.py:220
+#, python-brace-format
+msgid "Missing {param_type}"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/click/exceptions.py:227
+#, python-brace-format
+msgid "Missing parameter: {param_name}"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/click/exceptions.py:249
+msgid "No such option {name!r}."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/click/exceptions.py:285
+msgid "No such command {name!r}."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/click/exceptions.py:350
+msgid "unknown error"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/click/exceptions.py:357
+msgid "Could not open file {filename!r}: {message}"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/click/formatting.py:167
+msgid "Usage:"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/click/parser.py:145
+#, python-brace-format
+msgid "Invalid start character for option ({option})"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/click/parser.py:203
+msgid "Argument {name!r} takes {nargs} values."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/click/parser.py:382
+msgid "Option {name!r} does not take a value."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/click/parser.py:445
+msgid "Option {name!r} requires an argument."
+msgid_plural "Option {name!r} requires {nargs} arguments."
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.12/site-packages/click/shell_completion.py:417
+msgid "Shell completion is not supported for Bash versions older than 4.4."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/click/shell_completion.py:424
+msgid "Couldn't detect Bash version, shell completion is not supported."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/click/termui.py:256
+msgid "Repeat for confirmation"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/click/termui.py:286
+msgid "Error: The two entered values do not match."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/click/termui.py:340
+msgid "Error: invalid input"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/click/termui.py:638
+msgid "Unknown color {colour!r}"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/click/termui.py:1003
+msgid "Press any key to continue..."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/click/types.py:439
+#, python-brace-format
+msgid ""
+"Choose from:\n"
+"\t{choices}"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/click/types.py:476
+msgid "{value!r} is not {choice}."
+msgid_plural "{value!r} is not one of {choices}."
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.12/site-packages/click/types.py:482
+#, python-brace-format
+msgid "Choice({choices})"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/click/types.py:570
+msgid "{value!r} does not match the format {format}."
+msgid_plural "{value!r} does not match the formats {formats}."
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.12/site-packages/click/types.py:594
+msgid "{value!r} is not a valid {number_type}."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/click/types.py:679
+#, python-brace-format
+msgid "{value} is not in the range {range}."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/click/types.py:866
+msgid "{value!r} is not a valid boolean. Recognized values: {states}"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/click/types.py:892
+msgid "{value!r} is not a valid UUID."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/click/types.py:1116
+msgid "file"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/click/types.py:1118
+msgid "directory"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/click/types.py:1120
+msgid "path"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/click/types.py:1167
+msgid "{name} {filename!r} does not exist."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/click/types.py:1176
+msgid "{name} {filename!r} is a file."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/click/types.py:1184
+msgid "{name} {filename!r} is a directory."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/click/types.py:1193
+msgid "{name} {filename!r} is not readable."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/click/types.py:1202
+msgid "{name} {filename!r} is not writable."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/click/types.py:1211
+msgid "{name} {filename!r} is not executable."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/click/types.py:1283
+#, python-brace-format
+msgid "{len_type} values are required, but {len_value} was given."
+msgid_plural "{len_type} values are required, but {len_value} were given."
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.12/site-packages/click/utils.py:362
+#: venv/lib/python3.12/site-packages/click/utils.py:389
+#, python-brace-format
+msgid "Unknown standard stream '{name}'"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/contrib/sitemaps/apps.py:8
+msgid "Site Maps"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/contrib/staticfiles/apps.py:9
+msgid "Static Files"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/contrib/syndication/apps.py:7
+msgid "Syndication"
+msgstr ""
+
+#. Translators: String used to replace omitted page numbers in elided page
+#. range generated by paginators, e.g. [1, 2, '…', 5, 6, 7, '…', 9, 10].
+#: venv/lib/python3.12/site-packages/django/core/paginator.py:30
+msgid "…"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/core/paginator.py:32
+msgid "That page number is not an integer"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/core/paginator.py:33
+msgid "That page number is less than 1"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/core/paginator.py:34
+msgid "That page contains no results"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/core/validators.py:22
+msgid "Enter a valid value."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/core/validators.py:70
+msgid "Enter a valid domain name."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/core/validators.py:153
+#: venv/lib/python3.12/site-packages/django/forms/fields.py:774
+msgid "Enter a valid URL."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/core/validators.py:200
+msgid "Enter a valid integer."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/core/validators.py:211
+msgid "Enter a valid email address."
+msgstr ""
+
+#. Translators: "letters" means latin letters: a-z and A-Z.
+#: venv/lib/python3.12/site-packages/django/core/validators.py:289
+msgid ""
+"Enter a valid “slug” consisting of letters, numbers, underscores or hyphens."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/core/validators.py:297
+msgid ""
+"Enter a valid “slug” consisting of Unicode letters, numbers, underscores, or "
+"hyphens."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/core/validators.py:309
+#: venv/lib/python3.12/site-packages/django/core/validators.py:318
+#: venv/lib/python3.12/site-packages/django/core/validators.py:332
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:2220
+#, python-format
+msgid "Enter a valid %(protocol)s address."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/core/validators.py:311
+msgid "IPv4"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/core/validators.py:320
+#: venv/lib/python3.12/site-packages/django/utils/ipv6.py:43
+msgid "IPv6"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/core/validators.py:334
+msgid "IPv4 or IPv6"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/core/validators.py:375
+msgid "Enter only digits separated by commas."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/core/validators.py:381
+#, python-format
+msgid "Ensure this value is %(limit_value)s (it is %(show_value)s)."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/core/validators.py:416
+#, python-format
+msgid "Ensure this value is less than or equal to %(limit_value)s."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/core/validators.py:425
+#, python-format
+msgid "Ensure this value is greater than or equal to %(limit_value)s."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/core/validators.py:434
+#, python-format
+msgid "Ensure this value is a multiple of step size %(limit_value)s."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/core/validators.py:441
+#, python-format
+msgid ""
+"Ensure this value is a multiple of step size %(limit_value)s, starting from "
+"%(offset)s, e.g. %(offset)s, %(valid_value1)s, %(valid_value2)s, and so on."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/core/validators.py:473
+#, python-format
+msgid ""
+"Ensure this value has at least %(limit_value)d character (it has "
+"%(show_value)d)."
+msgid_plural ""
+"Ensure this value has at least %(limit_value)d characters (it has "
+"%(show_value)d)."
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.12/site-packages/django/core/validators.py:491
+#, python-format
+msgid ""
+"Ensure this value has at most %(limit_value)d character (it has "
+"%(show_value)d)."
+msgid_plural ""
+"Ensure this value has at most %(limit_value)d characters (it has "
+"%(show_value)d)."
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.12/site-packages/django/core/validators.py:514
+#: venv/lib/python3.12/site-packages/django/forms/fields.py:365
+#: venv/lib/python3.12/site-packages/django/forms/fields.py:404
+msgid "Enter a number."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/core/validators.py:516
+#, python-format
+msgid "Ensure that there are no more than %(max)s digit in total."
+msgid_plural "Ensure that there are no more than %(max)s digits in total."
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.12/site-packages/django/core/validators.py:521
+#, python-format
+msgid "Ensure that there are no more than %(max)s decimal place."
+msgid_plural "Ensure that there are no more than %(max)s decimal places."
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.12/site-packages/django/core/validators.py:526
+#, python-format
+msgid ""
+"Ensure that there are no more than %(max)s digit before the decimal point."
+msgid_plural ""
+"Ensure that there are no more than %(max)s digits before the decimal point."
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.12/site-packages/django/core/validators.py:597
+#, python-format
+msgid ""
+"File extension “%(extension)s” is not allowed. Allowed extensions are: "
+"%(allowed_extensions)s."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/core/validators.py:659
+msgid "Null characters are not allowed."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/db/models/base.py:1600
+#: venv/lib/python3.12/site-packages/django/forms/models.py:908
+msgid "and"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/db/models/base.py:1602
+#, python-format
+msgid "%(model_name)s with this %(field_labels)s already exists."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/db/models/constraints.py:22
+#, python-format
+msgid "Constraint “%(name)s” is violated."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:134
+#, python-format
+msgid "Value %(value)r is not a valid choice."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:135
+msgid "This field cannot be null."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:136
+msgid "This field cannot be blank."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:137
+#, python-format
+msgid "%(model_name)s with this %(field_label)s already exists."
+msgstr ""
+
+#. Translators: The 'lookup_type' is one of 'date', 'year' or
+#. 'month'. Eg: "Title must be unique for pub_date year"
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:141
+#, python-format
+msgid ""
+"%(field_label)s must be unique for %(date_field_label)s %(lookup_type)s."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:180
+#, python-format
+msgid "Field of type: %(field_type)s"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:1162
+#, python-format
+msgid "“%(value)s” value must be either True or False."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:1163
+#, python-format
+msgid "“%(value)s” value must be either True, False, or None."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:1165
+msgid "Boolean (Either True or False)"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:1215
+#, python-format
+msgid "String (up to %(max_length)s)"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:1217
+msgid "String (unlimited)"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:1326
+msgid "Comma-separated integers"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:1427
+#, python-format
+msgid ""
+"“%(value)s” value has an invalid date format. It must be in YYYY-MM-DD "
+"format."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:1431
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:1566
+#, python-format
+msgid ""
+"“%(value)s” value has the correct format (YYYY-MM-DD) but it is an invalid "
+"date."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:1435
+msgid "Date (without time)"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:1562
+#, python-format
+msgid ""
+"“%(value)s” value has an invalid format. It must be in YYYY-MM-DD HH:MM[:ss[."
+"uuuuuu]][TZ] format."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:1570
+#, python-format
+msgid ""
+"“%(value)s” value has the correct format (YYYY-MM-DD HH:MM[:ss[.uuuuuu]]"
+"[TZ]) but it is an invalid date/time."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:1575
+msgid "Date (with time)"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:1702
+#, python-format
+msgid "“%(value)s” value must be a decimal number."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:1704
+msgid "Decimal number"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:1864
+#, python-format
+msgid ""
+"“%(value)s” value has an invalid format. It must be in [DD] [[HH:]MM:]ss[."
+"uuuuuu] format."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:1868
+msgid "Duration"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:1920
+msgid "Email address"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:1945
+msgid "File path"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:2023
+#, python-format
+msgid "“%(value)s” value must be a float."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:2025
+msgid "Floating point number"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:2065
+#, python-format
+msgid "“%(value)s” value must be an integer."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:2067
+msgid "Integer"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:2163
+msgid "Big (8 byte) integer"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:2180
+msgid "Small integer"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:2188
+msgid "IPv4 address"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:2219
+msgid "IP address"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:2310
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:2311
+#, python-format
+msgid "“%(value)s” value must be either None, True or False."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:2313
+msgid "Boolean (Either True, False or None)"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:2364
+msgid "Positive big integer"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:2379
+msgid "Positive integer"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:2394
+msgid "Positive small integer"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:2410
+#, python-format
+msgid "Slug (up to %(max_length)s)"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:2446
+msgid "Text"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:2526
+#, python-format
+msgid ""
+"“%(value)s” value has an invalid format. It must be in HH:MM[:ss[.uuuuuu]] "
+"format."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:2530
+#, python-format
+msgid ""
+"“%(value)s” value has the correct format (HH:MM[:ss[.uuuuuu]]) but it is an "
+"invalid time."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:2534
+msgid "Time"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:2642
+msgid "URL"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:2666
+msgid "Raw binary data"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:2731
+#, python-format
+msgid "“%(value)s” is not a valid UUID."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:2733
+msgid "Universally unique identifier"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/files.py:420
+msgid "Image"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/json.py:24
+msgid "A JSON object"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/json.py:26
+msgid "Value must be valid JSON."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/related.py:979
+#, python-format
+msgid "%(model)s instance with %(field)s %(value)r is not a valid choice."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/related.py:982
+msgid "Foreign Key (type determined by related field)"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/related.py:1276
+msgid "One-to-one relationship"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/related.py:1333
+#, python-format
+msgid "%(from)s-%(to)s relationship"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/related.py:1335
+#, python-format
+msgid "%(from)s-%(to)s relationships"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/related.py:1383
+msgid "Many-to-many relationship"
+msgstr ""
+
+#. Translators: If found as last label character, these punctuation
+#. characters will prevent the default label_suffix to be appended to the label
+#: venv/lib/python3.12/site-packages/django/forms/boundfield.py:185
+msgid ":?.!"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/forms/fields.py:94
+msgid "This field is required."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/forms/fields.py:314
+msgid "Enter a whole number."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/forms/fields.py:485
+#: venv/lib/python3.12/site-packages/django/forms/fields.py:1257
+msgid "Enter a valid date."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/forms/fields.py:508
+#: venv/lib/python3.12/site-packages/django/forms/fields.py:1258
+msgid "Enter a valid time."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/forms/fields.py:535
+msgid "Enter a valid date/time."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/forms/fields.py:569
+msgid "Enter a valid duration."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/forms/fields.py:570
+#, python-brace-format
+msgid "The number of days must be between {min_days} and {max_days}."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/forms/fields.py:639
+msgid "No file was submitted. Check the encoding type on the form."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/forms/fields.py:640
+msgid "No file was submitted."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/forms/fields.py:641
+msgid "The submitted file is empty."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/forms/fields.py:643
+#, python-format
+msgid "Ensure this filename has at most %(max)d character (it has %(length)d)."
+msgid_plural ""
+"Ensure this filename has at most %(max)d characters (it has %(length)d)."
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.12/site-packages/django/forms/fields.py:648
+msgid "Please either submit a file or check the clear checkbox, not both."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/forms/fields.py:716
+msgid ""
+"Upload a valid image. The file you uploaded was either not an image or a "
+"corrupted image."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/forms/fields.py:879
+#: venv/lib/python3.12/site-packages/django/forms/fields.py:965
+#: venv/lib/python3.12/site-packages/django/forms/models.py:1592
+#, python-format
+msgid "Select a valid choice. %(value)s is not one of the available choices."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/forms/fields.py:967
+#: venv/lib/python3.12/site-packages/django/forms/fields.py:1086
+#: venv/lib/python3.12/site-packages/django/forms/models.py:1590
+msgid "Enter a list of values."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/forms/fields.py:1087
+msgid "Enter a complete value."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/forms/fields.py:1329
+msgid "Enter a valid UUID."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/forms/fields.py:1359
+msgid "Enter a valid JSON."
+msgstr ""
+
+#. Translators: This is the default suffix added to form field labels
+#: venv/lib/python3.12/site-packages/django/forms/forms.py:97
+msgid ":"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/forms/forms.py:239
+#, python-format
+msgid "(Hidden field %(name)s) %(error)s"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/forms/formsets.py:61
+#, python-format
+msgid ""
+"ManagementForm data is missing or has been tampered with. Missing fields: "
+"%(field_names)s. You may need to file a bug report if the issue persists."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/forms/formsets.py:65
+#, python-format
+msgid "Please submit at most %(num)d form."
+msgid_plural "Please submit at most %(num)d forms."
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.12/site-packages/django/forms/formsets.py:70
+#, python-format
+msgid "Please submit at least %(num)d form."
+msgid_plural "Please submit at least %(num)d forms."
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.12/site-packages/django/forms/formsets.py:484
+#: venv/lib/python3.12/site-packages/django/forms/formsets.py:491
+msgid "Order"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/forms/models.py:901
+#, python-format
+msgid "Please correct the duplicate data for %(field)s."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/forms/models.py:906
+#, python-format
+msgid "Please correct the duplicate data for %(field)s, which must be unique."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/forms/models.py:913
+#, python-format
+msgid ""
+"Please correct the duplicate data for %(field_name)s which must be unique "
+"for the %(lookup)s in %(date_field)s."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/forms/models.py:922
+msgid "Please correct the duplicate values below."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/forms/models.py:1359
+msgid "The inline value did not match the parent instance."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/forms/models.py:1450
+msgid "Select a valid choice. That choice is not one of the available choices."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/forms/models.py:1594
+#, python-format
+msgid "“%(pk)s” is not a valid value."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/forms/utils.py:229
+#, python-format
+msgid ""
+"%(datetime)s couldn’t be interpreted in time zone %(current_timezone)s; it "
+"may be ambiguous or it may not exist."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/forms/widgets.py:527
+msgid "Clear"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/forms/widgets.py:528
+msgid "Currently"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/forms/widgets.py:529
+msgid "Change"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/forms/widgets.py:866
+msgid "Unknown"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/forms/widgets.py:867
+msgid "Yes"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/forms/widgets.py:868
+msgid "No"
+msgstr ""
+
+#. Translators: Please do not add spaces around commas.
+#: venv/lib/python3.12/site-packages/django/template/defaultfilters.py:873
+msgid "yes,no,maybe"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/template/defaultfilters.py:903
+#: venv/lib/python3.12/site-packages/django/template/defaultfilters.py:920
+#, python-format
+msgid "%(size)d byte"
+msgid_plural "%(size)d bytes"
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.12/site-packages/django/template/defaultfilters.py:922
+#, python-format
+msgid "%s KB"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/template/defaultfilters.py:924
+#, python-format
+msgid "%s MB"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/template/defaultfilters.py:926
+#, python-format
+msgid "%s GB"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/template/defaultfilters.py:928
+#, python-format
+msgid "%s TB"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/template/defaultfilters.py:930
+#, python-format
+msgid "%s PB"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/utils/dateformat.py:74
+msgid "p.m."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/utils/dateformat.py:75
+msgid "a.m."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/utils/dateformat.py:80
+msgid "PM"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/utils/dateformat.py:81
+msgid "AM"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/utils/dateformat.py:153
+msgid "midnight"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/utils/dateformat.py:155
+msgid "noon"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:7
+msgid "Monday"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:8
+msgid "Tuesday"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:9
+msgid "Wednesday"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:10
+msgid "Thursday"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:11
+msgid "Friday"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:12
+msgid "Saturday"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:13
+msgid "Sunday"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:16
+msgid "Mon"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:17
+msgid "Tue"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:18
+msgid "Wed"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:19
+msgid "Thu"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:20
+msgid "Fri"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:21
+msgid "Sat"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:22
+msgid "Sun"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:25
+msgid "January"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:26
+msgid "February"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:27
+msgid "March"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:28
+msgid "April"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:29
+msgid "May"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:30
+msgid "June"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:31
+msgid "July"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:32
+msgid "August"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:33
+msgid "September"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:34
+msgid "October"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:35
+msgid "November"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:36
+msgid "December"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:39
+msgid "jan"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:40
+msgid "feb"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:41
+msgid "mar"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:42
+msgid "apr"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:43
+msgid "may"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:44
+msgid "jun"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:45
+msgid "jul"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:46
+msgid "aug"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:47
+msgid "sep"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:48
+msgid "oct"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:49
+msgid "nov"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:50
+msgid "dec"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:53
+msgctxt "abbrev. month"
+msgid "Jan."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:54
+msgctxt "abbrev. month"
+msgid "Feb."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:55
+msgctxt "abbrev. month"
+msgid "March"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:56
+msgctxt "abbrev. month"
+msgid "April"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:57
+msgctxt "abbrev. month"
+msgid "May"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:58
+msgctxt "abbrev. month"
+msgid "June"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:59
+msgctxt "abbrev. month"
+msgid "July"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:60
+msgctxt "abbrev. month"
+msgid "Aug."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:61
+msgctxt "abbrev. month"
+msgid "Sept."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:62
+msgctxt "abbrev. month"
+msgid "Oct."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:63
+msgctxt "abbrev. month"
+msgid "Nov."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:64
+msgctxt "abbrev. month"
+msgid "Dec."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:67
+msgctxt "alt. month"
+msgid "January"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:68
+msgctxt "alt. month"
+msgid "February"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:69
+msgctxt "alt. month"
+msgid "March"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:70
+msgctxt "alt. month"
+msgid "April"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:71
+msgctxt "alt. month"
+msgid "May"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:72
+msgctxt "alt. month"
+msgid "June"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:73
+msgctxt "alt. month"
+msgid "July"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:74
+msgctxt "alt. month"
+msgid "August"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:75
+msgctxt "alt. month"
+msgid "September"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:76
+msgctxt "alt. month"
+msgid "October"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:77
+msgctxt "alt. month"
+msgid "November"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:78
+msgctxt "alt. month"
+msgid "December"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/utils/ipv6.py:20
+msgid "This is not a valid IPv6 address."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/utils/text.py:76
+#, python-format
+msgctxt "String to return when truncating text"
+msgid "%(truncated_text)s…"
+msgstr ""
+
+#. Translators: This string is used as a separator between list elements
+#: venv/lib/python3.12/site-packages/django/utils/text.py:301
+#: venv/lib/python3.12/site-packages/django/utils/timesince.py:135
+msgid ", "
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/utils/timesince.py:8
+#, python-format
+msgid "%(num)d year"
+msgid_plural "%(num)d years"
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.12/site-packages/django/utils/timesince.py:9
+#, python-format
+msgid "%(num)d month"
+msgid_plural "%(num)d months"
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.12/site-packages/django/utils/timesince.py:10
+#, python-format
+msgid "%(num)d week"
+msgid_plural "%(num)d weeks"
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.12/site-packages/django/utils/timesince.py:11
+#, python-format
+msgid "%(num)d day"
+msgid_plural "%(num)d days"
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.12/site-packages/django/utils/timesince.py:12
+#, python-format
+msgid "%(num)d hour"
+msgid_plural "%(num)d hours"
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.12/site-packages/django/utils/timesince.py:13
+#, python-format
+msgid "%(num)d minute"
+msgid_plural "%(num)d minutes"
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.12/site-packages/django/views/csrf.py:29
+msgid "Forbidden"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/views/csrf.py:30
+msgid "CSRF verification failed. Request aborted."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/views/csrf.py:34
+msgid ""
+"You are seeing this message because this HTTPS site requires a “Referer "
+"header” to be sent by your web browser, but none was sent. This header is "
+"required for security reasons, to ensure that your browser is not being "
+"hijacked by third parties."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/views/csrf.py:40
+msgid ""
+"If you have configured your browser to disable “Referer” headers, please re-"
+"enable them, at least for this site, or for HTTPS connections, or for “same-"
+"origin” requests."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/views/csrf.py:45
+msgid ""
+"If you are using the <meta name=\"referrer\" content=\"no-referrer\"> tag or "
+"including the “Referrer-Policy: no-referrer” header, please remove them. The "
+"CSRF protection requires the “Referer” header to do strict referer checking. "
+"If you’re concerned about privacy, use alternatives like <a "
+"rel=\"noreferrer\" …> for links to third-party sites."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/views/csrf.py:54
+msgid ""
+"You are seeing this message because this site requires a CSRF cookie when "
+"submitting forms. This cookie is required for security reasons, to ensure "
+"that your browser is not being hijacked by third parties."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/views/csrf.py:60
+msgid ""
+"If you have configured your browser to disable cookies, please re-enable "
+"them, at least for this site, or for “same-origin” requests."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/views/csrf.py:66
+msgid "More information is available with DEBUG=True."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/views/generic/dates.py:44
+msgid "No year specified"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/views/generic/dates.py:64
+#: venv/lib/python3.12/site-packages/django/views/generic/dates.py:115
+#: venv/lib/python3.12/site-packages/django/views/generic/dates.py:214
+msgid "Date out of range"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/views/generic/dates.py:94
+msgid "No month specified"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/views/generic/dates.py:147
+msgid "No day specified"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/views/generic/dates.py:194
+msgid "No week specified"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/views/generic/dates.py:353
+#: venv/lib/python3.12/site-packages/django/views/generic/dates.py:384
+#, python-format
+msgid "No %(verbose_name_plural)s available"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/views/generic/dates.py:680
+#, python-format
+msgid ""
+"Future %(verbose_name_plural)s not available because %(class_name)s."
+"allow_future is False."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/views/generic/dates.py:720
+#, python-format
+msgid "Invalid date string “%(datestr)s” given format “%(format)s”"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/views/generic/detail.py:56
+#, python-format
+msgid "No %(verbose_name)s found matching the query"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/views/generic/list.py:70
+msgid "Page is not “last”, nor can it be converted to an int."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/views/generic/list.py:77
+#, python-format
+msgid "Invalid page (%(page_number)s): %(message)s"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/views/generic/list.py:173
+#, python-format
+msgid "Empty list and “%(class_name)s.allow_empty” is False."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/views/static.py:49
+msgid "Directory indexes are not allowed here."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/views/static.py:51
+#, python-format
+msgid "“%(path)s” does not exist"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/views/static.py:68
+#: venv/lib/python3.12/site-packages/django/views/templates/directory_index.html:8
+#: venv/lib/python3.12/site-packages/django/views/templates/directory_index.html:11
+#, python-format
+msgid "Index of %(directory)s"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/views/templates/default_urlconf.html:7
+#: venv/lib/python3.12/site-packages/django/views/templates/default_urlconf.html:204
+msgid "The install worked successfully! Congratulations!"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/views/templates/default_urlconf.html:206
+#, python-format
+msgid ""
+"View <a href=\"https://docs.djangoproject.com/en/%(version)s/releases/\" "
+"target=\"_blank\" rel=\"noopener\">release notes</a> for Django %(version)s"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/views/templates/default_urlconf.html:208
+#, python-format
+msgid ""
+"You are seeing this page because <a href=\"https://docs.djangoproject.com/en/"
+"%(version)s/ref/settings/#debug\" target=\"_blank\" "
+"rel=\"noopener\">DEBUG=True</a> is in your settings file and you have not "
+"configured any URLs."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/views/templates/default_urlconf.html:217
+msgid "Django Documentation"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/views/templates/default_urlconf.html:218
+msgid "Topics, references, &amp; how-to’s"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/views/templates/default_urlconf.html:226
+msgid "Tutorial: A Polling App"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/views/templates/default_urlconf.html:227
+msgid "Get started with Django"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/views/templates/default_urlconf.html:235
+msgid "Django Community"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/views/templates/default_urlconf.html:236
+msgid "Connect, get help, or contribute"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/kombu/transport/qpid.py:1311
+#, python-format
+msgid "Attempting to connect to qpid with SASL mechanism %s"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/kombu/transport/qpid.py:1316
+#, python-format
+msgid "Connected to qpid with SASL mechanism %s"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/kombu/transport/qpid.py:1334
+#, python-format
+msgid "Unable to connect to qpid with SASL mechanism %s"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/timezone_field/rest_framework.py:10
+msgid "A valid timezone is required."
 msgstr ""

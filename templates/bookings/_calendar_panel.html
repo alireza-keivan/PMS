@@ -29,10 +29,9 @@
        class="btn btn-icon btn-ghost h-[30px] w-[30px]" aria-label="{% translate 'Back one day' %}">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
     </a>
-    <a href="{{ nav.today }}" hx-get="{{ nav.today }}" hx-target="#calendar-panel" hx-push-url="true"
-       class="btn btn-ghost min-w-[150px] justify-center px-s2 text-[13.5px]">
+    <span class="flex min-w-[150px] items-center justify-center px-s2 font-display text-[13.5px] text-teal-700">
       {{ start|date:"j M" }} – {{ range_end|date:"j M" }}
-    </a>
+    </span>
     <a href="{{ nav.day_forward }}" hx-get="{{ nav.day_forward }}" hx-target="#calendar-panel" hx-push-url="true"
        class="btn btn-icon btn-ghost h-[30px] w-[30px]" aria-label="{% translate 'Forward one day' %}">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
@@ -102,7 +101,7 @@ not Django template variables - translate keeps them untouched, JS fills them
 in with String.replace after the fact. Kept here rather than hardcoded in JS
 so both languages go through the normal .po catalog like everywhere else.
 {% endcomment %}
-<div class="mx-s6 rounded-lg bg-sand-100 shadow-sm" id="calendar-grid" data-days="{{ days }}"
+<div class="mx-s6 rounded-lg bg-sand-100 shadow-sm" id="calendar-grid" data-days="{{ days }}" data-start="{{ start|date:'Y-m-d' }}"
      data-focus-booking-id="{{ focus_booking_id }}"
      data-msg-move-same-room="{% translate "Move %(guest)s's booking to %(dates)s?" %}"
      data-msg-move-new-room="{% translate "Move %(guest)s's booking to %(room)s, %(dates)s?" %}"
@@ -173,7 +172,7 @@ so both languages go through the normal .po catalog like everywhere else.
 
     {% elif row.kind == "room" %}
       <div class="flex border-t border-sand-300/60 bg-sand-50/60" x-show="isOpen({{ row.villa_id }})" x-cloak>
-        <div class="flex w-[300px] flex-none items-center gap-2 overflow-hidden py-1 pl-[44px] pr-s2">
+        <div class="relative z-[6] flex w-[300px] flex-none items-center gap-2 overflow-hidden bg-[#f1e5d0] py-1 pl-[44px] pr-s2">
           <input
             type="text" value="{{ row.name }}"
             hx-post="{% url 'villas:rename_room' row.villa_slug row.id %}" hx-trigger="change" hx-swap="none"
@@ -237,7 +236,7 @@ so both languages go through the normal .po catalog like everywhere else.
       <div class="flex border-t border-sand-300/60 {% if forloop.last %}rounded-b-lg{% endif %}"
            x-show="isOpen({{ row.villa_id }})" x-cloak
            {% if row.categories|length > 1 %}x-data="{ addRoomOpen: false, addRoomCategory: null }"{% endif %}>
-        <div class="w-[300px] flex-none py-1 pl-[44px] pr-s2">
+        <div class="relative z-[6] w-[300px] flex-none bg-sand-100 py-1 pl-[44px] pr-s2">
           {% if row.categories|length > 1 %}
             <button type="button" class="btn btn-ghost px-2.5 py-1 text-xs"
                     @click="addRoomOpen = true; addRoomCategory = null">

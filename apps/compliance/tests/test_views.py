@@ -15,13 +15,12 @@ from django.utils import timezone
 from apps.bookings.models import Booking
 from apps.compliance.models import ComplianceDocument, ComplianceDocumentType, PoliceReport
 from apps.guests.services import find_or_create_guest
-from apps.organizations.models import Membership
 from apps.villas.models import Villa
 
 
 @pytest.fixture
-def owner_client(client, org, user):
-    Membership.objects.create(user=user, organization=org, role=Membership.Role.OWNER)
+def owner_client(client, org, user, make_membership):
+    make_membership(user, org, manager=True)
     client.force_login(user)
     return client
 
@@ -50,8 +49,8 @@ def _police_report(org, villa, deadline, status=PoliceReport.Status.NEEDED):
     )
 
 
-def test_no_organization_shows_the_placeholder_state(client, user):
-    client.force_login(user)
+def test_no_organization_shows_the_placeholder_state(client, user_without_active_organization):
+    client.force_login(user_without_active_organization)
     response = client.get(reverse("compliance:action_needed"))
     assert response.context["no_organization"] is True
 
@@ -96,9 +95,9 @@ def test_action_needed_excludes_already_filed_police_reports(owner_client, org, 
     assert list(response.context["police_reports"]) == []
 
 
-def test_staff_scoped_to_specific_villas_only_sees_those_items(org, user, villa, doc_type):
+def test_staff_scoped_to_specific_villas_only_sees_those_items(org, user, villa, doc_type, make_membership):
     other_villa = Villa.objects.create(organization=org, name="Not Assigned", slug="not-assigned")
-    membership = Membership.objects.create(user=user, organization=org, role=Membership.Role.STAFF)
+    membership = make_membership(user, org, manager=False)
     membership.villas.add(villa)
     _document(org, other_villa, doc_type, expires_on=timezone.localdate())
 

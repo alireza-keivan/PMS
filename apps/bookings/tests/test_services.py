@@ -15,7 +15,6 @@ from django.test import RequestFactory
 from apps.bookings.models import Booking, BookingPayment
 from apps.bookings.services import build_calendar_data, build_calendar_rows, calendar_status
 from apps.guests.services import find_or_create_guest
-from apps.organizations.models import Membership
 
 
 def _dates(today, nights=3, offset=0):
@@ -61,8 +60,8 @@ def test_finished_stay_with_nothing_owed_is_checked_out(org, villa):
 
 
 @pytest.fixture
-def owner_request(org, user, villa):
-    Membership.objects.create(user=user, organization=org, role=Membership.Role.OWNER)
+def owner_request(org, user, villa, make_membership):
+    make_membership(user, org, manager=True)
     request = RequestFactory().get("/bookings/calendar/")
     request.organization = org
     request.user = user
@@ -88,11 +87,11 @@ def test_inactive_villas_are_excluded(owner_request, org, villa):
     assert not any("Retired Villa" in label for label in group_labels)
 
 
-def test_staff_scoped_to_specific_villas_only_sees_those(org, user, villa):
+def test_staff_scoped_to_specific_villas_only_sees_those(org, user, villa, make_membership):
     from apps.villas.models import Villa
 
     Villa.objects.create(organization=org, name="Not Assigned", slug="not-assigned")
-    membership = Membership.objects.create(user=user, organization=org, role=Membership.Role.STAFF)
+    membership = make_membership(user, org, manager=False)
     membership.villas.add(villa)
 
     request = RequestFactory().get("/bookings/calendar/")
@@ -105,11 +104,11 @@ def test_staff_scoped_to_specific_villas_only_sees_those(org, user, villa):
     assert any(villa.name in label for label in group_labels)
 
 
-def test_staff_with_no_assigned_villas_sees_every_villa(org, user, villa):
+def test_staff_with_no_assigned_villas_sees_every_villa(org, user, villa, make_membership):
     from apps.villas.models import Villa
 
     other_villa = Villa.objects.create(organization=org, name="Also Mine", slug="also-mine")
-    Membership.objects.create(user=user, organization=org, role=Membership.Role.STAFF)
+    make_membership(user, org, manager=False)
 
     request = RequestFactory().get("/bookings/calendar/")
     request.organization = org
@@ -136,13 +135,13 @@ def test_search_with_no_match_hides_the_villa_row(owner_request, org, villa):
     assert data["items"] == []
 
 
-def test_amount_owed_is_hidden_from_staff(org, user, villa):
+def test_amount_owed_is_hidden_from_staff(org, user, villa, make_membership):
     today = date.today()
     booking = _booking(org, villa, today, offset=0)
     BookingPayment.objects.create(
         organization=org, booking=booking, amount="1000000", currency="IDR", is_outstanding=True,
     )
-    Membership.objects.create(user=user, organization=org, role=Membership.Role.STAFF)
+    make_membership(user, org, manager=False)
     request = RequestFactory().get("/bookings/calendar/")
     request.organization = org
     request.user = user
@@ -292,14 +291,14 @@ def test_a_stay_starting_before_the_window_is_clamped_to_its_left_edge(owner_req
     assert "width:calc(30.0000%" in bar["style"]  # 3 of its 8 nights are still visible
 
 
-def test_money_owed_is_withheld_from_staff_in_the_rows(org, user, villa):
+def test_money_owed_is_withheld_from_staff_in_the_rows(org, user, villa, make_membership):
     today = date.today()
     room = villa.rooms.get(name="Standard")
     booking = _booking(org, villa, today, offset=0, room=room)
     BookingPayment.objects.create(
         organization=org, booking=booking, amount="1000000", currency="IDR", is_outstanding=True,
     )
-    Membership.objects.create(user=user, organization=org, role=Membership.Role.STAFF)
+    make_membership(user, org, manager=False)
     request = RequestFactory().get("/bookings/calendar/")
     request.organization = org
     request.user = user

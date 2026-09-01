@@ -95,6 +95,11 @@
   .seg-opt-active { @apply bg-teal-600 text-sand-50; }
   .seg-opt:not(.seg-opt-active):hover { @apply bg-sand-200; }
 
+  .nav-pill { @apply rounded-full px-3.5 py-1.5 text-sm font-medium text-ink-900/70 transition-colors; }
+  .nav-pill:hover { @apply bg-teal-50 text-ink-900; }
+  .nav-pill-active { @apply bg-teal-600 text-sand-50 shadow-sm; }
+  .nav-pill-active:hover { @apply bg-teal-600; }
+
   .card { @apply rounded-card border border-sand-300 bg-sand-100 p-4 shadow-sm; }
   /* Guest detail page: fixed-height card, ~4 rows visible, rest scrollable.
      Radius is locally overridden to 20px per the design handoff, rather than
@@ -162,4 +167,47 @@
   }
   .title-input:hover { @apply bg-sand-200; }
   .title-input:focus { @apply bg-teal-50 ring-2 ring-teal-600; }
+
+  /* Loading spinner - one look for every "waiting on something" moment.
+     Pure CSS rotation (no JS), terracotta arc on a faint terracotta track.
+     Used through templates/partials/_spinner.html - don't hand-write these
+     classes in a template, include the partial instead. */
+  .spinner {
+    @apply inline-block shrink-0 rounded-full border-solid;
+    border-color: theme("colors.teal.100");
+    border-top-color: theme("colors.teal.600");
+    animation: spinner-rotate 0.9s linear infinite;
+  }
+  .spinner-sm { @apply h-4 w-4 border-2; }
+  .spinner-md { @apply h-7 w-7 border-[3px]; }
+  .spinner-lg { @apply h-12 w-12 border-4; }
+  @keyframes spinner-rotate {
+    to { transform: rotate(360deg); }
+  }
+  /* Reduced motion: a slow pulse instead of a spin, so it still reads as
+     "busy" without moving. */
+  @media (prefers-reduced-motion: reduce) {
+    .spinner { animation: spinner-fade 1.4s ease-in-out infinite; }
+    @keyframes spinner-fade { 50% { opacity: 0.35; } }
+  }
+
+  /* Full-screen mode: dims the page and centres the spinner. */
+  /* display:flex from a class beats the browser's own [hidden] rule, so say
+     it here - otherwise hiding it with `hidden` would do nothing. */
+  .spinner-overlay[hidden] { display: none; }
+  .spinner-overlay {
+    @apply fixed inset-0 z-50 flex flex-col items-center justify-center gap-3;
+    background: rgba(46, 43, 37, 0.35);
+    backdrop-filter: blur(1px);
+  }
+
+  /* HTMX: any element with hx-indicator="#some-spinner" shows it only while
+     its request is running. HTMX toggles .htmx-request for us. */
+  /* Layout lives here, not as utility classes on the element - a utility
+     like `inline-flex` is written later in the built CSS and would beat
+     this rule, leaving the spinner on screen forever. */
+  .spinner-indicator { display: none; align-items: center; gap: 0.5rem; }
+  .htmx-request .spinner-indicator,
+  .htmx-request.spinner-indicator { display: inline-flex; }
+
 }

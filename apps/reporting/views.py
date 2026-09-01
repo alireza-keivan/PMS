@@ -7,19 +7,19 @@ dashboard/README.md). Reporting has no booking logic of its own, only the
 aggregation and the currency conversion for display.
 """
 
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.utils import timezone
 from django.views.generic import TemplateView
 
 from apps.bookings.models import Booking, BookingPayment
 from apps.compliance.models import ComplianceDocument, PoliceReport
+from apps.organizations.mixins import ManagerRequiredMixin
 from apps.reporting.fx import convert
 from apps.villas.models import Villa
 
 OCCUPYING_STATUSES = [Booking.Status.CONFIRMED, Booking.Status.BLOCKED]
 
 
-class DashboardView(LoginRequiredMixin, TemplateView):
+class DashboardView(ManagerRequiredMixin, TemplateView):
     template_name = "dashboard/dashboard.html"
 
     def get_context_data(self, **kwargs):

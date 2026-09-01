@@ -32,7 +32,7 @@ class ReservationForm(forms.Form):
     """Villa and room_type querysets are scoped by the view to whatever villas
     the logged-in user can actually see - never the raw Villa/RoomCategory
     tables. `hide_money` drops the three price fields entirely for a staff
-    member who isn't allowed to see money (Membership.can_see_money), rather
+    member who isn't allowed to see money (apps.organizations.permissions.can_see_money), rather
     than just hiding them in the template - so there's nothing to strip out
     of a hand-crafted POST either.
     """

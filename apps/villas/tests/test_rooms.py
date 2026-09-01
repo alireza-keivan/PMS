@@ -17,7 +17,6 @@ from django.urls import reverse
 
 from apps.bookings.models import Booking
 from apps.guests.services import find_or_create_guest
-from apps.organizations.models import Membership
 from apps.villas.models import (
     Room,
     Villa,
@@ -29,8 +28,8 @@ from apps.villas.models import (
 
 
 @pytest.fixture
-def owner_client(client, org, user):
-    Membership.objects.create(user=user, organization=org, role=Membership.Role.OWNER)
+def owner_client(client, org, user, make_membership):
+    make_membership(user, org, manager=True)
     client.force_login(user)
     return client
 

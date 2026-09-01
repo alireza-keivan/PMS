@@ -20,6 +20,8 @@ module.exports = {
     "btn", "btn-primary", "btn-secondary", "btn-ghost", "btn-icon",
     "input", "tag", "tag-accent", "tag-accent-2", "tag-neutral", "tag-toggle",
     "seg", "seg-opt", "seg-opt-active", "card", "field", "title-input",
+    "spinner", "spinner-sm", "spinner-md", "spinner-lg", "spinner-overlay",
+    "spinner-indicator",
     "elev-sm", "guest-scroll", "detail-card-fade", "cal-search-focus",
   ],
   theme: {

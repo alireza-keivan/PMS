@@ -17,9 +17,11 @@
       <h1 class="text-xl font-semibold text-ink-900">{% translate "Documents" %}</h1>
       <a href="{% url 'compliance:action_needed' %}" class="text-sm text-ink-600 underline">{% translate "Back to compliance" %}</a>
     </div>
+    {% if is_manager %}
     <a href="{% url 'compliance:add_document' %}" class="rounded bg-teal-600 px-4 py-2 text-sm font-medium text-white hover:bg-teal-700">
       {% translate "Add document" %}
     </a>
+    {% endif %}
   </div>
 
   {% if documents %}

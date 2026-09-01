@@ -33,11 +33,19 @@ DJANGO_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.humanize",  # intcomma, for locale-aware money grouping
+    "django.contrib.sites",     # required by allauth
 ]
 
 THIRD_PARTY_APPS = [
     "django_htmx",
     "django_celery_beat",
+    # Google sign-in. allauth owns the OAuth round trip only - the login page
+    # itself stays ours (apps/accounts), so every existing reverse("accounts:login")
+    # keeps working.
+    "allauth",
+    "allauth.account",
+    "allauth.socialaccount",
+    "allauth.socialaccount.providers.google",
 ]
 
 # Ordered roughly by dependency: foundations first, features after.
@@ -67,12 +75,17 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "allauth.account.middleware.AccountMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django_htmx.middleware.HtmxMiddleware",
     # Resolves the active Organization for the request and makes it available
     # as request.organization. Every tenant-scoped query depends on this.
     "apps.organizations.middleware.OrganizationMiddleware",
+    # Someone who signed in with Google but has no organization yet cannot use
+    # any dashboard screen - this sends them to the one-question welcome form.
+    # Must come after OrganizationMiddleware: it reads request.organization.
+    "apps.organizations.middleware.OnboardingMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"
@@ -92,6 +105,7 @@ TEMPLATES = [
                 "django.contrib.messages.context_processors.messages",
                 "django.template.context_processors.i18n",
                 "apps.organizations.context_processors.organization",
+                "apps.organizations.context_processors.user_role",
             ],
         },
     },
@@ -111,6 +125,56 @@ AUTH_USER_MODEL = "accounts.User"
 LOGIN_URL = "accounts:login"
 LOGIN_REDIRECT_URL = "villas:list"
 LOGOUT_REDIRECT_URL = "accounts:login"
+
+SITE_ID = 1
+
+# Both ways in, on purpose. Google is the front door for new operators; the
+# password backend keeps seeded demo accounts, superusers and anyone without a
+# Google account working.
+AUTHENTICATION_BACKENDS = [
+    "django.contrib.auth.backends.ModelBackend",
+    "allauth.account.auth_backends.AuthenticationBackend",
+]
+
+# Google has already verified the address, so there is nothing left for allauth
+# to ask or confirm - the account is created and signed in straight away, and
+# the welcome form (apps/accounts) collects the one thing we actually need.
+SOCIALACCOUNT_AUTO_SIGNUP = True
+SOCIALACCOUNT_EMAIL_VERIFICATION = "none"
+
+# Someone who already has a password account signing in with the same Google
+# address gets linked to that account rather than an "email already in use"
+# dead end. Only safe because Google verifies the address it hands us - do not
+# turn this on for a provider that doesn't.
+SOCIALACCOUNT_EMAIL_AUTHENTICATION = True
+SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = True
+
+# There is no self-service password signup: accounts come from Google or from
+# an admin. AccountAdapter closes that door - see apps/accounts/adapters.py.
+ACCOUNT_LOGIN_METHODS = {"email"}
+ACCOUNT_SIGNUP_FIELDS = ["email*"]
+ACCOUNT_EMAIL_VERIFICATION = "none"
+ACCOUNT_ADAPTER = "apps.accounts.adapters.AccountAdapter"
+SOCIALACCOUNT_ADAPTER = "apps.accounts.adapters.SocialAccountAdapter"
+
+# Credentials live in the environment, not in the database, so no per-machine
+# admin setup is needed to make sign-in work. Left empty the button is simply
+# hidden - see apps/accounts/views.py.
+GOOGLE_OAUTH_CLIENT_ID = env("GOOGLE_OAUTH_CLIENT_ID", default="")
+GOOGLE_OAUTH_CLIENT_SECRET = env("GOOGLE_OAUTH_CLIENT_SECRET", default="")
+
+SOCIALACCOUNT_PROVIDERS = {
+    "google": {
+        "APP": {
+            "client_id": GOOGLE_OAUTH_CLIENT_ID,
+            "secret": GOOGLE_OAUTH_CLIENT_SECRET,
+            "key": "",
+        },
+        "SCOPE": ["profile", "email"],
+        # No refresh token wanted: we only ever read the profile once, at sign-in.
+        "AUTH_PARAMS": {"access_type": "online"},
+    },
+}
 
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
