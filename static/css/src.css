@@ -120,6 +120,47 @@
      consistent gap. Used by templates/villas/_field.html. */
   .field { @apply flex flex-col gap-1.5; }
 
+  /* ---- Booking calendar on a phone ----
+     The grid is a fixed-width name column plus one column per day, which
+     cannot shrink to phone width without the day columns collapsing to
+     nothing. So below md the grid keeps a real minimum width and the page
+     swipes sideways through the dates, with the villa/room name column
+     pinned to the left edge while it does.
+
+     --cal-min-w is set inline on #calendar-grid, since it depends on how
+     many days are on screen. Above md everything reverts to the desktop
+     behaviour: no sideways scrolling, and the date/area/villa headers go
+     back to sticking to the top of the page (a sideways-scrolling box is
+     its own scroll area, so top-sticking doesn't apply inside it). */
+  /* Phones: the villa/room name column eats a big share of a ~390px screen,
+     so on mobile it gets narrower and the day columns get tighter - enough
+     that a full 7-day range fits on screen with nothing to scroll, and 14/30
+     still scroll sideways but show noticeably more than half a week at once.
+     Both sizes feed --cal-min-w on #calendar-grid, so the grid's total width
+     always matches the columns it actually draws. */
+  .cal-scroll {
+    --cal-name-w: 108px;
+    --cal-day-w: 40px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .cal-grid-min { min-width: var(--cal-min-w, 100%); }
+  .cal-namecol {
+    position: sticky;
+    left: 0;
+    z-index: 8;
+    width: var(--cal-name-w);
+  }
+  @media (min-width: 768px) {
+    .cal-scroll {
+      --cal-name-w: 300px;
+      --cal-day-w: 46px;
+      overflow-x: visible;
+    }
+    .cal-grid-min { min-width: 0; }
+    .cal-namecol { position: relative; }
+  }
+
   /* The bar you were just sent to by the search box: a single quick ring
      pulse plus a light sweeping across it, long enough to catch the eye in a
      grid full of other bars and short enough to be out of the way before
