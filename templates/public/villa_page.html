@@ -99,10 +99,12 @@ lines of the page. Gone from `lg` up, where there is no pinned bar.
       </ul>
     </header>
 
-    {# ---- the rest of the photos ---------------------------------------
-       A sideways scroll that snaps, in CSS. No carousel script, no dots, no
-       Alpine - a thumb-flick on a phone and a trackpad swipe on a laptop both
-       already do the right thing. #}
+    {# ---- the rest of the photos ---- #}
+    {% comment %}
+    A sideways scroll that snaps, in CSS. No carousel script, no dots, no
+    Alpine - a thumb-flick on a phone and a trackpad swipe on a laptop both
+    already do the right thing.
+    {% endcomment %}
     {% if gallery %}
       <ul class="-mx-4 mt-5 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-1 lg:mx-0 lg:px-0">
         {% for photo in gallery %}
@@ -124,8 +126,10 @@ lines of the page. Gone from `lg` up, where there is no pinned bar.
         {% if description %}
           <section>
             <h2 class="font-display text-xl lg:text-2xl">{% translate "About this villa" %}</h2>
-            {# linebreaks, not |safe: this is operator-typed text and must never
-               be able to put markup on a public page. #}
+            {% comment %}
+            linebreaks, not |safe: this is operator-typed text and must never
+            be able to put markup on a public page.
+            {% endcomment %}
             <div class="mt-2.5 space-y-3 text-[15px] leading-relaxed lg:mt-3.5 lg:text-base">
               {{ description|linebreaks }}
             </div>
@@ -278,10 +282,12 @@ lines of the page. Gone from `lg` up, where there is no pinned bar.
         {% endif %}
       </div>
 
-      {# ---- the booking panel ----
-         Below the text on a phone (the pinned bar's button jumps here), a
-         sticky sidebar from `lg` up. One panel, one form - see
-         public/_booking_panel.html. #}
+      {# ---- the booking panel ---- #}
+      {% comment %}
+      Below the text on a phone (the pinned bar's button jumps here), a
+      sticky sidebar from `lg` up. One panel, one form - see
+      public/_booking_panel.html.
+      {% endcomment %}
       <aside class="w-full lg:w-[340px] lg:flex-none lg:sticky lg:top-6">
         {% include "public/_booking_panel.html" %}
       </aside>
@@ -299,8 +305,10 @@ lines of the page. Gone from `lg` up, where there is no pinned bar.
         <p class="truncate font-display text-base leading-tight">{{ villa_name }}</p>
       {% endif %}
     </div>
-    {# A plain link to the panel further down the page. No JavaScript, and it
-       still works if the page is only half-loaded. #}
+    {% comment %}
+    A plain link to the panel further down the page. No JavaScript, and it
+    still works if the page is only half-loaded.
+    {% endcomment %}
     <a href="#book" class="btn btn-primary flex-none px-7 py-3 text-[15px]">
       {% translate "Ask to book" %}
     </a>
