@@ -7,11 +7,16 @@ instead - keeping the two apart means a bug in the public site can never
 accidentally expose an authenticated-only view, and vice versa.
 """
 
-from django.urls import path  # noqa: F401  - used once the views below are enabled
+from django.urls import path
+
+from apps.marketing import views
 
 app_name = "marketing"
 
-urlpatterns: list = [
-    # path("<slug:org>/<slug:villa>/", views.VillaPageView.as_view(), name="villa_page"),
-    # path("<slug:org>/<slug:villa>/book/", views.DirectBookingView.as_view(), name="book"),
+# Both slugs together, always: the org slug is what scopes the lookup to one
+# operator, since there is no signed-in user out here to do it. See
+# apps.marketing.views.published_villa_or_404.
+urlpatterns = [
+    path("<slug:org>/<slug:villa>/", views.VillaPageView.as_view(), name="villa_page"),
+    path("<slug:org>/<slug:villa>/book/", views.DirectBookingView.as_view(), name="book"),
 ]

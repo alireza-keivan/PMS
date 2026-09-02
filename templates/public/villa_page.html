@@ -1,0 +1,315 @@
+{% extends "public/base_public.html" %}
+{% load i18n %}
+
+{% comment %}
+One template for every screen. The phone layout is the base - full-bleed cover,
+one column, a pinned bar at the bottom - and the desktop layout is the same
+markup widened at `lg`: a padded hero, a 680px text column and the booking
+panel as a sticky sidebar beside it. No device detection anywhere; there is
+nothing here that could serve one visitor different HTML from another.
+
+A section whose data is missing is simply not rendered. No "no description
+yet", no empty room grid - a villa with three filled-in fields still reads as
+a finished page.
+{% endcomment %}
+
+{% block title %}{{ villa_name }}{% if area %} - {{ area }}{% endif %}{% endblock %}
+
+{% block meta_description %}{% if summary %}{{ summary }}{% else %}{% blocktranslate trimmed %}
+  {{ villa_name }} in {{ area }}. See photos, rooms and prices, and ask to book direct.
+{% endblocktranslate %}{% endif %}{% endblock %}
+
+{% block canonical %}
+  <link rel="canonical" href="{{ page_url }}">
+{% endblock %}
+
+{% block og_site_name %}{{ operator_name }}{% endblock %}
+{% block og_title %}{{ villa_name }}{% if area %} - {{ area }}{% endif %}{% endblock %}
+{% block og_description %}{{ summary }}{% endblock %}
+{% block og_image %}
+  {% if cover %}
+    <meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{{ cover.url }}">
+    <meta property="og:image:alt" content="{{ villa_name }}">
+  {% endif %}
+  <meta property="og:url" content="{{ page_url }}">
+{% endblock %}
+
+{% block header %}{{ operator_name }}{% endblock %}
+
+{% block body %}
+{% comment %}
+Room for the pinned bar on a phone, which would otherwise cover the last few
+lines of the page. Gone from `lg` up, where there is no pinned bar.
+{% endcomment %}
+<main class="pb-28 lg:pb-0">
+
+  {# ---- cover ---------------------------------------------------------- #}
+  {% if cover %}
+    <img src="{{ cover.url }}" srcset="{{ cover.srcset }}" sizes="{{ cover.sizes }}"
+         alt="{{ cover.caption|default:villa_name }}" width="1600" height="1000"
+         {% comment %}
+         The one image on the page that is NOT lazy - it is what the visitor
+         sees first, so it is fetched at high priority. Everything below is
+         loading="lazy".
+         {% endcomment %}
+         fetchpriority="high"
+         class="h-[340px] w-full object-cover lg:mx-auto lg:mt-8 lg:h-[480px] lg:max-w-6xl lg:rounded-lg lg:px-0">
+  {% endif %}
+
+  <div class="mx-auto max-w-6xl px-4 lg:px-8">
+
+    {# ---- name, area, the three facts ---------------------------------- #}
+    <header class="pt-5 lg:pt-6">
+      <h1 class="font-display text-3xl leading-none lg:text-[40px]">{{ villa_name }}</h1>
+      {% if area %}<p class="mt-1 text-[15px] text-ink-600 lg:mt-1.5 lg:text-base">{{ area }}</p>{% endif %}
+
+      <ul class="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-sm lg:mt-3.5 lg:gap-x-5 lg:text-[15px]">
+        <li class="flex items-center gap-1.5">
+          <svg class="h-4 w-4 flex-none text-teal-700" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M2 20v-8a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v8M2 16h20M4 10V7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v3"/>
+          </svg>
+          {% blocktranslate count count=bedrooms trimmed %}
+            {{ count }} bedroom
+          {% plural %}
+            {{ count }} bedrooms
+          {% endblocktranslate %}
+        </li>
+        {% if sleeps %}
+          <li class="flex items-center gap-1.5">
+            <svg class="h-4 w-4 flex-none text-teal-700" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+              <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+            {% blocktranslate count count=sleeps trimmed %}
+              Sleeps {{ count }}
+            {% plural %}
+              Sleeps {{ count }}
+            {% endblocktranslate %}
+          </li>
+        {% endif %}
+        <li class="flex items-center gap-1.5">
+          <svg class="h-4 w-4 flex-none text-teal-700" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="m3 10 9-7 9 7v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/>
+          </svg>
+          {{ property_type }}
+        </li>
+      </ul>
+    </header>
+
+    {# ---- the rest of the photos ---------------------------------------
+       A sideways scroll that snaps, in CSS. No carousel script, no dots, no
+       Alpine - a thumb-flick on a phone and a trackpad swipe on a laptop both
+       already do the right thing. #}
+    {% if gallery %}
+      <ul class="-mx-4 mt-5 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-1 lg:mx-0 lg:px-0">
+        {% for photo in gallery %}
+          <li class="snap-start">
+            <img src="{{ photo.url }}" srcset="{{ photo.srcset }}" sizes="{{ photo.sizes }}"
+                 alt="{{ photo.caption|default:villa_name }}" loading="lazy" decoding="async"
+                 width="640" height="440"
+                 class="h-40 w-[260px] rounded-md object-cover lg:h-52 lg:w-[340px]">
+          </li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+
+    {# ---- two columns from `lg` up, one below --------------------------- #}
+    <div class="flex flex-col gap-8 py-8 lg:flex-row lg:items-start lg:gap-12 lg:py-10">
+
+      <div class="min-w-0 flex-1 lg:max-w-[680px]">
+
+        {% if description %}
+          <section>
+            <h2 class="font-display text-xl lg:text-2xl">{% translate "About this villa" %}</h2>
+            {# linebreaks, not |safe: this is operator-typed text and must never
+               be able to put markup on a public page. #}
+            <div class="mt-2.5 space-y-3 text-[15px] leading-relaxed lg:mt-3.5 lg:text-base">
+              {{ description|linebreaks }}
+            </div>
+          </section>
+        {% endif %}
+
+        {% if amenities %}
+          <section class="mt-8 lg:mt-10">
+            <h2 class="font-display text-xl lg:text-2xl">{% translate "What's here" %}</h2>
+            <ul class="mt-3 grid grid-cols-2 gap-x-4 gap-y-3 text-sm lg:gap-x-6 lg:gap-y-3.5 lg:text-[15px]">
+              {% for amenity in amenities|slice:":8" %}
+                <li class="flex items-center gap-2">
+                  <svg class="h-4 w-4 flex-none text-accent2-700" viewBox="0 0 24 24" fill="none"
+                       stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                       stroke-linejoin="round" aria-hidden="true"><path d="m5 13 4 4L19 7"/></svg>
+                  {{ amenity }}
+                </li>
+              {% endfor %}
+            </ul>
+            {% comment %}
+            The design's "show all" toggle, as a <details>. The browser does the
+            opening and closing, so the rest of the list costs no JavaScript and
+            is still in the HTML for a search engine to read.
+            {% endcomment %}
+            {% if amenities|length > amenities_fold_at %}
+              <details class="mt-3 group">
+                <summary class="cursor-pointer list-none text-sm font-semibold text-teal-700">
+                  {% translate "Show everything" %}
+                </summary>
+                <ul class="mt-3 grid grid-cols-2 gap-x-4 gap-y-3 text-sm lg:gap-x-6 lg:text-[15px]">
+                  {% for amenity in amenities|slice:"8:" %}
+                    <li class="flex items-center gap-2">
+                      <svg class="h-4 w-4 flex-none text-accent2-700" viewBox="0 0 24 24" fill="none"
+                           stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                           stroke-linejoin="round" aria-hidden="true"><path d="m5 13 4 4L19 7"/></svg>
+                      {{ amenity }}
+                    </li>
+                  {% endfor %}
+                </ul>
+              </details>
+            {% endif %}
+          </section>
+        {% endif %}
+
+        {% if rooms %}
+          <section class="mt-8 lg:mt-10">
+            <h2 class="font-display text-xl lg:text-2xl">{% translate "Rooms" %}</h2>
+            <ul class="mt-3 flex flex-col gap-4 lg:grid lg:grid-cols-3 lg:gap-5">
+              {% for room in rooms %}
+                <li class="overflow-hidden rounded-lg border border-sand-300 bg-sand-100">
+                  {% if room.photo %}
+                    <img src="{{ room.photo.url }}" srcset="{{ room.photo.srcset }}"
+                         sizes="{{ room.photo.sizes }}" alt="{{ room.photo.caption|default:room.name }}"
+                         loading="lazy" decoding="async" width="640" height="400"
+                         class="h-40 w-full object-cover lg:h-[150px]">
+                  {% endif %}
+                  <div class="p-3.5">
+                    <h3 class="font-display text-[17px] leading-tight lg:text-base">{{ room.name }}</h3>
+                    <p class="mt-0.5 text-[13px] text-ink-600">
+                      {% if room.size_sqm %}{{ room.size_sqm }} m&sup2; &middot; {% endif %}
+                      {% blocktranslate count count=room.max_guests trimmed %}
+                        Sleeps {{ count }}
+                      {% plural %}
+                        Sleeps {{ count }}
+                      {% endblocktranslate %}
+                    </p>
+                    {% if room.amenities %}
+                      <ul class="mt-2 flex flex-wrap gap-1.5">
+                        {% for amenity in room.amenities|slice:":3" %}
+                          <li class="tag tag-accent-2">{{ amenity }}</li>
+                        {% endfor %}
+                      </ul>
+                    {% endif %}
+                    {% if room.nightly_rate %}
+                      <p class="mt-2.5 font-display text-base text-teal-700">
+                        {% blocktranslate with price=room.nightly_rate trimmed %}
+                          {{ price }} a night
+                        {% endblocktranslate %}
+                      </p>
+                    {% endif %}
+                  </div>
+                </li>
+              {% endfor %}
+            </ul>
+          </section>
+        {% endif %}
+
+        {% if experiences %}
+          <section class="mt-8 lg:mt-10">
+            <h2 class="font-display text-xl lg:text-2xl">{% translate "Things to do nearby" %}</h2>
+            <ul class="-mx-4 mt-3 flex snap-x gap-3.5 overflow-x-auto px-4 pb-1 lg:mx-0 lg:gap-[18px] lg:px-0">
+              {% for experience in experiences %}
+                <li class="w-[180px] flex-none snap-start lg:w-[220px]">
+                  {% if experience.photo_url %}
+                    <img src="{{ experience.photo_url }}" alt="{{ experience.name }}"
+                         loading="lazy" decoding="async" width="440" height="280"
+                         class="h-[120px] w-full rounded-md object-cover lg:h-[140px]">
+                  {% endif %}
+                  <h3 class="mt-2 font-display text-[15px] leading-tight lg:text-base">{{ experience.name }}</h3>
+                  {% if experience.description %}
+                    <p class="mt-0.5 text-[13px] leading-snug text-ink-600">{{ experience.description }}</p>
+                  {% endif %}
+                </li>
+              {% endfor %}
+            </ul>
+          </section>
+        {% endif %}
+
+        <section class="mt-8 lg:mt-10">
+          <h2 class="font-display text-xl lg:text-2xl">{% translate "Where it is" %}</h2>
+          {% if area %}<p class="mt-2 text-[15px]">{{ area }}</p>{% endif %}
+          {% if google_maps_url %}
+            <p class="mt-2">
+              <a href="{{ google_maps_url }}" target="_blank" rel="noopener noreferrer"
+                 class="text-sm font-semibold text-teal-700 underline">{% translate "Open in Maps" %}</a>
+            </p>
+          {% endif %}
+          <dl class="mt-3.5 flex gap-6 text-sm lg:gap-8 lg:text-[15px]">
+            <div>
+              <dt class="text-xs text-ink-600 lg:text-[13px]">{% translate "Check-in" %}</dt>
+              <dd>{{ check_in_time|time:"g:i A" }}</dd>
+            </div>
+            <div>
+              <dt class="text-xs text-ink-600 lg:text-[13px]">{% translate "Check-out" %}</dt>
+              <dd>{{ check_out_time|time:"g:i A" }}</dd>
+            </div>
+          </dl>
+          {% comment %}
+          The street address is deliberately not on this page - see
+          apps.marketing.views, rule 3. This line says so plainly rather than
+          leaving a visitor wondering where the address went.
+          {% endcomment %}
+          <p class="mt-2.5 text-[13px] text-ink-600 lg:text-sm">
+            {% translate "The exact address is shared once you have booked." %}
+          </p>
+        </section>
+
+        {% if whatsapp_number %}
+          <div class="mt-10 border-t border-sand-300 pt-7 lg:mt-12">
+            <a href="https://wa.me/{{ whatsapp_number|slugify }}?text={{ villa_name|urlencode }}"
+               target="_blank" rel="noopener noreferrer"
+               class="btn inline-flex bg-accent2-100 px-5 py-2.5 text-accent2-800 hover:bg-accent2-200">
+              <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                   stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8z"/>
+              </svg>
+              {% translate "Message the owner" %}
+            </a>
+          </div>
+        {% endif %}
+      </div>
+
+      {# ---- the booking panel ----
+         Below the text on a phone (the pinned bar's button jumps here), a
+         sticky sidebar from `lg` up. One panel, one form - see
+         public/_booking_panel.html. #}
+      <aside class="w-full lg:w-[340px] lg:flex-none lg:sticky lg:top-6">
+        {% include "public/_booking_panel.html" %}
+      </aside>
+
+    </div>
+  </div>
+
+  {# ---- the pinned bar, phones only ---------------------------------- #}
+  <div class="fixed inset-x-0 bottom-0 z-10 flex items-center justify-between gap-3 border-t border-sand-300 bg-sand-100 px-5 py-3.5 lg:hidden">
+    <div class="min-w-0">
+      {% if from_price %}
+        <p class="truncate font-display text-base leading-tight">{{ from_price }}</p>
+        <p class="text-xs text-ink-600">{% translate "per night" %}</p>
+      {% else %}
+        <p class="truncate font-display text-base leading-tight">{{ villa_name }}</p>
+      {% endif %}
+    </div>
+    {# A plain link to the panel further down the page. No JavaScript, and it
+       still works if the page is only half-loaded. #}
+    <a href="#book" class="btn btn-primary flex-none px-7 py-3 text-[15px]">
+      {% translate "Ask to book" %}
+    </a>
+  </div>
+</main>
+{% endblock %}
+
+{% block footer %}
+  {% blocktranslate with operator=operator_name trimmed %}
+    {{ operator }} - booked direct, no booking fees.
+  {% endblocktranslate %}
+{% endblock %}

@@ -1,0 +1,113 @@
+{% load i18n %}
+{% comment %}
+The booking panel, from the design's three states - empty, dates chosen, and
+unavailable. All three are the same markup: the state is whatever the form
+came back with, so there is nothing to switch between and no JavaScript to do
+the switching.
+
+Rendered exactly once on the page. On a phone it sits at the bottom of the
+scroll as a normal section, reached by the pinned bar's Book button; from `lg`
+up the same element becomes the sticky sidebar beside the description. See the
+`lg:sticky` on its wrapper in villa_page.html - not two panels, one.
+{% endcomment %}
+
+<div class="card" id="book">
+
+  {% if sent %}
+    {% comment %}
+    Careful wording, on purpose. The owner has the request - nobody has been
+    messaged, and no dates are held. CLAUDE.md rule 2.
+    {% endcomment %}
+    <div class="rounded-md bg-accent2-100 p-4 text-accent2-800">
+      <p class="font-display text-lg leading-tight">{% translate "Request sent" %}</p>
+      <p class="mt-1.5 text-sm">{{ sent_message }}</p>
+    </div>
+
+  {% else %}
+
+    {% if from_price %}
+      <p class="font-display text-[22px] leading-none">{{ from_price }}</p>
+      <p class="mt-1 text-xs text-ink-600">{% translate "per night" %}</p>
+    {% endif %}
+
+    {% comment %}
+    The #book fragment on the action, not just on the phone bar's link: a
+    refused request re-renders the whole page, and without it the visitor is
+    dropped at the top of a long page with the reason for the refusal off
+    screen. The browser applies the fragment to the POST response, so this
+    lands them back on the panel - no JavaScript involved.
+    {% endcomment %}
+    <form method="post" action="{{ book_url }}#book" class="mt-4 flex flex-col gap-2.5" novalidate>
+      {% csrf_token %}
+
+      {% comment %}
+      The form's own errors - "these dates are not available" among them. This
+      is the design's unavailable state: same panel, a plain message where the
+      price breakdown would be.
+      {% endcomment %}
+      {% if form.non_field_errors %}
+        <div class="flex items-start gap-2 rounded-md bg-teal-50 p-3 text-sm text-teal-800">
+          <svg class="mt-0.5 h-4 w-4 flex-none" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" aria-hidden="true">
+            <path d="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/>
+            <path d="m10 14 4 4M14 14l-4 4"/>
+          </svg>
+          <div>{% for error in form.non_field_errors %}<p>{{ error }}</p>{% endfor %}</div>
+        </div>
+      {% endif %}
+
+      <div class="grid grid-cols-2 gap-2.5">
+        {% for field in form.visible_fields %}
+          {% if field.name == "check_in" or field.name == "check_out" %}
+            <div class="field">
+              <label for="{{ field.id_for_label }}" class="text-xs text-ink-600">{{ field.label }}</label>
+              {{ field }}
+              {% for error in field.errors %}<p class="text-xs text-teal-800">{{ error }}</p>{% endfor %}
+            </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+
+      {% for field in form.visible_fields %}
+        {% if field.name != "check_in" and field.name != "check_out" %}
+          {% comment %}
+          The room picker is only worth showing when there is a choice to make -
+          a whole-villa rental has exactly one room type and asking about it is
+          noise. Handled by hiding the field, not by leaving it out: the form
+          still fills it in itself.
+          {% endcomment %}
+          {% if field.name == "room_category" and rooms|length < 2 %}
+            <input type="hidden" name="{{ field.name }}" value="">
+          {% else %}
+            <div class="field">
+              <label for="{{ field.id_for_label }}" class="text-xs text-ink-600">
+                {{ field.label }}{% if not field.field.required %}
+                  <span class="text-ink-500">{% translate "(optional)" %}</span>{% endif %}
+              </label>
+              {{ field }}
+              {% for error in field.errors %}<p class="text-xs text-teal-800">{{ error }}</p>{% endfor %}
+            </div>
+          {% endif %}
+        {% endif %}
+      {% endfor %}
+
+      <button type="submit" class="btn btn-primary mt-1.5 w-full py-3 text-[15px]">
+        {% translate "Ask to book" %}
+      </button>
+
+      {% comment %}
+      "Ask to book", not "Book" - and this line says why. Nothing here reserves
+      anything; an owner reads the request and replies. Saying otherwise would
+      be the exact overstatement CLAUDE.md rule 2 rules out.
+      {% endcomment %}
+      <p class="text-center text-xs text-ink-600">
+        {% blocktranslate count nights=shortest_stay trimmed %}
+          Shortest stay is {{ nights }} night. No payment now - the owner replies to confirm.
+        {% plural %}
+          Shortest stay is {{ nights }} nights. No payment now - the owner replies to confirm.
+        {% endblocktranslate %}
+      </p>
+    </form>
+
+  {% endif %}
+</div>

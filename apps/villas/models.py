@@ -66,6 +66,20 @@ class VillaQuerySet(TenantQuerySet):
         """
         return self.filter(is_active=True, is_draft=False)
 
+    def public(self):
+        """Villas that have a public web page, and whose operator is still
+        running.
+
+        The single gate behind apps.marketing - the public villa pages, the
+        direct booking form, and anything else that answers to a visitor with
+        no account at all. Written here rather than in each view so there is
+        exactly one definition of "published": the villa really exists
+        (live()), the operator chose to list it, and their business is still
+        switched on. A villa failing any one of those is a 404 out there, not
+        a thinner version of the page.
+        """
+        return self.live().filter(is_listed_publicly=True, organization__is_active=True)
+
 
 class Villa(TenantOwnedModel):
     class PropertyType(models.TextChoices):

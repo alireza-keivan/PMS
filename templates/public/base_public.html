@@ -1,0 +1,91 @@
+{% load i18n i18n_extras static %}<!doctype html>
+{% comment %}
+The visitor's shell, for the public mini villa sites at /villa/<org>/<villa>/.
+
+Deliberately NOT extending base.html, for the same reason portal/base_portal.html
+doesn't: base.html always pulls in partials/_topnav.html, which reads `user`,
+`is_manager` and reverses staff-only URL names. A visitor here has no account and
+never signs in, so every one of those is absent or meaningless.
+
+It is not base_portal.html either, and the differences are the point:
+
+  - Indexable. A guest link is private and carries `noindex`; this page exists to
+    be found. So: a real description, Open Graph tags so a link pasted into
+    WhatsApp or Instagram previews with the cover photo, and a canonical URL so
+    the /id/ and unprefixed versions don't compete with each other in search.
+
+  - Almost no JavaScript. Guests arrive on 4G on a phone, often mid-holiday. No
+    HTMX and no Alpine: the photo strip is a CSS scroll-snap row, the dates are
+    native date inputs, and the booking form is a plain POST. Nothing on this
+    page needs a script to work, so nothing is loaded.
+
+  - The language switcher stays. Plenty of guests are domestic, and Bahasa
+    Indonesia matters more here than on any staff screen.
+{% endcomment %}
+<html lang="{{ LANGUAGE_CODE }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>{% block title %}{% endblock %}</title>
+  <meta name="description" content="{% block meta_description %}{% endblock %}">
+
+  {% comment %}
+  The same page is served at /villa/... and /id/villa/..., so each language
+  points at itself as canonical and declares the other with hreflang. Without
+  this the two read as duplicates of each other.
+  {% endcomment %}
+  {% block canonical %}{% endblock %}
+
+  {% comment %}
+  Open Graph, for the two places these links actually get shared. WhatsApp reads
+  og:title/og:description/og:image; Instagram and Facebook read the same set.
+  The image has to be an absolute URL - a relative one silently gets no preview.
+  {% endcomment %}
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="{% block og_site_name %}{% endblock %}">
+  <meta property="og:title" content="{% block og_title %}{% endblock %}">
+  <meta property="og:description" content="{% block og_description %}{% endblock %}">
+  <meta property="og:locale" content="{{ LANGUAGE_CODE }}">
+  {% block og_image %}{% endblock %}
+  <meta name="twitter:card" content="summary_large_image">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caprasimo&family=Figtree:wght@400;600;700&display=swap">
+  <link rel="stylesheet" href="{% static 'css/tailwind.css' %}">
+
+  {% block extra_head %}{% endblock %}
+</head>
+<body class="min-h-screen bg-sand-50 text-ink-900 antialiased">
+
+  {% comment %}
+  No nav bar - there is nowhere else to go. Just the operator's name and the
+  language switch, so the page still says who is behind it.
+  {% endcomment %}
+  <header class="border-b border-sand-300 bg-sand-100">
+    <div class="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3 lg:px-8">
+      <span class="font-display text-[19px] leading-none">{% block header %}{% endblock %}</span>
+
+      <div class="seg">
+        {% for code, label in LANGUAGES %}
+          <form method="post" action="{% url 'set_language' %}" class="contents">
+            {% csrf_token %}
+            <input type="hidden" name="language" value="{{ code }}">
+            <input type="hidden" name="next" value="{% language_url code %}">
+            <button type="submit" class="seg-opt seg-opt-nav {% if LANGUAGE_CODE == code %}seg-opt-active{% endif %}"
+                    lang="{{ code }}">{{ code|upper }}</button>
+          </form>
+        {% endfor %}
+      </div>
+    </div>
+  </header>
+
+  {% block body %}{% endblock %}
+
+  <footer class="border-t border-sand-300 px-4 py-6 text-center text-xs text-ink-600 lg:px-8">
+    {% block footer %}{% endblock %}
+  </footer>
+
+</body>
+</html>
