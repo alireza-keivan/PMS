@@ -151,6 +151,7 @@ def _room_types(villa) -> list:
         photos = _live_photos(category.display_photos)
         first = photos.first()
         rooms.append({
+            "id": category.pk,
             "name": category.name,
             "size_sqm": category.size_sqm,
             "max_guests": category.max_guests,
@@ -192,21 +193,23 @@ def _experiences(villa) -> list:
     return out
 
 
-def _from_price(villa) -> str:
-    """The cheapest nightly rate on the villa, which is what the page leads
-    with. Blank when no room type has a price on it - better an absent line
-    than "Rp 0", which reads as free.
-    """
-    rates = [
-        c.nightly_rate for c in villa.room_categories.all() if c.nightly_rate
-    ]
-    return rupiah(min(rates)) if rates else ""
-
-
 def _shortest_stay(villa) -> int:
     """The fewest nights anyone can book, across the villa's room types."""
     minimums = [c.minimum_nights for c in villa.room_categories.all() if c.minimum_nights]
     return min(minimums) if minimums else 1
+
+
+def _single_price(rooms: list) -> str | None:
+    """The nightly rate to show without waiting for a room to be picked -
+    only when it's true for every room type, so it never implies a rate that
+    isn't actually available on some of them.
+    """
+    if not rooms:
+        return None
+    rates = {r["nightly_rate"] for r in rooms}
+    if len(rates) == 1:
+        return next(iter(rates)) or None
+    return None
 
 
 def page_context(request, villa, form=None, **extra) -> dict:
@@ -234,6 +237,7 @@ def page_context(request, villa, form=None, **extra) -> dict:
         "check_in_time": villa.check_in_time,
         "check_out_time": villa.check_out_time,
         "google_maps_url": villa.google_maps_url,
+        "google_maps_embed_url": villa.google_maps_embed_url,
         "operator_name": villa.organization.name,
         "whatsapp_number": villa.organization.whatsapp_number,
 
@@ -244,8 +248,17 @@ def page_context(request, villa, form=None, **extra) -> dict:
         "amenities_fold_at": AMENITIES_BEFORE_FOLD,
         "experiences": _experiences(villa),
 
-        "from_price": _from_price(villa),
         "shortest_stay": _shortest_stay(villa),
+        # For the booking panel: no price is shown there until a room is
+        # chosen (CLAUDE.md rule 2 - "from Rp X" up front implies every room
+        # is that price, which isn't true once there's more than one type).
+        # Keyed by room id as a string since that's how Alpine reads it off
+        # the <select>'s value.
+        "room_prices": {str(r["id"]): r["nightly_rate"] for r in rooms},
+        # The one exception: if every room type costs the same (or there's
+        # only one to begin with), that price isn't misleading - show it
+        # right away, in the panel and the phone bar.
+        "single_price": _single_price(rooms),
 
         "page_url": page_url,
         "book_url": reverse(

@@ -17,17 +17,49 @@ up the same element becomes the sticky sidebar beside the description. See the
     {% comment %}
     Careful wording, on purpose. The owner has the request - nobody has been
     messaged, and no dates are held. CLAUDE.md rule 2.
+
+    Shown above the form, not instead of it: the form stays on screen (reset
+    to blank) so a visitor can send another request - for different dates,
+    another room, or a second villa - without the widget disappearing from
+    under them.
     {% endcomment %}
     <div class="rounded-md bg-accent2-100 p-4 text-accent2-800">
       <p class="font-display text-lg leading-tight">{% translate "Request sent" %}</p>
       <p class="mt-1.5 text-sm">{{ sent_message }}</p>
     </div>
+  {% endif %}
 
-  {% else %}
-
-    {% if from_price %}
-      <p class="font-display text-[22px] leading-none">{{ from_price }}</p>
+  {% if not sent %}
+    {% comment %}
+    The price is only meaningful once a room is chosen - a villa with more
+    than one room type showing "from Rp X" up front reads as every room
+    costing that, which isn't true. So: nothing here until the visitor picks
+    one (or there's only one room type to begin with, which counts as
+    already chosen, or every room type happens to cost the same, in which
+    case naming one price isn't misleading). A room with no price on it gets
+    a plain "we'll be in touch" line instead of a blank space or "Rp 0".
+    {% endcomment %}
+    {% if single_price %}
+      <p class="font-display text-[22px] leading-none">{{ single_price }}</p>
       <p class="mt-1 text-xs text-ink-600">{% translate "per night" %}</p>
+    {% elif rooms|length < 2 %}
+      {% if rooms.0.nightly_rate %}
+        <p class="font-display text-[22px] leading-none">{{ rooms.0.nightly_rate }}</p>
+        <p class="mt-1 text-xs text-ink-600">{% translate "per night" %}</p>
+      {% else %}
+        <p class="font-display text-sm leading-snug text-ink-600">
+          {% translate "We'll contact you with a price list." %}
+        </p>
+      {% endif %}
+    {% else %}
+      {{ room_prices|json_script:"room-prices" }}
+      <div id="room-price" hidden>
+        <p class="font-display text-[22px] leading-none" data-price></p>
+        <p class="mt-1 text-xs text-ink-600">{% translate "per night" %}</p>
+      </div>
+      <p id="room-price-contact" class="font-display text-sm leading-snug text-ink-600" hidden>
+        {% translate "We'll contact you with a price list." %}
+      </p>
     {% endif %}
 
     {% comment %}
@@ -108,6 +140,34 @@ up the same element becomes the sticky sidebar beside the description. See the
         {% endblocktranslate %}
       </p>
     </form>
+
+    {% if rooms|length >= 2 %}
+      {% comment %}
+      Progressive enhancement only: the room picker still submits fine with
+      no JS, this just fills in the price line above once one is chosen.
+      {% endcomment %}
+      <script>
+        (function () {
+          var pricesEl = document.getElementById('room-prices');
+          var select = document.querySelector('#book select[name="room_category"]');
+          var priceBox = document.getElementById('room-price');
+          var contactBox = document.getElementById('room-price-contact');
+          if (!pricesEl || !select || !priceBox || !contactBox) return;
+
+          var prices = JSON.parse(pricesEl.textContent);
+          var priceText = priceBox.querySelector('[data-price]');
+
+          function update() {
+            var price = select.value ? prices[select.value] : null;
+            priceBox.hidden = !price;
+            contactBox.hidden = !select.value || !!price;
+            if (price) priceText.textContent = price;
+          }
+          select.addEventListener('change', update);
+          update();
+        })();
+      </script>
+    {% endif %}
 
   {% endif %}
 </div>

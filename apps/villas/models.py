@@ -19,7 +19,10 @@ arrive and leave.
 import logging
 import re
 from datetime import time
+from urllib.parse import urlparse
 
+import httpx
+from django.core.cache import cache
 from django.db import models
 from django.db.models import ProtectedError
 from django.db.models.signals import post_delete, post_save
@@ -29,6 +32,61 @@ from django.utils.translation import gettext_lazy as _
 from apps.core.models import TenantOwnedModel, TenantQuerySet
 
 logger = logging.getLogger(__name__)
+
+# Google's old key-free "&output=embed" trick is dead - that path now sends
+# back X-Frame-Options: SAMEORIGIN, so it can never be framed on our site,
+# and the real replacement (the Maps Embed API) requires a Google Cloud
+# billing account just to issue a key. OpenStreetMap's embed needs neither -
+# it just wants coordinates, which we pull out of whatever Google Maps link
+# the operator pasted in (following a short link first, if that's what it is).
+_SHORT_MAPS_LINK_HOSTS = {"maps.app.goo.gl", "goo.gl"}
+_LAT_LNG_RE = re.compile(r"(-?\d{1,3}\.\d+),\+?\s*(-?\d{1,3}\.\d+)")
+
+# How far the embedded map extends around the marker, in degrees - about a
+# 1km-wide view, enough to place the villa within its neighbourhood.
+_MAP_BBOX_DEGREES = 0.005
+
+
+def _resolve_maps_link(url):
+    """Follow a maps.app.goo.gl/goo.gl short link to its real, long URL."""
+    if urlparse(url).netloc not in _SHORT_MAPS_LINK_HOSTS:
+        return url
+
+    cache_key = f"villas:maps_resolved_url:{url}"
+    resolved = cache.get(cache_key)
+    if resolved is not None:
+        return resolved
+
+    try:
+        response = httpx.head(url, follow_redirects=True, timeout=5)
+        resolved = str(response.url)
+    except httpx.HTTPError:
+        logger.warning("Could not resolve short Google Maps link: %s", url)
+        resolved = url
+
+    cache.set(cache_key, resolved, timeout=60 * 60 * 24 * 30)
+    return resolved
+
+
+def _osm_embed_url(google_maps_url):
+    """An OpenStreetMap embed URL for wherever a pasted Google Maps link points to.
+
+    Returns "" when no coordinates could be read from the link - the caller
+    should fall back to just the plain "Open in Maps" link in that case.
+    """
+    match = _LAT_LNG_RE.search(_resolve_maps_link(google_maps_url))
+    if not match:
+        return ""
+    lat, lng = (float(value) for value in match.groups())
+
+    bbox = (
+        f"{lng - _MAP_BBOX_DEGREES},{lat - _MAP_BBOX_DEGREES},"
+        f"{lng + _MAP_BBOX_DEGREES},{lat + _MAP_BBOX_DEGREES}"
+    )
+    return (
+        "https://www.openstreetmap.org/export/embed.html"
+        f"?bbox={bbox}&marker={lat},{lng}"
+    )
 
 # A villa created outside the add form - Django admin, the seed command, a
 # shell script - still needs somewhere to put its rooms, so it starts with
@@ -146,6 +204,18 @@ class Villa(TenantOwnedModel):
 
     def __str__(self):
         return self.name
+
+    @property
+    def google_maps_embed_url(self) -> str:
+        """The OpenStreetMap URL for the public villa page's map iframe.
+
+        Empty when there's no pasted google_maps_url, or no coordinates could
+        be read from it - callers should hide the map and fall back to the
+        plain "Open in Maps" link either way.
+        """
+        if not self.google_maps_url:
+            return ""
+        return _osm_embed_url(self.google_maps_url)
 
     @property
     def sleeps(self) -> int:
