@@ -54,8 +54,8 @@ edit page. See apps.villas.views.VillaActivitiesView and friends.
     {% endif %}
 
     <details class="mt-4"{% if experience_form.errors %} open{% endif %}>
-      <summary class="cursor-pointer text-sm font-medium text-teal-700">
-        {% translate "+ Add an activity" %}
+      <summary class="btn btn-ghost cursor-pointer list-none [&::-webkit-details-marker]:hidden">
+        {% translate "Add an activity" %}
       </summary>
       <form id="add-experience-form" method="post" enctype="multipart/form-data" action="{% url 'villas:add_experience' villa.slug %}" class="mt-4 space-y-4">
         {% csrf_token %}
@@ -65,7 +65,7 @@ edit page. See apps.villas.views.VillaActivitiesView and friends.
 
     <div class="mt-8 flex items-center justify-between">
       <a href="{% url 'villas:edit' villa.slug %}" class="btn btn-ghost">{% translate "Back" %}</a>
-      <button type="submit" form="add-experience-form" class="btn btn-secondary">{% translate "Add" %}</button>
+      <button type="submit" form="add-experience-form" class="btn btn-ghost">{% translate "Add" %}</button>
     </div>
   </div>
 </div>

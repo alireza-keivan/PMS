@@ -92,6 +92,20 @@
       return;
     }
 
+    // A single-photo tile (no "multiple" on its input, e.g.
+    // villas/_experience_fields.html) has nowhere else for a second photo to
+    // go, so picking a file turns the dashed placeholder itself into the
+    // preview instead of adding a new box next to it.
+    if (!input.multiple) {
+      tile.querySelector("svg").remove();
+      var singleImg = document.createElement("img");
+      singleImg.src = URL.createObjectURL(file);
+      singleImg.alt = "";
+      singleImg.className = "h-full w-full object-cover";
+      tile.appendChild(singleImg);
+      return;
+    }
+
     row.querySelectorAll("[data-pending-preview]").forEach(function (el) { el.remove(); });
 
     var box = document.createElement("div");

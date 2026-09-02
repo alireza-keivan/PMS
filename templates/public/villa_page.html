@@ -43,21 +43,7 @@ lines of the page. Gone from `lg` up, where there is no pinned bar.
 {% endcomment %}
 <main class="pb-28 lg:pb-0">
 
-  {# ---- cover ---------------------------------------------------------- #}
-  {% if cover %}
-    <img src="{{ cover.url }}" srcset="{{ cover.srcset }}" sizes="{{ cover.sizes }}"
-         alt="{{ cover.caption|default:villa_name }}" width="1600" height="1000"
-         {% comment %}
-         The one image on the page that is NOT lazy - it is what the visitor
-         sees first, so it is fetched at high priority. Everything below is
-         loading="lazy".
-         {% endcomment %}
-         fetchpriority="high"
-         class="h-[340px] w-full object-cover lg:mx-auto lg:mt-8 lg:h-[480px] lg:max-w-6xl lg:rounded-lg lg:px-0">
-  {% endif %}
-
   <div class="mx-auto max-w-6xl px-4 lg:px-8">
-
     {# ---- name, area, the three facts ---------------------------------- #}
     <header class="pt-5 lg:pt-6">
       <h1 class="font-display text-3xl leading-none lg:text-[40px]">{{ villa_name }}</h1>
@@ -98,24 +84,84 @@ lines of the page. Gone from `lg` up, where there is no pinned bar.
         </li>
       </ul>
     </header>
+  </div>
+
+  {# ---- cover ---------------------------------------------------------- #}
+  {% if cover %}
+    <img id="villa-cover-image" src="{{ cover.url }}" srcset="{{ cover.srcset }}" sizes="{{ cover.sizes }}"
+         alt="{{ cover.caption|default:villa_name }}" width="1600" height="1000"
+         {% comment %}
+         The one image on the page that is NOT lazy - it is what the visitor
+         sees first, so it is fetched at high priority. Everything below is
+         loading="lazy".
+         {% endcomment %}
+         fetchpriority="high"
+         class="mt-5 h-[340px] w-full object-cover lg:mx-auto lg:mt-6 lg:h-[480px] lg:max-w-6xl lg:rounded-lg lg:px-0">
+  {% endif %}
+
+  <div class="mx-auto max-w-6xl px-4 lg:px-8">
 
     {# ---- the rest of the photos ---- #}
     {% comment %}
-    A sideways scroll that snaps, in CSS. No carousel script, no dots, no
-    Alpine - a thumb-flick on a phone and a trackpad swipe on a laptop both
-    already do the right thing.
+    A carousel, not a plain scroll strip: prev/next arrows for a mouse or
+    trackpad user (and a visible hint that there's more to see), click-and-drag
+    for a mouse, scroll-snap for a thumb-flick on a phone. Same pattern as the
+    "Things to do nearby" carousel further down - see .pms-carousel script.
     {% endcomment %}
     {% if gallery %}
-      <ul class="-mx-4 mt-5 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-1 lg:mx-0 lg:px-0">
-        {% for photo in gallery %}
-          <li class="snap-start">
-            <img src="{{ photo.url }}" srcset="{{ photo.srcset }}" sizes="{{ photo.sizes }}"
-                 alt="{{ photo.caption|default:villa_name }}" loading="lazy" decoding="async"
-                 width="640" height="440"
-                 class="h-40 w-[260px] rounded-md object-cover lg:h-52 lg:w-[340px]">
-          </li>
-        {% endfor %}
-      </ul>
+      <div class="pms-carousel relative mt-5">
+        <ul id="villa-gallery-list" class="pms-carousel-track -mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-1 lg:mx-0 lg:px-0"
+            style="scrollbar-width: none; -ms-overflow-style: none; cursor: grab;">
+          {% for photo in gallery %}
+            <li class="snap-start flex-none">
+              <img src="{{ photo.url }}" srcset="{{ photo.srcset }}" sizes="{{ photo.sizes }}"
+                   alt="{{ photo.caption|default:villa_name }}" loading="lazy" decoding="async"
+                   width="640" height="440"
+                   data-full-src="{{ photo.url }}" data-full-srcset="{{ photo.srcset }}"
+                   data-full-sizes="{{ photo.sizes }}"
+                   class="villa-gallery-thumb h-40 w-[260px] cursor-pointer rounded-md object-cover select-none lg:h-52 lg:w-[340px]"
+                   draggable="false">
+            </li>
+          {% endfor %}
+        </ul>
+        <button type="button" aria-label="{% translate 'Previous' %}"
+                class="pms-carousel-prev absolute left-0 top-20 hidden h-9 w-9 -translate-x-4 -translate-y-1/2 items-center justify-center rounded-full border border-sand-300 bg-sand-50 shadow-sm lg:top-[104px] lg:flex">
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+        </button>
+        <button type="button" aria-label="{% translate 'Next' %}"
+                class="pms-carousel-next absolute right-0 top-20 hidden h-9 w-9 translate-x-4 -translate-y-1/2 items-center justify-center rounded-full border border-sand-300 bg-sand-50 shadow-sm lg:top-[104px] lg:flex">
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+        </button>
+      </div>
+      {% comment %}
+      Clicking a thumbnail below swaps the big cover image to show that
+      photo instead - a lightweight "preview" without a lightbox library.
+      {% endcomment %}
+      <script>
+        (function () {
+          var cover = document.getElementById('villa-cover-image');
+          var list = document.getElementById('villa-gallery-list');
+          if (!cover || !list) return;
+          // The drag-scroll script below calls setPointerCapture() on this
+          // same element, which retargets the eventual click event's
+          // `target` to the list itself rather than the thumbnail that was
+          // actually pressed - so the thumbnail has to be captured here on
+          // pointerdown, before that retargeting kicks in.
+          var pressedThumb = null;
+          list.addEventListener('pointerdown', function (event) {
+            pressedThumb = event.target.closest('.villa-gallery-thumb');
+          });
+          list.addEventListener('click', function () {
+            if (!pressedThumb) return;
+            cover.src = pressedThumb.dataset.fullSrc;
+            cover.srcset = pressedThumb.dataset.fullSrcset;
+            cover.sizes = pressedThumb.dataset.fullSizes;
+            cover.alt = pressedThumb.alt;
+          });
+        })();
+      </script>
     {% endif %}
 
     {# ---- two columns from `lg` up, one below --------------------------- #}
@@ -139,34 +185,31 @@ lines of the page. Gone from `lg` up, where there is no pinned bar.
         {% if amenities %}
           <section class="mt-8 lg:mt-10">
             <h2 class="font-display text-xl lg:text-2xl">{% translate "Amenities" %}</h2>
-            <ul class="mt-3 grid grid-cols-2 gap-x-4 gap-y-3 text-sm lg:gap-x-6 lg:gap-y-3.5 lg:text-[15px]">
-              {% for amenity in amenities|slice:":8" %}
-                <li class="flex items-center gap-2">
-                  {% include "public/_amenity_icon.html" with icon=amenity.icon %}
-                  {{ amenity.name }}
-                </li>
-              {% endfor %}
-            </ul>
             {% comment %}
-            The design's "show all" toggle, as a <details>. The browser does the
-            opening and closing, so the rest of the list costs no JavaScript and
-            is still in the HTML for a search engine to read.
+            One list, not two. Splitting the fold into a separate <ul> left the
+            "show everything" toggle wedged between the two grids instead of
+            after the full list. A hidden checkbox plus :has() toggles the
+            extra rows and swaps the two labels - still no JavaScript.
             {% endcomment %}
-            {% if amenities|length > amenities_fold_at %}
-              <details class="mt-3 group">
-                <summary class="cursor-pointer list-none text-sm font-semibold text-teal-700">
+            <div class="amenities-block">
+              <input type="checkbox" id="amenities-toggle" class="hidden">
+              <ul class="mt-3 grid grid-cols-2 gap-x-4 gap-y-3 text-sm lg:gap-x-6 lg:gap-y-3.5 lg:text-[15px]">
+                {% for amenity in amenities %}
+                  <li class="flex items-center gap-2{% if forloop.counter > amenities_fold_at %} amenity-extra{% endif %}">
+                    {% include "public/_amenity_icon.html" with icon=amenity.icon %}
+                    {{ amenity.name }}
+                  </li>
+                {% endfor %}
+              </ul>
+              {% if amenities|length > amenities_fold_at %}
+                <label for="amenities-toggle" class="amenity-toggle-show mt-3 block cursor-pointer text-sm font-semibold text-teal-700">
                   {% translate "Show everything" %}
-                </summary>
-                <ul class="mt-3 grid grid-cols-2 gap-x-4 gap-y-3 text-sm lg:gap-x-6 lg:text-[15px]">
-                  {% for amenity in amenities|slice:"8:" %}
-                    <li class="flex items-center gap-2">
-                      {% include "public/_amenity_icon.html" with icon=amenity.icon %}
-                      {{ amenity.name }}
-                    </li>
-                  {% endfor %}
-                </ul>
-              </details>
-            {% endif %}
+                </label>
+                <label for="amenities-toggle" class="amenity-toggle-hide mt-3 hidden cursor-pointer text-sm font-semibold text-teal-700">
+                  {% translate "Show less" %}
+                </label>
+              {% endif %}
+            </div>
           </section>
         {% endif %}
 
@@ -216,21 +259,41 @@ lines of the page. Gone from `lg` up, where there is no pinned bar.
         {% if experiences %}
           <section class="mt-8 lg:mt-10">
             <h2 class="font-display text-xl lg:text-2xl">{% translate "Things to do nearby" %}</h2>
-            <ul class="-mx-4 mt-3 flex snap-x gap-3.5 overflow-x-auto px-4 pb-1 lg:mx-0 lg:gap-[18px] lg:px-0">
-              {% for experience in experiences %}
-                <li class="w-[180px] flex-none snap-start lg:w-[220px]">
-                  {% if experience.photo_url %}
-                    <img src="{{ experience.photo_url }}" alt="{{ experience.name }}"
-                         loading="lazy" decoding="async" width="440" height="280"
-                         class="h-[120px] w-full rounded-md object-cover lg:h-[140px]">
-                  {% endif %}
-                  <h3 class="mt-2 font-display text-[15px] leading-tight lg:text-base">{{ experience.name }}</h3>
-                  {% if experience.description %}
-                    <p class="mt-0.5 text-[13px] leading-snug text-ink-600">{{ experience.description }}</p>
-                  {% endif %}
-                </li>
-              {% endfor %}
-            </ul>
+            {% comment %}
+            A carousel, not a plain scroll strip: prev/next buttons for a mouse
+            or trackpad user, click-and-drag for a mouse user, and the existing
+            scroll-snap for a thumb-flick on a phone - one small vanilla script,
+            no Alpine, scoped to just this section.
+            {% endcomment %}
+            <div class="pms-carousel relative mt-3">
+              <ul class="pms-carousel-track -mx-4 flex snap-x snap-mandatory gap-3.5 overflow-x-auto px-4 pb-1 lg:mx-0 lg:gap-[18px] lg:px-0"
+                  style="scrollbar-width: none; -ms-overflow-style: none; cursor: grab;">
+                {% for experience in experiences %}
+                  <li class="w-[180px] flex-none snap-start lg:w-[220px]">
+                    {% if experience.photo_url %}
+                      <img src="{{ experience.photo_url }}" alt="{{ experience.name }}"
+                           loading="lazy" decoding="async" width="440" height="280"
+                           class="h-[120px] w-full rounded-md object-cover pointer-events-none select-none lg:h-[140px]"
+                           draggable="false">
+                    {% endif %}
+                    <h3 class="mt-2 font-display text-[15px] leading-tight lg:text-base">{{ experience.name }}</h3>
+                    {% if experience.description %}
+                      <p class="mt-0.5 text-[13px] leading-snug text-ink-600">{{ experience.description }}</p>
+                    {% endif %}
+                  </li>
+                {% endfor %}
+              </ul>
+              <button type="button" aria-label="{% translate 'Previous' %}"
+                      class="pms-carousel-prev absolute left-0 top-[60px] hidden h-9 w-9 -translate-x-4 items-center justify-center rounded-full border border-sand-300 bg-sand-50 shadow-sm lg:flex">
+                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+              </button>
+              <button type="button" aria-label="{% translate 'Next' %}"
+                      class="pms-carousel-next absolute right-0 top-[60px] hidden h-9 w-9 translate-x-4 items-center justify-center rounded-full border border-sand-300 bg-sand-50 shadow-sm lg:flex">
+                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+              </button>
+            </div>
           </section>
         {% endif %}
 
@@ -310,6 +373,155 @@ lines of the page. Gone from `lg` up, where there is no pinned bar.
     </a>
   </div>
 </main>
+
+{% if gallery or experiences %}
+  <style>
+    .pms-carousel-track::-webkit-scrollbar { display: none; }
+  </style>
+  {% comment %}
+  One tiny script shared by every carousel on the page (villa photos, things
+  to do nearby) - not Alpine, not a library. Prev/next buttons step by one
+  card width, and a pointer-drag lets a mouse user drag the strip the way a
+  phone's thumb-flick already works. Scroll-snap still handles touch on its
+  own.
+  {% endcomment %}
+  <script>
+    (function () {
+      document.querySelectorAll('.pms-carousel').forEach(function (carousel) {
+        var track = carousel.querySelector('.pms-carousel-track');
+        if (!track) return;
+
+        var prevBtn = carousel.querySelector('.pms-carousel-prev');
+        var nextBtn = carousel.querySelector('.pms-carousel-next');
+
+        function step() {
+          var card = track.querySelector('li');
+          return card ? card.getBoundingClientRect().width + 14 : track.clientWidth * 0.8;
+        }
+
+        function updateButtons() {
+          if (!prevBtn || !nextBtn) return;
+          var maxScroll = track.scrollWidth - track.clientWidth - 1;
+          prevBtn.disabled = track.scrollLeft <= 0;
+          nextBtn.disabled = track.scrollLeft >= maxScroll;
+          prevBtn.classList.toggle('opacity-40', prevBtn.disabled);
+          nextBtn.classList.toggle('opacity-40', nextBtn.disabled);
+        }
+
+        if (prevBtn) prevBtn.addEventListener('click', function () {
+          track.scrollBy({ left: -step(), behavior: 'smooth' });
+        });
+        if (nextBtn) nextBtn.addEventListener('click', function () {
+          track.scrollBy({ left: step(), behavior: 'smooth' });
+        });
+        track.addEventListener('scroll', updateButtons, { passive: true });
+        window.addEventListener('resize', updateButtons);
+        updateButtons();
+
+        // Click-and-drag for a mouse/trackpad; touch already scrolls natively.
+        // The delta is multiplied (not 1:1) so the strip feels loose and
+        // fast under the cursor - the same trick most drag-scroll galleries
+        // use - and a short momentum fling on release instead of a dead stop.
+        var DRAG_SPEED = 1.6;
+        var isDown = false, startX = 0, startScroll = 0, moved = false;
+        var lastX = 0, lastT = 0, velocity = 0, momentumId = null;
+
+        function stopMomentum() {
+          if (momentumId) { cancelAnimationFrame(momentumId); momentumId = null; }
+        }
+
+        track.addEventListener('pointerdown', function (e) {
+          if (e.pointerType === 'touch') return;
+          stopMomentum();
+          isDown = true;
+          moved = false;
+          startX = lastX = e.clientX;
+          startScroll = track.scrollLeft;
+          lastT = performance.now();
+          velocity = 0;
+          track.style.cursor = 'grabbing';
+          track.style.scrollSnapType = 'none';
+          track.setPointerCapture(e.pointerId);
+        });
+
+        track.addEventListener('pointermove', function (e) {
+          if (!isDown) return;
+          var dx = e.clientX - startX;
+          // A real click (mouse or trackpad) almost always has a couple of
+          // pixels of jitter between button-down and button-up - too low a
+          // threshold here was swallowing ordinary thumbnail clicks as if
+          // they were carousel drags.
+          if (Math.abs(dx) > 8) moved = true;
+          track.scrollLeft = startScroll - dx * DRAG_SPEED;
+
+          var now = performance.now();
+          var dt = now - lastT;
+          if (dt > 0) velocity = ((e.clientX - lastX) * DRAG_SPEED) / dt;
+          lastX = e.clientX;
+          lastT = now;
+        });
+
+        // Where the nearest card edge is to a given scroll position - used
+        // to ease into place ourselves instead of letting CSS scroll-snap
+        // yank the strip there in one native jump.
+        function nearestSnap(pos) {
+          var cards = track.querySelectorAll('li');
+          var trackLeft = track.getBoundingClientRect().left;
+          var nearest = pos, best = Infinity;
+          cards.forEach(function (card) {
+            var target = card.getBoundingClientRect().left - trackLeft + track.scrollLeft;
+            var dist = Math.abs(target - pos);
+            if (dist < best) { best = dist; nearest = target; }
+          });
+          var max = track.scrollWidth - track.clientWidth;
+          return Math.max(0, Math.min(nearest, max));
+        }
+
+        function settle() {
+          // Snap stays off (see below) until this smooth scroll finishes,
+          // so nothing fights it mid-animation.
+          track.scrollTo({ left: nearestSnap(track.scrollLeft), behavior: 'smooth' });
+          setTimeout(function () { track.style.scrollSnapType = ''; }, 400);
+        }
+
+        function endDrag(e) {
+          if (!isDown) return;
+          isDown = false;
+          track.style.cursor = 'grab';
+
+          // Momentum: keep coasting in the fling direction, decaying to a
+          // stop, then ease smoothly into the nearest card ourselves - snap
+          // stays disabled the whole time so it can't jerk the strip mid-flight.
+          var v = velocity;
+          if (Math.abs(v) > 0.05) {
+            stopMomentum();
+            var tick = function () {
+              track.scrollLeft -= v * 16;
+              v *= 0.94;
+              if (Math.abs(v) > 0.05) {
+                momentumId = requestAnimationFrame(tick);
+              } else {
+                momentumId = null;
+                settle();
+              }
+            };
+            momentumId = requestAnimationFrame(tick);
+          } else {
+            settle();
+          }
+        }
+        track.addEventListener('pointerup', endDrag);
+        track.addEventListener('pointerleave', endDrag);
+        track.addEventListener('pointercancel', endDrag);
+
+        // Dragging shouldn't also fire a click on the card underneath.
+        track.addEventListener('click', function (e) {
+          if (moved) { e.preventDefault(); e.stopPropagation(); moved = false; }
+        }, true);
+      });
+    })();
+  </script>
+{% endif %}
 {% endblock %}
 
 {% block footer %}

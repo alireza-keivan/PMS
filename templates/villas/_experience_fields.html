@@ -23,7 +23,11 @@ enctype="multipart/form-data".
 <div class="field">
   <label class="mb-1 flex items-baseline gap-1 text-sm text-ink-800">
     <span>{{ form.photo.label }}</span>
-    <span class="text-xs text-ink-500">({% translate "optional" %})</span>
+    {% if form.fields.photo.required %}
+      <span class="text-teal-700">*</span>
+    {% else %}
+      <span class="text-xs text-ink-500">({% translate "optional" %})</span>
+    {% endif %}
   </label>
   <div class="flex flex-wrap gap-2">
     {% if form.instance.photo %}
@@ -46,9 +50,8 @@ enctype="multipart/form-data".
   {% endif %}
 </div>
 
-<div class="grid gap-4 sm:grid-cols-2">
+<div class="grid gap-4 sm:grid-cols-3">
   {% include "villas/_field.html" with field=form.operator_name %}
   {% include "villas/_field.html" with field=form.operator_phone %}
+  {% include "villas/_field.html" with field=form.commission_percent %}
 </div>
-
-{% include "villas/_field.html" with field=form.commission_percent hint=_("What the local operator pays the villa owner.") %}

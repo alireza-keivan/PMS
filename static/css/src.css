@@ -2,6 +2,19 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer utilities {
+  /* Villa page amenities list - the extra rows past the fold, and the two
+     toggle labels, all keyed off one hidden checkbox via :has(). Must live
+     in the utilities layer (emitted after components) so `.amenity-extra`'s
+     `hidden` beats the `flex` utility also on those <li> elements - same
+     specificity, so layer order decides. See the comment in villa_page.html
+     for why this replaced a <details> split. */
+  .amenity-extra { @apply hidden; }
+  .amenities-block:has(#amenities-toggle:checked) .amenity-extra { @apply flex; }
+  .amenities-block:has(#amenities-toggle:checked) .amenity-toggle-show { @apply hidden; }
+  .amenities-block:has(#amenities-toggle:checked) .amenity-toggle-hide { @apply block; }
+}
+
 /* Alpine hides [x-cloak] elements once it loads, but doesn't ship this rule
    itself - without it, the mobile sidebar overlay flashes visible on load. */
 [x-cloak] {
@@ -40,6 +53,16 @@
     accent-color: theme("colors.teal.600");
   }
 
+  textarea.input {
+    resize: none;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  textarea.input::-webkit-scrollbar {
+    display: none;
+  }
+
   /* Chrome/Safari tint autofilled email/password fields blue by default -
      force the autofill background back to match the rest of the input. */
   .input:-webkit-autofill,
@@ -56,6 +79,16 @@
   .input.bg-sand-50:-webkit-autofill:focus {
     -webkit-box-shadow: 0 0 0 1000px theme("colors.sand.50") inset;
     box-shadow: 0 0 0 1000px theme("colors.sand.50") inset;
+  }
+
+  /* Hide the native up/down spinner on number inputs - it's not part of the design. */
+  .input[type="number"]::-webkit-outer-spin-button,
+  .input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  .input[type="number"] {
+    -moz-appearance: textfield;
   }
 
   /* The native type=search "clear" button renders blue in some browsers,

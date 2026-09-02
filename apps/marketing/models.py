@@ -47,7 +47,6 @@ class Experience(TenantOwnedModel):
     operator_phone = models.CharField(max_length=32, blank=True)
     commission_percent = models.DecimalField(
         max_digits=5, decimal_places=2, default=0,
-        help_text=_("What the local operator pays the villa owner."),
     )
     photo = models.ImageField(upload_to="experiences/", blank=True)
     villas = models.ManyToManyField("villas.Villa", blank=True, related_name="experiences")

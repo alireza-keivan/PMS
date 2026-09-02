@@ -215,6 +215,10 @@ class ExperienceForm(forms.ModelForm):
         for optional in ("name_id", "description_en", "description_id", "operator_name", "operator_phone"):
             self.fields[optional].required = False
         self.fields["commission_percent"].required = False
+        # Require a photo when adding a new activity. When editing one that
+        # already has a photo, don't force re-upload just to save the form.
+        if not (self.instance and self.instance.pk and self.instance.photo):
+            self.fields["photo"].required = True
 
     def clean_commission_percent(self):
         # Optional on the form, but the model column can't be empty - so a
