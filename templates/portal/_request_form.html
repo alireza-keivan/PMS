@@ -1,0 +1,55 @@
+{% load i18n %}
+{% comment %}
+"What do you need?" - every option visible at once as a tappable card, so
+nothing is hidden behind a dropdown a guest has to open to discover.
+
+Posts over HTMX and swaps #request-area (form + list together). The form also
+works as a plain form post with JavaScript switched off, which is why it keeps
+a real action and method - see RequestCreateView.respond.
+{% endcomment %}
+<section class="card mb-5">
+  <h2 class="mb-1 text-lg">{% translate "Ask for something" %}</h2>
+  <p class="m-0 mb-4 text-sm text-ink-600">{% translate "The team looks after this villa. Tell them what you need." %}</p>
+
+  {% if error %}
+    <p class="mb-3 rounded-md border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-800">{{ error }}</p>
+  {% endif %}
+
+  <form method="post" action="{% url 'portal:request' token=token %}"
+        hx-post="{% url 'portal:request' token=token %}"
+        hx-target="#request-area" hx-swap="innerHTML"
+        hx-indicator="#request-spinner">
+    {% csrf_token %}
+
+    <fieldset class="mb-4 border-0 p-0">
+      <legend class="mb-2 p-0 text-sm text-ink-800">{{ form.kind.label }}</legend>
+      <div class="grid grid-cols-2 gap-2">
+        {% for radio in form.kind %}
+          <label class="block">
+            {{ radio.tag }}
+            <span class="pick">{{ radio.choice_label }}</span>
+          </label>
+        {% endfor %}
+      </div>
+      {% if form.kind.errors %}
+        <p class="mt-2 text-sm text-red-700">{{ form.kind.errors.0 }}</p>
+      {% endif %}
+    </fieldset>
+
+    <div class="field mb-4">
+      <label class="text-sm text-ink-800" for="{{ form.message.id_for_label }}">
+        {{ form.message.label }}
+        <span class="text-xs text-ink-600">({% translate "optional" %})</span>
+      </label>
+      {{ form.message }}
+      {% if form.message.errors %}
+        <p class="text-sm text-red-700">{{ form.message.errors.0 }}</p>
+      {% endif %}
+    </div>
+
+    <button type="submit" class="btn btn-primary w-full justify-center py-3">
+      {% translate "Send" %}
+      {% include "partials/_spinner.html" with indicator=True id="request-spinner" size="sm" %}
+    </button>
+  </form>
+</section>

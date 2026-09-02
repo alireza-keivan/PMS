@@ -59,6 +59,16 @@
     <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {% for villa in villas %}
         <div class="flex flex-col rounded-lg border border-sand-200 bg-sand-100 p-4 shadow-sm sm:p-6">
+          {% if villa.is_listed_publicly %}
+            <a
+              href="{% url 'marketing:villa_page' villa.organization.slug villa.slug %}"
+              target="_blank"
+              rel="noopener"
+              class="mb-2 inline-flex items-center gap-1 self-start text-xs text-teal-700 underline hover:text-teal-800"
+            >
+              {% translate "View website" %}
+            </a>
+          {% endif %}
           <div class="mb-3 flex min-h-[2.75rem] items-start justify-between gap-2">
             <h2 class="font-semibold text-ink-900">{{ villa.name }}</h2>
             {% if villa.available_from %}

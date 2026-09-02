@@ -79,19 +79,30 @@
     var row = tile && tile.parentElement;
     if (!row) return;
 
+    var file = input.files && input.files[0];
+    if (!file) return;
+
+    // A tile that already wraps an existing photo (see
+    // villas/_experience_fields.html) just gets its own image swapped, so
+    // picking a new file replaces the preview in place instead of adding a
+    // second box next to it.
+    var existingImg = tile.querySelector("img");
+    if (existingImg) {
+      existingImg.src = URL.createObjectURL(file);
+      return;
+    }
+
     row.querySelectorAll("[data-pending-preview]").forEach(function (el) { el.remove(); });
 
-    Array.from(input.files || []).forEach(function (file) {
-      var box = document.createElement("div");
-      box.dataset.pendingPreview = "true";
-      box.className = "h-[74px] w-[74px] flex-none overflow-hidden rounded-sm border border-sand-300";
-      var img = document.createElement("img");
-      img.src = URL.createObjectURL(file);
-      img.alt = "";
-      img.className = "h-full w-full object-cover";
-      box.appendChild(img);
-      row.insertBefore(box, tile);
-    });
+    var box = document.createElement("div");
+    box.dataset.pendingPreview = "true";
+    box.className = "h-[74px] w-[74px] flex-none overflow-hidden rounded-sm border border-sand-300";
+    var img = document.createElement("img");
+    img.src = URL.createObjectURL(file);
+    img.alt = "";
+    img.className = "h-full w-full object-cover";
+    box.appendChild(img);
+    row.insertBefore(box, tile);
   });
 
   // ---- 4. "Save" stays off until something actually changes ------------

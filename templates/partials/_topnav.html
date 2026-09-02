@@ -8,6 +8,7 @@ the bar, then the user and the language switch pushed right.
 {% url 'bookings:calendar' as calendar_url %}
 {% url 'villas:list' as villas_url %}
 {% url 'compliance:action_needed' as compliance_url %}
+{% url 'guests:requests' as requests_url %}
 {% url 'messaging:inbox' as messages_url %}
 {% url 'marketing_admin:overview' as marketing_url %}
 {% url 'organizations:staff_list' as team_url %}
@@ -31,6 +32,7 @@ the bar, then the user and the language switch pushed right.
     <div class="inline-flex items-center gap-1 rounded-full border border-sand-300 bg-sand-100 p-1">
       <a href="{{ villas_url }}" class="nav-pill {% if request.path == villas_url %}nav-pill-active{% endif %}">{% translate "Villas" %}</a>
       <a href="{{ compliance_url }}" class="nav-pill {% if request.path == compliance_url %}nav-pill-active{% endif %}">{% translate "Compliance" %}</a>
+      <a href="{{ requests_url }}" class="nav-pill {% if request.path == requests_url %}nav-pill-active{% endif %}">{% translate "Requests" %}</a>
       <a href="{{ messages_url }}" class="nav-pill {% if request.path == messages_url %}nav-pill-active{% endif %}">{% translate "Messages" %}</a>
       <a href="{{ marketing_url }}" class="nav-pill {% if request.path == marketing_url %}nav-pill-active{% endif %}">{% translate "Marketing" %}</a>
       {% if is_manager %}
@@ -83,6 +85,7 @@ the bar, then the user and the language switch pushed right.
       {% endif %}
       <a href="{{ villas_url }}" class="nav-pill w-full {% if request.path == villas_url %}nav-pill-active{% endif %}">{% translate "Villas" %}</a>
       <a href="{{ compliance_url }}" class="nav-pill w-full {% if request.path == compliance_url %}nav-pill-active{% endif %}">{% translate "Compliance" %}</a>
+      <a href="{{ requests_url }}" class="nav-pill w-full {% if request.path == requests_url %}nav-pill-active{% endif %}">{% translate "Requests" %}</a>
       <a href="{{ messages_url }}" class="nav-pill w-full {% if request.path == messages_url %}nav-pill-active{% endif %}">{% translate "Messages" %}</a>
       <a href="{{ marketing_url }}" class="nav-pill w-full {% if request.path == marketing_url %}nav-pill-active{% endif %}">{% translate "Marketing" %}</a>
       {% if is_manager %}

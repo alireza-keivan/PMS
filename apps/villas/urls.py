@@ -11,8 +11,12 @@ from apps.villas.views import (
     RoomPhotoUploadView,
     RoomQuickAddView,
     RoomRenameView,
+    VillaActivitiesView,
     VillaDeleteView,
     VillaDetailsView,
+    VillaExperienceCreateView,
+    VillaExperienceDeleteView,
+    VillaExperienceUpdateView,
     VillaListView,
     VillaPhotoDeleteView,
     VillaPhotoUploadView,
@@ -67,4 +71,10 @@ urlpatterns = [
 
     path("amenities/add/", AmenityCreateView.as_view(), name="add_amenity"),
     path("amenities/<int:pk>/remove/", AmenityDeleteView.as_view(), name="remove_amenity"),
+
+    # "Things to do nearby" (feature #8), its own page.
+    path("<slug:slug>/activities/", VillaActivitiesView.as_view(), name="activities"),
+    path("<slug:slug>/nearby/add/", VillaExperienceCreateView.as_view(), name="add_experience"),
+    path("<slug:slug>/nearby/<int:pk>/edit/", VillaExperienceUpdateView.as_view(), name="edit_experience"),
+    path("<slug:slug>/nearby/<int:pk>/remove/", VillaExperienceDeleteView.as_view(), name="remove_experience"),
 ]

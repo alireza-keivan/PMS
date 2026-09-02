@@ -23,6 +23,7 @@ module.exports = {
     "spinner", "spinner-sm", "spinner-md", "spinner-lg", "spinner-overlay",
     "spinner-indicator",
     "elev-sm", "guest-scroll", "detail-card-fade", "cal-search-focus",
+    "pick", "pick-input",
   ],
   theme: {
     extend: {

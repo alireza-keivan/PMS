@@ -1,0 +1,23 @@
+{% load i18n %}
+{% comment %}
+The list body on its own, so the To do / All filter can swap just this part.
+Also what a bare HTMX GET of guests:requests returns - see
+GuestRequestListView.get_template_names.
+{% endcomment %}
+{% if requests %}
+  <ul class="m-0 list-none space-y-2 p-0">
+    {% for r in requests %}
+      {% include "guests/_request_row.html" with r=r %}
+    {% endfor %}
+  </ul>
+{% else %}
+  <div class="card">
+    <p class="m-0 text-ink-600">
+      {% if show_done %}
+        {% translate "No guest has asked for anything yet." %}
+      {% else %}
+        {% translate "Nothing to do right now." %}
+      {% endif %}
+    </p>
+  </div>
+{% endif %}

@@ -138,14 +138,12 @@ lines of the page. Gone from `lg` up, where there is no pinned bar.
 
         {% if amenities %}
           <section class="mt-8 lg:mt-10">
-            <h2 class="font-display text-xl lg:text-2xl">{% translate "What's here" %}</h2>
+            <h2 class="font-display text-xl lg:text-2xl">{% translate "Amenities" %}</h2>
             <ul class="mt-3 grid grid-cols-2 gap-x-4 gap-y-3 text-sm lg:gap-x-6 lg:gap-y-3.5 lg:text-[15px]">
               {% for amenity in amenities|slice:":8" %}
                 <li class="flex items-center gap-2">
-                  <svg class="h-4 w-4 flex-none text-accent2-700" viewBox="0 0 24 24" fill="none"
-                       stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
-                       stroke-linejoin="round" aria-hidden="true"><path d="m5 13 4 4L19 7"/></svg>
-                  {{ amenity }}
+                  {% include "public/_amenity_icon.html" with icon=amenity.icon %}
+                  {{ amenity.name }}
                 </li>
               {% endfor %}
             </ul>
@@ -162,10 +160,8 @@ lines of the page. Gone from `lg` up, where there is no pinned bar.
                 <ul class="mt-3 grid grid-cols-2 gap-x-4 gap-y-3 text-sm lg:gap-x-6 lg:text-[15px]">
                   {% for amenity in amenities|slice:"8:" %}
                     <li class="flex items-center gap-2">
-                      <svg class="h-4 w-4 flex-none text-accent2-700" viewBox="0 0 24 24" fill="none"
-                           stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
-                           stroke-linejoin="round" aria-hidden="true"><path d="m5 13 4 4L19 7"/></svg>
-                      {{ amenity }}
+                      {% include "public/_amenity_icon.html" with icon=amenity.icon %}
+                      {{ amenity.name }}
                     </li>
                   {% endfor %}
                 </ul>

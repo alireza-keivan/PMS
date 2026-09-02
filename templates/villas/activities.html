@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% load i18n static %}
+{% comment %}
+"Things to do nearby" (feature #8) - its own page, linked from the villa
+edit page. See apps.villas.views.VillaActivitiesView and friends.
+{% endcomment %}
+
+{% block title %}{% translate "Activities" %} - {{ villa.name }}{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-2xl">
+  <h2 class="mb-0.5 text-[32px]">{% translate "Things to do nearby" %}</h2>
+  <p class="m-0 mb-6 text-ink-600">{{ villa.name }}</p>
+
+  <div class="card">
+    <p class="m-0 mb-4 text-sm text-ink-600">
+      {% translate "Tours, classes, and activities shown on this villa's public page." %}
+    </p>
+
+    {% if experiences %}
+      <div class="space-y-3">
+        {% for experience in experiences %}
+          <div class="flex items-center gap-3 rounded-md border border-sand-200 p-3">
+            <div class="min-w-0 flex-1">
+              <p class="m-0 truncate text-sm font-medium text-ink-900">{{ experience.name_en }}</p>
+              {% if experience.operator_name %}
+                <p class="m-0 truncate text-sm text-ink-600">{{ experience.operator_name }}</p>
+              {% endif %}
+            </div>
+            {% if experience.photo %}
+              <img src="{{ experience.photo.url }}" alt="" class="h-12 w-12 flex-none rounded object-cover">
+            {% else %}
+              <div class="h-12 w-12 flex-none rounded bg-sand-100"></div>
+            {% endif %}
+            <a href="{% url 'villas:edit_experience' villa.slug experience.pk %}" class="btn btn-ghost">
+              {% translate "Edit" %}
+            </a>
+            <form method="post" action="{% url 'villas:remove_experience' villa.slug experience.pk %}">
+              {% csrf_token %}
+              <button
+                type="submit"
+                class="btn btn-icon btn-ghost flex-none opacity-60 hover:opacity-100 hover:!text-red-600"
+                title="{% translate 'Remove' %}"
+                aria-label="{% translate 'Remove' %}"
+              >
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+              </button>
+            </form>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="mb-4 text-sm text-ink-600">{% translate "Nothing added yet." %}</p>
+    {% endif %}
+
+    <details class="mt-4"{% if experience_form.errors %} open{% endif %}>
+      <summary class="cursor-pointer text-sm font-medium text-teal-700">
+        {% translate "+ Add an activity" %}
+      </summary>
+      <form id="add-experience-form" method="post" enctype="multipart/form-data" action="{% url 'villas:add_experience' villa.slug %}" class="mt-4 space-y-4">
+        {% csrf_token %}
+        {% include "villas/_experience_fields.html" with form=experience_form %}
+      </form>
+    </details>
+
+    <div class="mt-8 flex items-center justify-between">
+      <a href="{% url 'villas:edit' villa.slug %}" class="btn btn-ghost">{% translate "Back" %}</a>
+      <button type="submit" form="add-experience-form" class="btn btn-secondary">{% translate "Add" %}</button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block pre_alpine_js %}
+  <script src="{% static 'js/villa_form.js' %}" defer></script>
+{% endblock %}

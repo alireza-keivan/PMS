@@ -1,0 +1,56 @@
+{% extends "portal/base_portal.html" %}
+{% load i18n %}
+
+{% block title %}{{ villa.name }}{% endblock %}
+{% block header %}{{ villa.name }}{% endblock %}
+
+{% block content %}
+  <h1 class="mb-1 text-[28px]">{% blocktranslate with name=guest.full_name %}Hi {{ name }}{% endblocktranslate %}</h1>
+  <p class="m-0 mb-5 text-ink-600">{% translate "Need something during your stay? Ask here." %}</p>
+
+  {% comment %}
+  Your stay, so the guest can tell at a glance that this link is really theirs
+  and really this villa. Dates and times only - no rate, no payment status, no
+  channel. What they paid and where they booked is the operator's business, and
+  a signed link is not a login (see apps/guests/portal_views.py).
+  {% endcomment %}
+  <section class="card mb-5">
+    <h2 class="mb-3 text-lg">{% translate "Your stay" %}</h2>
+    <dl class="m-0 grid grid-cols-2 gap-y-3 text-sm">
+      <dt class="text-ink-600">{% translate "Arrive" %}</dt>
+      <dd class="m-0 text-right">
+        {{ booking.check_in|date:"D j M" }}
+        <span class="block text-xs text-ink-600">{% translate "from" %} {{ villa.check_in_time|time:"g:i A" }}</span>
+      </dd>
+
+      <dt class="text-ink-600">{% translate "Leave" %}</dt>
+      <dd class="m-0 text-right">
+        {{ booking.check_out|date:"D j M" }}
+        <span class="block text-xs text-ink-600">{% translate "by" %} {{ villa.check_out_time|time:"g:i A" }}</span>
+      </dd>
+
+      <dt class="text-ink-600">{% translate "Nights" %}</dt>
+      <dd class="m-0 text-right">{{ booking.nights }}</dd>
+
+      {% if villa.area %}
+        <dt class="text-ink-600">{% translate "Where" %}</dt>
+        <dd class="m-0 text-right">{{ villa.area }}</dd>
+      {% endif %}
+    </dl>
+
+    {% if villa.google_maps_url %}
+      <a href="{{ villa.google_maps_url }}" target="_blank" rel="noopener noreferrer"
+         class="btn btn-secondary mt-4 w-full justify-center">{% translate "Open in Maps" %}</a>
+    {% endif %}
+  </section>
+
+  {% comment %}
+  The form and the list of what's already been asked for live inside one
+  container, because sending a request swaps both at once - see
+  portal/_request_result.html.
+  {% endcomment %}
+  <div id="request-area">
+    {% include "portal/_request_form.html" %}
+    {% include "portal/_requests_list.html" %}
+  </div>
+{% endblock %}

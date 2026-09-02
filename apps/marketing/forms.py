@@ -18,7 +18,7 @@ from django import forms
 from django.utils.translation import gettext_lazy as _
 
 from apps.bookings.services import find_available_room
-from apps.marketing.models import BookingEnquiry
+from apps.marketing.models import BookingEnquiry, Experience
 
 logger = logging.getLogger(__name__)
 
@@ -173,3 +173,50 @@ class BookingEnquiryForm(forms.ModelForm):
     rejection = ""
     next_free_date = None
     available_category = None
+
+
+class ExperienceForm(forms.ModelForm):
+    """One local activity on a villa's "Things to do nearby" section
+    (feature #8). Edited from the villa's own edit page - see
+    apps.villas.views - rather than only through the admin.
+    """
+
+    class Meta:
+        model = Experience
+        fields = [
+            "name_en", "name_id", "description_en", "description_id", "photo",
+            "operator_name", "operator_phone", "commission_percent",
+        ]
+        widgets = {
+            "name_en": forms.TextInput(attrs={"class": "input", "placeholder": _("e.g. Sunset cooking class")}),
+            "name_id": forms.TextInput(attrs={"class": "input"}),
+            "description_en": forms.Textarea(attrs={"class": "input rounded-md", "rows": 3}),
+            "description_id": forms.Textarea(attrs={"class": "input rounded-md", "rows": 3}),
+            "operator_name": forms.TextInput(attrs={"class": "input"}),
+            "operator_phone": forms.TextInput(attrs={"class": "input", "autocomplete": "tel"}),
+            "commission_percent": forms.NumberInput(attrs={"class": "input", "min": 0, "max": 100, "step": "0.01"}),
+        }
+        labels = {
+            "name_en": _("Name (English)"),
+            "name_id": _("Name (Indonesian)"),
+            "description_en": _("Description (English)"),
+            "description_id": _("Description (Indonesian)"),
+            "photo": _("Photo"),
+            "operator_name": _("Operator name"),
+            "operator_phone": _("Operator phone"),
+            "commission_percent": _("Commission (%)"),
+        }
+        error_messages = {
+            "name_en": {"required": _("Give this activity a name.")},
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for optional in ("name_id", "description_en", "description_id", "operator_name", "operator_phone"):
+            self.fields[optional].required = False
+        self.fields["commission_percent"].required = False
+
+    def clean_commission_percent(self):
+        # Optional on the form, but the model column can't be empty - so a
+        # blank box means "no commission", not "unknown".
+        return self.cleaned_data.get("commission_percent") or 0

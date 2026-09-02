@@ -1,0 +1,46 @@
+{% load i18n %}
+{% comment %}
+One request. Also the reply to a status change, which swaps this <li> in place
+via hx-target="closest li" hx-swap="outerHTML" - so the buttons below have to
+stay inside the same element they replace.
+{% endcomment %}
+<li id="guest-request-{{ r.pk }}" class="card flex flex-wrap items-start justify-between gap-3">
+  <div class="min-w-0">
+    <p class="m-0 font-semibold">
+      {{ r.get_kind_display }}
+      <span class="font-normal text-ink-600">
+        &middot; <a href="{% url 'guests:detail' r.guest_id %}" class="underline">{{ r.guest.full_name }}</a>
+        &middot; {{ r.booking.villa.name }}
+      </span>
+    </p>
+
+    {% if r.message %}
+      <p class="m-0 mt-1 text-sm text-ink-700">{{ r.message }}</p>
+    {% endif %}
+
+    <p class="m-0 mt-1 text-xs text-ink-600">
+      {{ r.created_at|date:"j M, g:i A" }}
+      &middot;
+      {% blocktranslate with checkout=r.booking.check_out|date:"j M" %}here until {{ checkout }}{% endblocktranslate %}
+    </p>
+  </div>
+
+  <div class="flex shrink-0 items-center gap-2">
+    {% if r.status == 'done' %}
+      <span class="tag tag-accent-2">{% translate "Done" %}</span>
+    {% elif r.status == 'cancelled' %}
+      <span class="tag tag-neutral">{% translate "Cancelled" %}</span>
+    {% else %}
+      {% if r.status == 'new' %}
+        <button hx-post="{% url 'guests:request_status' r.pk %}" hx-vals='{"status": "seen"}'
+                hx-target="closest li" hx-swap="outerHTML"
+                class="btn btn-secondary text-xs">{% translate "I'm on it" %}</button>
+      {% else %}
+        <span class="tag tag-accent">{% translate "On it" %}</span>
+      {% endif %}
+      <button hx-post="{% url 'guests:request_status' r.pk %}" hx-vals='{"status": "done"}'
+              hx-target="closest li" hx-swap="outerHTML"
+              class="btn btn-primary text-xs">{% translate "Done" %}</button>
+    {% endif %}
+  </div>
+</li>

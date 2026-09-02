@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% translate "Guest requests" %}{% endblock %}
+
+{% block content %}
+{% if no_organization %}
+  <div class="card">
+    <p class="text-ink-900">{% translate "Your account isn't linked to a property yet." %}</p>
+    <p class="mt-2 text-sm text-ink-600">
+      {% translate "Ask an owner to add you, or use the admin panel to set this up." %}
+    </p>
+  </div>
+{% else %}
+
+  <div class="mb-6 flex flex-wrap items-end justify-between gap-3">
+    <div>
+      <h1 class="mb-0.5 text-[32px]">{% translate "Guest requests" %}</h1>
+      {% comment %}
+      This page is the delivery mechanism today. The WhatsApp nudge to the
+      right staff member is build order step 3 and isn't built yet, so the
+      sub-line says so plainly rather than letting an operator assume someone
+      gets pinged. See CLAUDE.md rule 2.
+      {% endcomment %}
+      <p class="m-0 text-ink-600">
+        {% blocktranslate count counter=open_count %}{{ counter }} thing to do{% plural %}{{ counter }} things to do{% endblocktranslate %}
+        &middot;
+        {% translate "Check this page - nobody is messaged automatically yet." %}
+      </p>
+    </div>
+
+    {% comment %}
+    Both links carry a real href as well as hx-get, so the filter still works
+    with JavaScript off and each view stays shareable.
+    {% endcomment %}
+    <div class="seg">
+      <a href="{% url 'guests:requests' %}"
+         hx-get="{% url 'guests:requests' %}" hx-target="#request-rows" hx-swap="innerHTML" hx-push-url="true"
+         class="seg-opt {% if not show_done %}seg-opt-active{% endif %}">{% translate "To do" %}</a>
+      <a href="{% url 'guests:requests' %}?show=all"
+         hx-get="{% url 'guests:requests' %}?show=all" hx-target="#request-rows" hx-swap="innerHTML" hx-push-url="true"
+         class="seg-opt {% if show_done %}seg-opt-active{% endif %}">{% translate "All" %}</a>
+    </div>
+  </div>
+
+  <div id="request-rows">
+    {% include "guests/_request_rows.html" %}
+  </div>
+
+{% endif %}
+{% endblock %}

@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block title %}{{ experience.name_en }}{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-2xl">
+  <h2 class="mb-0.5 text-[32px]">{% translate "Edit activity" %}</h2>
+  <p class="m-0 mb-6 text-ink-600">{{ villa.name }}</p>
+
+  <div class="card">
+    <form method="post" enctype="multipart/form-data" novalidate class="space-y-4">
+      {% csrf_token %}
+      {% include "villas/_experience_fields.html" %}
+
+      <div class="mt-8 flex items-center justify-between">
+        <a href="{% url 'villas:activities' villa.slug %}" class="btn btn-ghost">{% translate "Back" %}</a>
+        <button type="submit" class="btn btn-primary">{% translate "Save" %}</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block pre_alpine_js %}
+  <script src="{% static 'js/villa_form.js' %}" defer></script>
+{% endblock %}

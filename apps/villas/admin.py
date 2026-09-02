@@ -14,11 +14,32 @@ from apps.villas.models import (
 class VillaPhotoInline(admin.TabularInline):
     model = VillaPhoto
     extra = 0
+    # organization is inherited from TenantOwnedModel, but a photo's operator
+    # is always its villa's - showing it here just duplicates the villa's own
+    # operator field.
+    exclude = ("organization",)
 
 
 class RoomCategoryPhotoInline(admin.TabularInline):
     model = RoomCategoryPhoto
     extra = 0
+
+
+class ExperienceInline(admin.TabularInline):
+    """Things to do nearby (feature #8), edited straight from the villa.
+
+    `Experience` lives in apps.marketing and is shared through a many-to-many
+    (one activity - a cooking class, say - can be offered on more than one
+    villa's page), so this inline goes through the m2m's own through table
+    rather than through a normal ForeignKey inline.
+    """
+
+    from apps.marketing.models import Experience
+
+    model = Experience.villas.through
+    extra = 1
+    verbose_name = _("nearby activity")
+    verbose_name_plural = _("things to do nearby")
 
 
 @admin.register(Villa)
@@ -30,7 +51,17 @@ class VillaAdmin(admin.ModelAdmin):
     # is_draft is filterable on purpose: an operator asking "where did my villa
     # go" is usually one who never finished adding it.
     list_filter = ("organization", "property_type", "area", "is_draft", "is_active")
-    inlines = [VillaPhotoInline]
+    inlines = [VillaPhotoInline, ExperienceInline]
+
+    def save_formset(self, request, form, formset, change):
+        if formset.model is VillaPhoto:
+            instances = formset.save(commit=False)
+            for instance in instances:
+                instance.organization = form.instance.organization
+                instance.save()
+            formset.save_m2m()
+        else:
+            formset.save()
 
 
 @admin.register(Room)

@@ -1,0 +1,62 @@
+{% comment %}
+The small mark shown next to one amenity on the public villa page. Include
+with `icon` (the amenity's icon key, blank for anything an operator typed in
+themselves). Unknown or blank keys fall back to a plain checkmark, since a
+custom amenity has no icon assigned to it.
+
+Every branch renders the same 24x24 viewBox stroke icon so they line up
+whichever one shows.
+{% endcomment %}
+<svg class="h-4 w-4 flex-none text-accent2-700" viewBox="0 0 24 24" fill="none"
+     stroke="currentColor" stroke-width="2" stroke-linecap="round"
+     stroke-linejoin="round" aria-hidden="true">
+  {% if icon == "pool" %}
+    <path d="M2 17c1.5 1 3 1 4.5 0s3-1 4.5 0 3 1 4.5 0 3-1 4.5 0 3 1 4.5 0"/>
+    <path d="M2 21c1.5 1 3 1 4.5 0s3-1 4.5 0 3 1 4.5 0 3-1 4.5 0 3 1 4.5 0"/>
+    <path d="M8 13V5a2 2 0 1 1 4 0v2"/>
+    <path d="M14 13V9a2 2 0 1 1 4 0v4"/>
+  {% elif icon == "wifi" %}
+    <path d="M2 8.5a16 16 0 0 1 20 0"/>
+    <path d="M5 12.5a11 11 0 0 1 14 0"/>
+    <path d="M8.5 16.5a6 6 0 0 1 7 0"/>
+    <path d="M12 20.5h.01"/>
+  {% elif icon == "ac" %}
+    <path d="M12 2v20"/>
+    <path d="M4.5 5.5 12 12l7.5-6.5"/>
+    <path d="M4.5 18.5 12 12l7.5 6.5"/>
+  {% elif icon == "kitchen" %}
+    <path d="M7 2v8a2 2 0 0 0 4 0V2"/>
+    <path d="M9 10v12"/>
+    <path d="M17 2c-1.5 1-2 3-2 5s.5 3 2 3 2-1 2-3-.5-4-2-5Z"/>
+    <path d="M17 10v12"/>
+  {% elif icon == "parking" %}
+    <rect x="3" y="8" width="18" height="9" rx="2"/>
+    <path d="M5 8V6a2 2 0 0 1 2-2h6l4 4"/>
+    <circle cx="7.5" cy="17" r="1.5"/>
+    <circle cx="17" cy="17" r="1.5"/>
+  {% elif icon == "housekeeping" %}
+    <path d="M12 3c2 2.5 4 5.5 4 8a4 4 0 0 1-8 0c0-2.5 2-5.5 4-8Z"/>
+    <path d="M6 21c0-2 2-3 6-3s6 1 6 3"/>
+  {% elif icon == "electricity" %}
+    <path d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z"/>
+  {% elif icon == "garden" %}
+    <path d="M12 21V10"/>
+    <path d="M12 10C9 10 7 8 7 5c3 0 5 2 5 5Z"/>
+    <path d="M12 10c3 0 5-2 5-5-3 0-5 2-5 5Z"/>
+  {% elif icon == "view" %}
+    <path d="m3 17 4.5-6L11 15l4-5.5L21 17"/>
+    <path d="M3 20h18"/>
+  {% elif icon == "laundry" %}
+    <rect x="4" y="3" width="16" height="18" rx="2"/>
+    <circle cx="12" cy="13" r="4"/>
+    <circle cx="7" cy="6" r=".5" fill="currentColor" stroke="none"/>
+  {% elif icon == "breakfast" %}
+    <path d="M4 8h13a3 3 0 0 1 0 6h-1"/>
+    <path d="M4 8v6a4 4 0 0 0 4 4h4a4 4 0 0 0 4-4V8"/>
+    <path d="M4 2s0 2 2 2-2-2-2-2"/>
+  {% elif icon == "hot_water" %}
+    <path d="M12 2C9 6 7 9.5 7 13a5 5 0 0 0 10 0c0-3.5-2-7-5-11Z"/>
+  {% else %}
+    <path d="m5 13 4 4L19 7"/>
+  {% endif %}
+</svg>

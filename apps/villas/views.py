@@ -25,6 +25,8 @@ from django.views.generic import DetailView, TemplateView, View
 
 from apps.bookings.models import Booking
 from apps.core.utils import safe_next
+from apps.marketing.forms import ExperienceForm
+from apps.marketing.models import Experience
 from apps.organizations.mixins import ManagerRequiredMixin
 from apps.organizations.permissions import is_manager
 from apps.organizations.scoping import scoped_villas
@@ -448,13 +450,14 @@ class VillaDetailsView(ManagerRequiredMixin, View):
         return redirect("villas:edit", slug=villa.slug)
 
     def _render(self, form):
-        return render(self.request, self.template_name, {
+        context = {
             "form": form,
             "villa": self.villa,
             "organization": self.organization,
             "areas": BALI_AREAS,
             "step": 1,
-        })
+        }
+        return render(self.request, self.template_name, context)
 
 
 # ---------------------------------------------------------------------------
@@ -827,6 +830,130 @@ class AmenityDeleteView(ManagerRequiredMixin, View):
         amenity.delete()
         logger.info("Removed custom amenity %s for organization %s", pk, request.organization.pk)
         return HttpResponse("")
+
+
+# ---------------------------------------------------------------------------
+# "Things to do nearby" (feature #8)
+# ---------------------------------------------------------------------------
+
+
+class VillaActivitiesView(ManagerRequiredMixin, View):
+    """Its own page, at villas/<slug>/activities/, listing this villa's local
+    activities and letting the client add a new one. Only reachable once the
+    villa is real and not a draft - Experience links to a villa through its
+    own many-to-many, which needs a villa row to point at.
+    """
+
+    template_name = "villas/activities.html"
+
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return super().dispatch(request, *args, **kwargs)
+        self.villa = _get_org_villa(request, kwargs["slug"], drafts_too=False)
+        return super().dispatch(request, *args, **kwargs)
+
+    def get(self, request, slug):
+        return self._render(getattr(self, "experience_form", None) or ExperienceForm())
+
+    def _render(self, experience_form):
+        return render(self.request, self.template_name, {
+            "villa": self.villa,
+            "experiences": self.villa.experiences.all(),
+            "experience_form": experience_form,
+        })
+
+
+class VillaExperienceCreateView(ManagerRequiredMixin, View):
+    """Adds a local activity straight to this villa's "Things to do nearby".
+
+    `Experience` lives in apps.marketing and can be shared across villas
+    through its own many-to-many - see ExperienceInline in
+    apps.villas.admin - but an activity added from here is a fresh row of
+    its own, linked only to this villa.
+    """
+
+    def post(self, request, slug):
+        villa = _get_org_villa(request, slug, drafts_too=False)
+        form = ExperienceForm(request.POST, request.FILES)
+        if not form.is_valid():
+            view = VillaActivitiesView()
+            view.request, view.villa = request, villa
+            return view._render(form)
+
+        experience = form.save(commit=False)
+        experience.organization = request.organization
+        experience.save()
+        experience.villas.add(villa)
+        logger.info(
+            "Added experience %s (%s) to villa %s by user %s",
+            experience.pk, experience.name_en, villa.pk, request.user.pk,
+        )
+        messages.success(request, _('Added "%(name)s".') % {"name": experience.name_en})
+        return redirect("villas:activities", slug=villa.slug)
+
+
+class VillaExperienceUpdateView(ManagerRequiredMixin, View):
+    """Editing one activity already on this villa's page. A standalone page
+    rather than an inline card, so a photo swap gets the same clear
+    save-or-cancel step as everything else that uploads a picture.
+    """
+
+    template_name = "villas/experience_form.html"
+
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return super().dispatch(request, *args, **kwargs)
+        self.villa = _get_org_villa(request, kwargs["slug"], drafts_too=False)
+        self.experience = get_object_or_404(
+            Experience, pk=kwargs["pk"], organization=request.organization, villas=self.villa,
+        )
+        return super().dispatch(request, *args, **kwargs)
+
+    def get(self, request, slug, pk):
+        return self._render(ExperienceForm(instance=self.experience))
+
+    def post(self, request, slug, pk):
+        form = ExperienceForm(request.POST, request.FILES, instance=self.experience)
+        if not form.is_valid():
+            return self._render(form)
+        form.save()
+        logger.info(
+            "Updated experience %s (%s) on villa %s by user %s",
+            self.experience.pk, self.experience.name_en, self.villa.pk, request.user.pk,
+        )
+        messages.success(request, _("Saved"))
+        return redirect("villas:activities", slug=self.villa.slug)
+
+    def _render(self, form):
+        return render(self.request, self.template_name, {
+            "form": form, "villa": self.villa, "experience": self.experience,
+        })
+
+
+class VillaExperienceDeleteView(ManagerRequiredMixin, View):
+    """Takes an activity off this villa's page.
+
+    Unlinked rather than blanket-deleted, since the same activity can be
+    shared onto more than one villa - it is only actually deleted once no
+    villa is showing it any more.
+    """
+
+    def post(self, request, slug, pk):
+        villa = _get_org_villa(request, slug, drafts_too=False)
+        experience = get_object_or_404(
+            Experience, pk=pk, organization=request.organization, villas=villa,
+        )
+        experience.villas.remove(villa)
+        name = experience.name_en
+        left_on = experience.villas.count()
+        if left_on == 0:
+            experience.delete()
+        logger.info(
+            "Removed experience %s (%s) from villa %s by user %s - still on %s other villa(s)",
+            pk, name, villa.pk, request.user.pk, left_on,
+        )
+        messages.success(request, _('Removed "%(name)s".') % {"name": name})
+        return redirect("villas:activities", slug=villa.slug)
 
 
 # ---------------------------------------------------------------------------

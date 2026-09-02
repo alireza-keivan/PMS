@@ -140,6 +140,29 @@
      consistent gap. Used by templates/villas/_field.html. */
   .field { @apply flex flex-col gap-1.5; }
 
+  /* ---- Guest portal: pick one of a few things ----
+     Same hidden-input + :has() trick as .tag-toggle, but sized for a guest's
+     thumb on a phone rather than an operator's mouse on a form: a full card
+     with a comfortable target, not a small pill. Used for "what do you need?"
+     in templates/portal/_request_form.html.
+
+     Height is set with padding rather than a fixed h-*, so the label still
+     fits when it's a long Indonesian translation of a short English word. */
+  .pick {
+    @apply flex cursor-pointer select-none items-center justify-center rounded-md border border-sand-300
+           bg-sand-50 px-3 py-4 text-center text-sm leading-tight text-ink-900 transition-colors;
+    min-height: 64px;
+  }
+  .pick:hover { @apply bg-teal-50; }
+  label:has(> .pick-input:checked) .pick {
+    @apply border-teal-600 bg-teal-600 font-semibold text-sand-50;
+  }
+  /* The radio is visually hidden (see KIND_RADIO in apps/guests/forms.py), so
+     a keyboard user needs the card itself to show where focus landed. */
+  label:has(> .pick-input:focus-visible) .pick {
+    @apply outline outline-2 outline-offset-2 outline-teal-600;
+  }
+
   /* ---- Booking calendar on a phone ----
      The grid is a fixed-width name column plus one column per day, which
      cannot shrink to phone width without the day columns collapsing to

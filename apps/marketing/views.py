@@ -167,12 +167,16 @@ def _villa_amenities(villa) -> list:
 
     Amenities are recorded per room type, but a guest reading the page wants
     to know what the villa has - so they are pooled and de-duplicated, in the
-    language of the page.
+    language of the page. Each one carries its icon key (blank for anything
+    an operator typed in themselves) so the template can show a matching mark.
     """
-    names = set()
+    by_name = {}
     for category in villa.room_categories.prefetch_related("amenities"):
-        names.update(in_language(a, "name") for a in category.amenities.all())
-    return sorted(name for name in names if name)
+        for amenity in category.amenities.all():
+            name = in_language(amenity, "name")
+            if name:
+                by_name[name] = amenity.icon
+    return [{"name": name, "icon": by_name[name]} for name in sorted(by_name)]
 
 
 def _experiences(villa) -> list:

@@ -1,0 +1,25 @@
+{% extends "portal/base_portal.html" %}
+{% load i18n %}
+
+{% block title %}{% translate "Link not working" %}{% endblock %}
+
+{% comment %}
+Every rejected link lands here, whatever the reason - expired, edited, a
+cancelled booking, a stay that ended last month. One page for all of them on
+purpose: a page that explained *why* would tell someone poking at links which
+of their guesses was closest.
+
+So the guest gets no jargon and no error code, just the one thing that actually
+helps: message the villa and ask for a new link.
+{% endcomment %}
+{% block content %}
+  <div class="card mt-6 text-center">
+    <h1 class="mb-2 text-[26px]">{% translate "This link doesn't work" %}</h1>
+    <p class="m-0 text-ink-700">
+      {% translate "It may have been for a stay that has finished, or it was only part of a longer link." %}
+    </p>
+    <p class="m-0 mt-3 text-ink-700">
+      {% translate "Message the villa on WhatsApp and ask them to send you a new one." %}
+    </p>
+  </div>
+{% endblock %}

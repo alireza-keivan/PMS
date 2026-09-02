@@ -16,6 +16,24 @@
         {% blocktranslate count n=guest.total_stays %}{{ n }} stay{% plural %}{{ n }} stays{% endblocktranslate %}
       </span>
     {% endif %}
+
+    {% comment %}
+    How a guest actually gets into their page: staff copy this and paste it
+    into WhatsApp. It only appears while the link genuinely works - see
+    _sendable_portal_link in apps/guests/views.py - so it can never be copied
+    into a message that lands the guest on the "this link doesn't work" page.
+    {% endcomment %}
+    {% if portal_link %}
+      <div x-data="{ copied: false }" class="flex items-center gap-2">
+        <button type="button" class="btn btn-secondary text-sm"
+                @click="navigator.clipboard.writeText('{{ portal_link }}').then(() => { copied = true; setTimeout(() => copied = false, 2000) })">
+          <span x-show="!copied">{% translate "Copy guest link" %}</span>
+          <span x-show="copied" x-cloak class="text-accent2-800">{% translate "Copied" %}</span>
+        </button>
+        <a href="{{ portal_link }}" target="_blank" rel="noopener noreferrer"
+           class="text-xs text-ink-600 underline">{% translate "Preview" %}</a>
+      </div>
+    {% endif %}
   </div>
 </div>
 

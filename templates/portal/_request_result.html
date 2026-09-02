@@ -1,0 +1,17 @@
+{% load i18n %}
+{% comment %}
+The HTMX reply to sending a request: the whole #request-area comes back, so the
+form resets and the new request appears in the list below it in one swap.
+
+The confirmation says the team will *see* this, never that anyone has been
+messaged - nobody has. See portal/_requests_list.html for the full note.
+{% endcomment %}
+{% if sent %}
+  <p class="mb-4 rounded-md border border-accent2-300 bg-accent2-100 px-3 py-2 text-sm text-accent2-800"
+     role="status">
+    {% translate "Sent. The team will see this." %}
+  </p>
+{% endif %}
+
+{% include "portal/_request_form.html" %}
+{% include "portal/_requests_list.html" %}

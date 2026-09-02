@@ -1,0 +1,40 @@
+{% load i18n %}
+{% comment %}
+What this guest has already asked for on this stay, so nobody wonders whether
+their first tap went through and sends it four more times.
+
+The wording of each status is the honest one. "The team will see this" is the
+truth today: creating a request writes a row the staff dashboard shows, and
+nothing is sent to anybody yet. When the WhatsApp hand-off lands (build order
+step 3, apps.messaging.tasks.notify_staff_of_request), GuestRequest.notified_at
+starts getting stamped and only then may this say someone was actually messaged.
+See CLAUDE.md rule 2 - never label something done that a person still has to do.
+{% endcomment %}
+{% if requests %}
+  <section>
+    <h2 class="mb-2 px-1 text-lg">{% translate "What you asked for" %}</h2>
+    <ul class="m-0 list-none space-y-2 p-0">
+      {% for r in requests %}
+        <li class="card elev-sm flex items-start justify-between gap-3 py-3">
+          <div>
+            <p class="m-0 font-semibold">{{ r.get_kind_display }}</p>
+            {% if r.message %}
+              <p class="m-0 mt-0.5 text-sm text-ink-700">{{ r.message }}</p>
+            {% endif %}
+            <p class="m-0 mt-1 text-xs text-ink-600">{{ r.created_at|date:"j M, g:i A" }}</p>
+          </div>
+
+          <span class="tag shrink-0
+            {% if r.status == 'done' %}tag-accent-2
+            {% elif r.status == 'cancelled' %}tag-neutral
+            {% else %}tag-accent{% endif %}">
+            {% if r.status == 'new' %}{% translate "Sent" %}
+            {% elif r.status == 'seen' %}{% translate "Team is on it" %}
+            {% elif r.status == 'done' %}{% translate "Done" %}
+            {% else %}{% translate "Cancelled" %}{% endif %}
+          </span>
+        </li>
+      {% endfor %}
+    </ul>
+  </section>
+{% endif %}

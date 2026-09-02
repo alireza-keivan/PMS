@@ -1113,7 +1113,7 @@ msgstr ""
 msgid "Monthly rate (IDR)"
 msgstr "Tarif per bulan (IDR)"
 
-#: apps/villas/forms.py:218
+#: apps/villas/forms.py:218 templates/public/villa_page.html:141
 msgid "Amenities"
 msgstr "Fasilitas"
 
@@ -2382,12 +2382,6 @@ msgstr[0] "Tidur hingga %(count)s orang"
 #| msgid "About the villa"
 msgid "About this villa"
 msgstr "Tentang villa"
-
-#: templates/public/villa_page.html:138
-#, fuzzy
-#| msgid "Where"
-msgid "What's here"
-msgstr "Lokasi"
 
 #: templates/public/villa_page.html:158
 msgid "Show everything"

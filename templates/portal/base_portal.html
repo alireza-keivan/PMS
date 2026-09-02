@@ -1,0 +1,66 @@
+{% load i18n i18n_extras static %}<!doctype html>
+{% comment %}
+The guest's shell. Deliberately NOT extending base.html: that one always
+includes partials/_topnav.html, which reads `user`, `is_manager` and reverses
+staff-only URL names - all of which are absent or meaningless for a visitor
+with no account.
+
+Phone first and phone mostly. Guests are one-handed on a small screen, often on
+hotel wifi, so: one column, no sidebar, large tap targets, and nothing that
+needs JavaScript to be usable.
+{% endcomment %}
+<html lang="{{ LANGUAGE_CODE }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{% translate "Your stay" %}{% endblock %}</title>
+  {% comment %}
+  A guest link is private. Even though it expires on its own, keep it out of
+  search results and out of the referrer header if a guest taps a link out.
+  {% endcomment %}
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="referrer" content="no-referrer">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caprasimo&family=Figtree:wght@400;600;700&display=swap">
+  <link rel="stylesheet" href="{% static 'css/tailwind.css' %}">
+  <script src="{% static 'js/htmx.min.js' %}" defer></script>
+  <script src="{% static 'js/alpine.min.js' %}" defer></script>
+</head>
+{% comment %}
+CSRF for every HTMX post on the page, set once - same as base.html does.
+{% endcomment %}
+<body class="min-h-screen bg-sand-50 text-ink-900 antialiased" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+
+  <header class="border-b border-sand-300 bg-sand-100">
+    <div class="mx-auto flex max-w-md items-center justify-between gap-3 px-4 py-3">
+      <span class="font-display text-[19px] leading-none">{% block header %}{% translate "Rumah" %}{% endblock %}</span>
+
+      {% comment %}
+      Bahasa Indonesia matters more here than on any staff screen - plenty of
+      guests are domestic. Same switcher as the staff topnav, using
+      {% templatetag openblock %} language_url {% templatetag closeblock %} so
+      the signed token in the path survives the language swap.
+      {% endcomment %}
+      <div class="seg">
+        {% for code, label in LANGUAGES %}
+          <form method="post" action="{% url 'set_language' %}" class="contents">
+            {% csrf_token %}
+            <input type="hidden" name="language" value="{{ code }}">
+            <input type="hidden" name="next" value="{% language_url code %}">
+            <button type="submit" class="seg-opt {% if LANGUAGE_CODE == code %}seg-opt-active{% endif %}">
+              {{ code|upper }}
+            </button>
+          </form>
+        {% endfor %}
+      </div>
+    </div>
+  </header>
+
+  <main class="mx-auto max-w-md px-4 py-5 pb-16">
+    {% block content %}{% endblock %}
+  </main>
+
+  {% block extra_js %}{% endblock %}
+</body>
+</html>
