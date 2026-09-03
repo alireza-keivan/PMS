@@ -114,7 +114,7 @@ class VillaForm(forms.ModelForm):
         fields = [
             "name", "property_type", "area", "address", "google_maps_url",
             "check_in_time", "check_out_time",
-            "description_en", "description_id",
+            "description_en", "description_id", "amenities",
         ]
         labels = {
             "name": _("Name"),
@@ -126,6 +126,7 @@ class VillaForm(forms.ModelForm):
             "check_out_time": _("Check-out time"),
             "description_en": _("Description (English)"),
             "description_id": _("Description (Indonesian)"),
+            "amenities": _("Amenities"),
         }
         widgets = {
             "name": forms.TextInput(attrs={"class": INPUT, "placeholder": _("e.g. Villa Kenanga")}),
@@ -148,14 +149,16 @@ class VillaForm(forms.ModelForm):
             "description_id": forms.Textarea(attrs={
                 "class": TEXTAREA, "rows": 3, "placeholder": _("A few sentences guests will see"),
             }),
+            "amenities": forms.CheckboxSelectMultiple(attrs={"class": CHECKBOX}),
         }
         error_messages = {
             "name": {"required": _("Give the villa a name.")},
             "google_maps_url": {"invalid": _("That doesn't look like a link. It should start with https://")},
         }
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, organization=None, **kwargs):
         super().__init__(*args, **kwargs)
+        self.organization = organization
         # `area` is blank=True on the model so villas made in the admin or by a
         # script don't need one, but it is asked for here - knowing which part
         # of Bali a villa is in is most of what makes the villa list readable.
@@ -164,6 +167,10 @@ class VillaForm(forms.ModelForm):
         # Optional on the form even though the model always holds a time.
         self.fields["check_in_time"].required = False
         self.fields["check_out_time"].required = False
+        # Only the shared amenities and this operator's own - never another
+        # operator's, even though they all live in one table.
+        self.fields["amenities"].queryset = Amenity.available_to(organization)
+        self.fields["amenities"].required = False
 
     def clean_check_in_time(self):
         return self.cleaned_data.get("check_in_time") or DEFAULT_CHECK_IN_TIME

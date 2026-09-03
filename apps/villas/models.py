@@ -62,8 +62,13 @@ def _resolve_maps_link(url):
         response = httpx.head(url, follow_redirects=True, timeout=5)
         resolved = str(response.url)
     except httpx.HTTPError:
+        # A timeout or network hiccup shouldn't poison the map for a month -
+        # cache the failure briefly so the next request tries again instead
+        # of being stuck with the unresolved short link until this entry
+        # would have expired.
         logger.warning("Could not resolve short Google Maps link: %s", url)
-        resolved = url
+        cache.set(cache_key, url, timeout=60 * 5)
+        return url
 
     cache.set(cache_key, resolved, timeout=60 * 60 * 24 * 30)
     return resolved
@@ -203,6 +208,14 @@ class Villa(TenantOwnedModel):
     # somewhere to go and nothing typed is ever lost - but it is invisible
     # everywhere else in the app. See VillaQuerySet.live().
     is_draft = models.BooleanField(default=False)
+
+    # ---- what the property itself offers ---------------------------------
+    # Separate from a room type's own amenities (RoomCategory.amenities,
+    # above) - a shared pool, a beachfront view or free parking belongs to
+    # the villa as a whole, not to any one kind of room in it.
+    amenities = models.ManyToManyField(
+        "Amenity", blank=True, related_name="villas",
+    )
 
     objects = VillaQuerySet.as_manager()
 

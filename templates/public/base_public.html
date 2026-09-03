@@ -87,5 +87,12 @@ It is not base_portal.html either, and the differences are the point:
     {% block footer %}{% endblock %}
   </footer>
 
+  {% comment %}
+  Still almost no JavaScript here (see the note at the top) - this block is for
+  the few small progressive-enhancement scripts, like the date range picker.
+  Every one of them has to leave the page working when it doesn't load.
+  {% endcomment %}
+  {% block scripts %}{% endblock %}
+
 </body>
 </html>

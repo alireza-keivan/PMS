@@ -11,7 +11,7 @@ from django.utils import timezone
 from django.views.generic import TemplateView
 
 from apps.bookings.models import Booking, BookingPayment
-from apps.compliance.models import ComplianceDocument, PoliceReport
+from apps.compliance.views import _documents_needing_attention, _upcoming_police_reports
 from apps.organizations.mixins import ManagerRequiredMixin
 from apps.reporting.fx import convert
 from apps.villas.models import Villa
@@ -91,13 +91,10 @@ class DashboardView(ManagerRequiredMixin, TemplateView):
 
         revenue_this_month, unconverted_count = self._revenue_this_month(org, month_start, today)
 
-        needs_doing = sum(
-            1 for d in ComplianceDocument.objects.filter(organization=org) if d.needs_attention
-        )
-        overdue_reports = sum(
-            1 for p in PoliceReport.objects.filter(organization=org, status=PoliceReport.Status.NEEDED)
-            if p.is_overdue
-        )
+        # Same helpers the compliance action-needed page uses, so this card's
+        # count always matches what "Needs doing" actually links to.
+        needs_doing = len(_documents_needing_attention(self.request))
+        overdue_reports = _upcoming_police_reports(self.request).count()
 
         context.update(
             today=today,

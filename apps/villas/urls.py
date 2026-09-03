@@ -25,6 +25,7 @@ from apps.villas.views import (
     VillaRenameView,
     VillaRoomsView,
     VillaUpdateView,
+    VillaWebsiteToggleView,
 )
 
 app_name = "villas"
@@ -86,6 +87,7 @@ urlpatterns = [
 
     # "Things to do nearby" (feature #8), its own page.
     path("<slug:slug>/activities/", VillaActivitiesView.as_view(), name="activities"),
+    path("<slug:slug>/website/", VillaWebsiteToggleView.as_view(), name="toggle_website"),
     path("<slug:slug>/nearby/add/", VillaExperienceCreateView.as_view(), name="add_experience"),
     path("<slug:slug>/nearby/<int:pk>/edit/", VillaExperienceUpdateView.as_view(), name="edit_experience"),
     path("<slug:slug>/nearby/<int:pk>/remove/", VillaExperienceDeleteView.as_view(), name="remove_experience"),

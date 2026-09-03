@@ -1,5 +1,5 @@
 {% extends "public/base_public.html" %}
-{% load i18n %}
+{% load i18n static %}
 
 {% comment %}
 One template for every screen. The phone layout is the base - full-bleed cover,
@@ -266,7 +266,7 @@ lines of the page. Gone from `lg` up, where there is no pinned bar.
                   style="scrollbar-width: none; -ms-overflow-style: none; cursor: grab;">
                 {% for room in rooms %}
                   <li data-room-id="{{ room.id }}"
-                      class="room-card group w-[260px] flex-none select-none overflow-hidden rounded-lg border border-sand-300 bg-sand-100 shadow-sm transition duration-200 ease-out lg:w-[280px]{% if rooms|length >= 2 %} cursor-pointer hover:-translate-y-1 hover:border-teal-400 hover:shadow-lg{% endif %}">
+                      class="room-card group flex w-[260px] flex-none flex-col select-none overflow-hidden rounded-lg border border-sand-300 bg-sand-100 shadow-sm transition duration-200 ease-out lg:w-[280px]{% if rooms|length >= 2 %} cursor-pointer hover:-translate-y-1 hover:border-teal-400 hover:shadow-lg{% endif %}">
                     {% if room.photo %}
                       <div class="overflow-hidden">
                         <img src="{{ room.photo.url }}" srcset="{{ room.photo.srcset }}"
@@ -276,7 +276,7 @@ lines of the page. Gone from `lg` up, where there is no pinned bar.
                              draggable="false">
                       </div>
                     {% endif %}
-                    <div class="p-3.5">
+                    <div class="flex flex-1 flex-col p-3.5">
                       <h3 class="font-display text-[17px] leading-tight lg:text-base">{{ room.name }}</h3>
                       <p class="mt-0.5 text-[13px] text-ink-600">
                         {% if room.size_sqm %}{{ room.size_sqm }} m&sup2; &middot; {% endif %}
@@ -294,13 +294,19 @@ lines of the page. Gone from `lg` up, where there is no pinned bar.
                         </ul>
                       {% endif %}
                       {% if room.nightly_rate %}
-                        <p class="mt-2.5 font-display text-base text-teal-700">
+                        <p class="mt-auto pt-2.5 font-display text-base text-teal-700">
                           {% if room.original_nightly_rate %}
-                            <span class="mr-1.5 text-ink-500 line-through">{{ room.original_nightly_rate }}</span>
+                            <span class="mr-1.5 font-light text-ink-500 line-through">{{ room.original_nightly_rate }}</span>
                           {% endif %}
-                          {% blocktranslate with price=room.nightly_rate trimmed %}
-                            {{ price }} a night
-                          {% endblocktranslate %}
+                          {{ room.nightly_rate }}<span class="text-xs">/{% translate "night" %}</span>
+                        </p>
+                      {% endif %}
+                      {% if room.monthly_rate %}
+                        <p class="{% if not room.nightly_rate %}mt-auto pt-2.5{% endif %} font-display text-base text-teal-700">
+                          {% if room.original_monthly_rate %}
+                            <span class="mr-1.5 font-light text-ink-500 line-through">{{ room.original_monthly_rate }}</span>
+                          {% endif %}
+                          {{ room.monthly_rate }}<span class="text-xs">/{% translate "month" %}</span>
                         </p>
                       {% endif %}
                     </div>
@@ -477,10 +483,27 @@ lines of the page. Gone from `lg` up, where there is no pinned bar.
     A plain link to the panel further down the page. No JavaScript, and it
     still works if the page is only half-loaded.
     {% endcomment %}
-    <a href="#book" class="btn btn-primary flex-none px-7 py-3 text-[15px]">
+    <a href="#book" class="pms-ask-to-book btn btn-primary flex-none px-7 py-3 text-[15px]">
       {% translate "Ask to book" %}
     </a>
   </div>
+
+  {% comment %}
+  Plain #book jump link would snap instantly - smooth-scroll it instead,
+  same behavior as picking a room card above. Falls back to the plain
+  anchor jump if JS hasn't loaded yet.
+  {% endcomment %}
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      var link = document.querySelector('.pms-ask-to-book');
+      var target = document.getElementById('book');
+      if (!link || !target) return;
+      link.addEventListener('click', function (event) {
+        event.preventDefault();
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    });
+  </script>
 </main>
 
 {% if gallery or experiences %}
@@ -631,6 +654,14 @@ lines of the page. Gone from `lg` up, where there is no pinned bar.
     })();
   </script>
 {% endif %}
+{% endblock %}
+
+{% block scripts %}
+  {% comment %}
+  Turns the two date boxes in the booking panel into the design's date range
+  picker. Fails safe: without it the boxes stay as they are.
+  {% endcomment %}
+  <script defer src="{% static 'js/date_range_picker.js' %}"></script>
 {% endblock %}
 
 {% block footer %}

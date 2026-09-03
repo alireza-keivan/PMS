@@ -44,6 +44,8 @@ extra homework instead of what it is - genuinely fine to skip.
     {% include "villas/_field.html" with field=form.check_out_time hint=_("Left empty, this is 11:00 AM.") %}
   </div>
 
+  {% include "villas/_amenity_checkboxes.html" with field=form.amenities category=villa %}
+
   <div class="field">
     <label class="mb-1 flex items-baseline gap-1 text-sm text-ink-800">
       <span>{% translate "Photos" %}</span>

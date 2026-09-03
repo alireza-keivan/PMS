@@ -1,0 +1,120 @@
+{% load i18n %}
+{% comment %}
+Pick the whole stay - the "Date Range Picker" card from the design handoff.
+
+One field, not two. The visitor sees a single box reading "12 Sep - 15 Sep, 3
+nights"; tapping it opens the calendar, where the two ends of the stay are set
+by picking a start and an end. Inside the calendar the design's two tabs say
+which end the next tap sets, and the nights in between are shaded.
+
+Reusable on purpose. Anywhere two date fields form a stay, include it as:
+
+    {% include "partials/_date_range_picker.html" with ci_field=form.check_in co_field=form.check_out %}
+
+Optional extras:
+    min_nights   shortest stay, so the leaving date can't be picked too early
+                 (default 1)
+    dates_label  the label on the one field (default "Dates")
+    picker_id    only needed if two pickers ever share one page
+
+How it works, and why it's built this way: the two real date inputs are always
+here and always submitted. With no JavaScript they show as ordinary date boxes
+and the form works exactly as before - the visitor is on 4G on a phone and
+nothing on the public villa page is allowed to depend on a script. When the
+script does run it hides those boxes, shows the single field, and writes back
+into the same inputs (firing `change`, so the price line listening on them
+still updates). So the inputs stay the one source of truth; the calendar is
+only a nicer way to fill them in.
+{% endcomment %}
+
+<div class="drp" data-date-range-picker
+     data-min-nights="{{ min_nights|default:1 }}"
+     id="{{ picker_id|default:'drp' }}">
+
+  {% comment %} The plain fields - the only thing shown when there is no script. {% endcomment %}
+  <div class="drp-native grid grid-cols-2 gap-2.5">
+    <div class="field">
+      <label for="{{ ci_field.id_for_label }}" class="text-xs text-ink-600">{{ ci_field.label }}</label>
+      {{ ci_field }}
+    </div>
+    <div class="field">
+      <label for="{{ co_field.id_for_label }}" class="text-xs text-ink-600">{{ co_field.label }}</label>
+      {{ co_field }}
+    </div>
+  </div>
+
+  {% comment %}
+  Field errors sit outside the boxes above, so they still show once the script
+  has hidden them.
+  {% endcomment %}
+  {% for error in ci_field.errors %}<p class="text-xs text-teal-800">{{ error }}</p>{% endfor %}
+  {% for error in co_field.errors %}<p class="text-xs text-teal-800">{{ error }}</p>{% endfor %}
+
+  {% comment %}
+  The one field. Closed, this is all there is: a label, the stay written out,
+  and a calendar mark.
+  {% endcomment %}
+  {% translate "Dates" as default_dates_label %}
+  <span class="drp-trigger-label" data-drp-label hidden>{{ dates_label|default:default_dates_label }}</span>
+  <button type="button" class="drp-trigger" data-drp-trigger hidden
+          aria-haspopup="dialog" aria-expanded="false">
+    <span class="drp-trigger-value min-w-0 flex-1" data-drp-trigger-value
+          data-empty-text="{% translate 'Add your dates' %}">{% translate "Add your dates" %}</span>
+    <svg class="h-[18px] w-[18px] flex-none text-ink-600" viewBox="0 0 24 24" fill="none"
+         stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+      <path d="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/>
+    </svg>
+  </button>
+
+  {% comment %} The calendar. Hidden until the field is tapped. {% endcomment %}
+  <div class="drp-panel" hidden role="dialog"
+       aria-label="{% translate 'Pick your dates' %}">
+
+    {% comment %}
+    The design's two tabs, kept inside the calendar: they are not a second and
+    third field to fill in, they only show the two ends of the stay and say
+    which one the next tap sets.
+    {% endcomment %}
+    <div class="mb-s4 flex gap-2.5">
+      <button type="button" class="drp-tab drp-tab-active" data-drp-tab="in">
+        <span class="drp-tab-label">{{ ci_field.label }}</span>
+        <span class="drp-tab-value" data-drp-summary="in">{% translate "Pick a date" %}</span>
+      </button>
+      <button type="button" class="drp-tab" data-drp-tab="out">
+        <span class="drp-tab-label">{{ co_field.label }}</span>
+        <span class="drp-tab-value" data-drp-summary="out">{% translate "Pick a date" %}</span>
+      </button>
+    </div>
+
+    <div class="mb-s3 flex items-center justify-between">
+      <button type="button" class="btn btn-ghost btn-icon" data-drp-prev
+              aria-label="{% translate 'Previous month' %}">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M15 18l-6-6 6-6"/>
+        </svg>
+      </button>
+      <div class="font-display text-base" data-drp-month aria-live="polite"></div>
+      <button type="button" class="btn btn-ghost btn-icon" data-drp-next
+              aria-label="{% translate 'Next month' %}">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M9 18l6-6-6-6"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="grid grid-cols-7" data-drp-weekdays></div>
+    <div class="grid grid-cols-7" data-drp-days></div>
+
+    <div class="my-s3 h-px bg-sand-300"></div>
+
+    <div class="flex items-center justify-between gap-2">
+      <span class="text-[13px] text-ink-700" data-drp-summary-text
+            data-night-word="{% translate 'night' %}"
+            data-nights-word="{% translate 'nights' %}"
+            data-empty-text="{% translate 'Pick arriving and leaving' %}"></span>
+      <button type="button" class="btn btn-primary" data-drp-done>{% translate "Done" %}</button>
+    </div>
+  </div>
+</div>

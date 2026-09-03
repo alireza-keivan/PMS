@@ -91,24 +91,28 @@ class VillaListView(LoginRequiredMixin, TemplateView):
             .order_by("name")
         )
 
-        # A villa has several rooms, so it's "available" again as soon as its
-        # earliest-checking-out current booking frees up a room - not when
-        # every room is empty. Picking the earliest check-out per villa also
-        # covers the (should-never-happen, but possible via manual admin
-        # edits) case of overlapping bookings.
-        available_from = {}
+        # A villa has several rooms, so it's only "unavailable" once every one
+        # of its rooms is occupied today - a single booked room out of many
+        # should still show "available now". Once fully booked, "available
+        # from" is when the last of today's occupying bookings checks out
+        # (the earliest checkout only frees one room, not the villa).
+        occupied_rooms_by_villa = {}
+        latest_checkout_by_villa = {}
         current_bookings = Booking.objects.filter(
             organization=org,
             villa_id__in=[v.id for v in villas],
             check_in__lte=today, check_out__gt=today,
             status__in=OCCUPYING_STATUSES,
-        ).values_list("villa_id", "check_out")
-        for villa_id, check_out in current_bookings:
-            if villa_id not in available_from or check_out < available_from[villa_id]:
-                available_from[villa_id] = check_out
+        ).values_list("villa_id", "room_id", "check_out")
+        for villa_id, room_id, check_out in current_bookings:
+            occupied_rooms_by_villa.setdefault(villa_id, set()).add(room_id)
+            if villa_id not in latest_checkout_by_villa or check_out > latest_checkout_by_villa[villa_id]:
+                latest_checkout_by_villa[villa_id] = check_out
 
         for villa in villas:
-            villa.available_from = available_from.get(villa.id)  # None = available now
+            occupied = occupied_rooms_by_villa.get(villa.id, set())
+            fully_booked = villa.room_count > 0 and len(occupied) >= villa.room_count
+            villa.available_from = latest_checkout_by_villa.get(villa.id) if fully_booked else None
 
         manager = is_manager(self.request.user)
         context.update(
@@ -464,10 +468,10 @@ class VillaDetailsView(ManagerRequiredMixin, View):
         return super().dispatch(request, *args, **kwargs)
 
     def get(self, request, slug=None):
-        return self._render(VillaForm(instance=self.villa))
+        return self._render(VillaForm(instance=self.villa, organization=self.organization))
 
     def post(self, request, slug=None):
-        form = VillaForm(request.POST, instance=self.villa)
+        form = VillaForm(request.POST, instance=self.villa, organization=self.organization)
         if not form.is_valid():
             return self._render(form)
 
@@ -500,6 +504,7 @@ class VillaDetailsView(ManagerRequiredMixin, View):
                 # new_villas_start_with_rooms in models.py.
                 villa.skip_default_rooms = True
             villa.save()
+            form.save_m2m()
 
             if not villa.room_categories.exists():
                 create_room_type(villa, DEFAULT_ROOM_TYPE, how_many=1)
@@ -532,6 +537,12 @@ class VillaDetailsView(ManagerRequiredMixin, View):
             "organization": self.organization,
             "areas": BALI_AREAS,
             "step": 1,
+            # Only amenities this operator typed in themselves can be removed -
+            # never one of the shared, built-in ones.
+            "custom_amenity_ids": {
+                str(pk) for pk in
+                Amenity.objects.filter(organization=self.organization).values_list("pk", flat=True)
+            },
         }
         return render(self.request, self.template_name, context)
 
@@ -987,11 +998,36 @@ class VillaActivitiesView(ManagerRequiredMixin, View):
         return self._render(getattr(self, "experience_form", None) or ExperienceForm())
 
     def _render(self, experience_form):
+        website_path = reverse(
+            "marketing:villa_page",
+            args=[self.villa.organization.slug, self.villa.slug],
+        )
         return render(self.request, self.template_name, {
             "villa": self.villa,
             "experiences": self.villa.experiences.all(),
             "experience_form": experience_form,
+            "website_url": self.request.build_absolute_uri(website_path),
         })
+
+
+class VillaWebsiteToggleView(ManagerRequiredMixin, View):
+    """Turns the villa's public web page on or off, from the "I want to have
+    my website" checkbox on the activities page.
+    """
+
+    def post(self, request, slug):
+        villa = _get_org_villa(request, slug, drafts_too=False)
+        villa.is_listed_publicly = bool(request.POST.get("want_website"))
+        villa.save(update_fields=["is_listed_publicly"])
+        logger.info(
+            "Set is_listed_publicly=%s for villa %s by user %s",
+            villa.is_listed_publicly, villa.pk, request.user.pk,
+        )
+        if villa.is_listed_publicly:
+            messages.success(request, _("Your villa's website is now on."))
+        else:
+            messages.success(request, _("Your villa's website is now off."))
+        return redirect("villas:activities", slug=villa.slug)
 
 
 class VillaExperienceCreateView(ManagerRequiredMixin, View):

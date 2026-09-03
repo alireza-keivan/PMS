@@ -59,16 +59,6 @@
     <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {% for villa in villas %}
         <div class="flex flex-col rounded-lg border border-sand-200 bg-sand-100 p-4 shadow-sm sm:p-6">
-          {% if villa.is_listed_publicly %}
-            <a
-              href="{% url 'marketing:villa_page' villa.organization.slug villa.slug %}"
-              target="_blank"
-              rel="noopener"
-              class="mb-2 inline-flex items-center gap-1 self-start text-xs text-teal-700 underline hover:text-teal-800"
-            >
-              {% translate "View website" %}
-            </a>
-          {% endif %}
           <div class="mb-3 flex min-h-[2.75rem] items-start justify-between gap-2">
             <h2 class="font-semibold text-ink-900">{{ villa.name }}</h2>
             {% if villa.available_from %}
@@ -79,7 +69,7 @@
               <span class="w-28 shrink-0 rounded-2xl bg-teal-50 px-2 py-1 text-left text-xs leading-snug text-teal-700">{% translate "Available now" %}</span>
             {% endif %}
           </div>
-          <p class="text-sm text-ink-600">{{ villa.address|default:villa.area }}</p>
+          <p class="text-sm text-ink-600">{{ villa.area }}</p>
           <p class="mt-1 text-xs text-ink-600">
             {% blocktranslate with guests=villa.sleeps count n=villa.room_count %}
               {{ n }} room - sleeps {{ guests }}
@@ -87,25 +77,69 @@
               {{ n }} rooms - sleeps {{ guests }}
             {% endblocktranslate %}
           </p>
-          {% if is_manager %}
-          <div class="mt-4 flex items-stretch gap-2 text-xs">
+          <div class="mt-auto flex items-stretch justify-between pt-4 text-xs">
+            {% if is_manager %}
             <a
               href="{% url 'villas:edit' villa.slug %}"
-              class="btn btn-ghost flex-1 !text-amber-800 hover:!bg-amber-50"
+              aria-label="{% translate "Edit" %}"
+              title="{% translate "Edit" %}"
+              class="btn btn-ghost flex h-12 w-12 items-center justify-center !p-0 !text-amber-800 hover:!bg-amber-50"
             >
-              {% translate "Edit" %}
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6">
+                <path d="M12 20h9" />
+                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z" />
+              </svg>
             </a>
+            {% endif %}
+            {% if villa.is_listed_publicly %}
+              <a
+                href="{% url 'marketing:villa_page' villa.organization.slug villa.slug %}"
+                target="_blank"
+                rel="noopener"
+                aria-label="{% translate "View website" %}"
+                title="{% translate "View website" %}"
+                class="btn btn-ghost flex h-12 w-12 items-center justify-center !p-0 !text-amber-800 hover:!bg-amber-50"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6">
+                  <rect x="3" y="4" width="18" height="12" rx="1" />
+                  <path d="M2 20h20" />
+                </svg>
+              </a>
+            {% else %}
+              <button
+                type="button"
+                data-leave-url="{% url 'villas:activities' 'villa-laguna-biru' %}"
+                @click="confirmTarget = { type: 'leave', message: '{% translate "This villa does not have a website yet. Continue to a sample instead?" %}', url: $el.dataset.leaveUrl }"
+                aria-label="{% translate "No website yet" %}"
+                title="{% translate "No website yet" %}"
+                class="btn btn-ghost flex h-12 w-12 items-center justify-center !p-0 !text-amber-800 opacity-30 hover:!bg-amber-50"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6">
+                  <rect x="3" y="4" width="18" height="12" rx="1" />
+                  <path d="M2 20h20" />
+                </svg>
+              </button>
+            {% endif %}
+            {% if is_manager %}
             <button
               type="button"
               data-remove-url="{% url 'villas:delete' villa.slug %}"
-              data-remove-title="{% blocktranslate with name=villa.name %}Delete {{ name }}?{% endblocktranslate %}"
-              @click="confirmTarget = { title: $el.dataset.removeTitle, url: $el.dataset.removeUrl }"
-              class="btn btn-ghost flex-1 !text-red-600 hover:!bg-red-50"
+              data-remove-message="{% blocktranslate with name=villa.name %}Delete {{ name }}? This takes it off your villa list. Its bookings, guests, and documents are kept, not deleted.{% endblocktranslate %}"
+              @click="confirmTarget = { type: 'remove', message: $el.dataset.removeMessage, url: $el.dataset.removeUrl }"
+              aria-label="{% translate "Delete" %}"
+              title="{% translate "Delete" %}"
+              class="btn btn-ghost flex h-12 w-12 items-center justify-center !p-0 !text-red-600 hover:!bg-red-50"
             >
-              {% translate "Delete" %}
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6">
+                <path d="M3 6h18" />
+                <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+                <path d="M10 11v6" />
+                <path d="M14 11v6" />
+              </svg>
             </button>
+            {% endif %}
           </div>
-          {% endif %}
         </div>
       {% endfor %}
 
@@ -148,25 +182,24 @@
   <div x-show="confirmTarget" x-cloak
        class="fixed inset-0 z-50 flex items-center justify-center"
        style="background:rgba(32,30,29,.4);"
-       @click="confirmTarget = null">
-    <div class="w-[360px] rounded-lg border border-sand-200 bg-white p-4 shadow-sm sm:p-6" @click.stop>
+       @click="confirmTarget = null"
+       @keydown.escape.window="confirmTarget = null">
+    <div class="w-[90vw] max-w-[360px] rounded-card border border-sand-300 bg-sand-100 p-s6 shadow-lg" @click.stop>
       <template x-if="confirmTarget">
         <div>
-          <h1 class="mb-2 text-lg font-semibold text-ink-900" x-text="confirmTarget.title"></h1>
-          <p class="mb-4 text-sm text-ink-600">
-            {% translate "This takes it off your villa list. Its bookings, guests, and documents are kept, not deleted." %}
-          </p>
-          <form :action="confirmTarget.url" method="post">
-            {% csrf_token %}
-            <div class="flex items-center gap-3">
-              <button type="submit" class="rounded bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-500">
-                {% translate "Yes, delete it" %}
-              </button>
-              <button type="button" class="text-sm text-ink-600 underline" @click="confirmTarget = null">
-                {% translate "Cancel" %}
-              </button>
-            </div>
-          </form>
+          <p class="mb-s4 text-sm" x-text="confirmTarget.message"></p>
+          <div class="flex justify-end gap-2">
+            <button type="button" class="btn btn-ghost" @click="confirmTarget = null">{% translate "Cancel" %}</button>
+            <template x-if="confirmTarget.type === 'leave'">
+              <button type="button" class="btn bg-teal-600 text-sand-50 hover:bg-teal-500" @click="window.location.href = confirmTarget.url">{% translate "Continue" %}</button>
+            </template>
+            <template x-if="confirmTarget.type !== 'leave'">
+              <form :action="confirmTarget.url" method="post">
+                {% csrf_token %}
+                <button type="submit" class="btn bg-red-600 text-sand-50 hover:bg-red-700 active:bg-red-800">{% translate "Remove" %}</button>
+              </form>
+            </template>
+          </div>
         </div>
       </template>
     </div>

@@ -285,6 +285,70 @@
   .title-input:hover { @apply bg-sand-200; }
   .title-input:focus { @apply bg-teal-50 ring-2 ring-teal-600; }
 
+  /* ---- Date range picker ----
+     The "Date Range Picker" card from the design handoff: two summary tabs,
+     then one month at a time with the chosen nights shaded between the two
+     ends. Markup is templates/partials/_date_range_picker.html, behaviour is
+     static/js/date_range_picker.js. */
+  .drp { @apply relative; }
+
+  /* display:grid from the .drp-native grid classes beats the browser's own
+     [hidden] rule (same specificity, later in source), so say it here -
+     otherwise the script hiding it with `hidden` would do nothing and the
+     two plain date boxes would stay visible next to the one field below. */
+  .drp-native[hidden] { display: none; }
+
+  /* The one field, closed: label above, the whole stay below, calendar mark on
+     the right. Shaped like .input (pill, same ground) so it reads as a field
+     and not as a button. */
+  .drp-trigger {
+    @apply flex w-full cursor-pointer items-center gap-3 rounded-[22px] border border-sand-300
+           bg-sand-100 px-4 py-2 text-left transition-colors;
+  }
+  .drp-trigger:hover { @apply border-sand-400; }
+  .drp-trigger[aria-expanded="true"] { @apply border-teal-600; }
+  .drp-trigger-label { @apply mb-1 block text-xs text-ink-600; }
+  .drp-trigger-value { @apply block truncate text-sm text-ink-900; }
+
+  .drp-tab {
+    @apply flex flex-1 cursor-pointer flex-col rounded-md border border-sand-300 bg-sand-100
+           p-s3 text-left transition-colors;
+  }
+  .drp-tab:hover { @apply border-sand-400; }
+  .drp-tab-active { @apply border-teal-500 bg-teal-50; }
+  .drp-tab-label { @apply text-[11.5px] font-semibold text-ink-700; }
+  .drp-tab-value { @apply mt-0.5 font-display text-[15px] leading-tight text-ink-900; }
+
+  /* A popover on top of the form, not a block that shoves the fields down
+     every time it opens. Narrow enough for the sidebar panel it lives in and
+     for a phone screen. */
+  .drp-panel {
+    @apply absolute left-0 right-0 top-full z-30 mt-2 w-full min-w-[286px] max-w-[calc(100vw-2rem)]
+           rounded-card border border-sand-300 bg-sand-100 p-s4 shadow-lg;
+    transform-origin: top center;
+    transition: opacity 0.16s ease, transform 0.16s ease;
+  }
+  /* [hidden] still fully removes it - the no-JS fallback and the resting
+     state before the open class kicks in fade + scale it instead. */
+  .drp-panel[hidden] { display: none; }
+  .drp-panel:not(.drp-panel-open) {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.98);
+    pointer-events: none;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .drp-panel { transition: none; }
+  }
+  .drp-weekday { @apply py-1 text-center text-[11.5px] font-bold text-ink-600; }
+  .drp-day { @apply flex h-10 items-center justify-center; }
+  .drp-day-in-range { @apply bg-teal-50; }
+  .drp-day-inner {
+    @apply flex h-9 w-9 items-center justify-center rounded-full text-sm text-ink-900 transition-colors;
+  }
+  .drp-day-inner:hover:not(:disabled) { @apply bg-teal-100; }
+  .drp-day-selected, .drp-day-selected:hover { @apply bg-teal-500 font-bold text-sand-50; }
+  .drp-day-off { @apply cursor-not-allowed text-ink-400 line-through opacity-60; }
+
   /* Loading spinner - one look for every "waiting on something" moment.
      Pure CSS rotation (no JS), terracotta arc on a faint terracotta track.
      Used through templates/partials/_spinner.html - don't hand-write these

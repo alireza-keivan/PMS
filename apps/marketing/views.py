@@ -18,8 +18,9 @@ everything in here, without exception:
      `booking.guest` - one careless template line away from showing another
      operator's guests. So the view reads the handful of fields the page
      needs and passes those, and nothing on the page can reach any further.
-     The street address is not among them: the area is public, the address
-     is not until someone has actually booked.
+     The street address is shown under "Where it is" (falling back to the
+     neighborhood when no address is set) alongside the map pin, which
+     already reveals the location - so the text adds no privacy exposure.
 
   4. Nothing here writes to live booking or availability data.
 """
@@ -43,6 +44,11 @@ logger = logging.getLogger(__name__)
 # How many amenities the grid shows before the rest are folded away. Matches
 # the design; the fold itself is a <details>, so it costs no JavaScript.
 AMENITIES_BEFORE_FOLD = 8
+
+# Past this many nights, a stay is priced by the month rather than the night
+# (when the manager has set a monthly rate) - both in the booking panel's
+# displayed price and in the quoted total saved on the enquiry.
+LONG_STAY_NIGHTS = 30
 
 
 def published_villa_or_404(org_slug: str, villa_slug: str) -> Villa:
@@ -70,19 +76,26 @@ def published_villa_or_404(org_slug: str, villa_slug: str) -> Villa:
 
 
 def rupiah(amount) -> str:
-    """1500000 -> "Rp 1.500.000". Never a bare number: an unlabelled figure
-    invites being read in the wrong currency (same rule as
+    """1500000 -> "Rp 1.5m", 800000 -> "Rp 800k". Never a bare number: an
+    unlabelled figure invites being read in the wrong currency (same rule as
     apps.guests.views._format_money and apps.bookings.services._money).
 
-    Dots, always - not the active locale's separator. This is a price in
-    rupiah written on a Bali villa's page, and it is written the way it is
-    written in Bali whichever language the visitor is reading. Letting the
-    English locale group it with commas would print "Rp 2,500,000", which an
-    Indonesian reader can reasonably misread by a factor of a thousand.
+    Abbreviated for the public villa page only - a villa card is small and a
+    full "Rp 19.500.000" wraps or crowds the layout. Internal screens (admin,
+    the booking calendar, guest-facing quotes in bookings/guests apps) still
+    show the exact figure via their own money formatters; only this
+    front-end display gets shortened.
     """
     if not amount:
         return ""
-    return f"Rp {int(amount):,}".replace(",", ".")
+    amount = int(amount)
+    if amount >= 1_000_000:
+        value = amount / 1_000_000
+        return f"Rp {value:.1f}".rstrip("0").rstrip(".") + "m"
+    if amount >= 1_000:
+        value = amount / 1_000
+        return f"Rp {value:.1f}".rstrip("0").rstrip(".") + "k"
+    return f"Rp {amount}"
 
 
 def in_language(obj, base: str) -> str:
@@ -173,6 +186,8 @@ def _room_types(villa) -> list:
         # or one that rounds to the same rupiah figure, would just show the
         # same price twice.
         has_discount = discounted != category.nightly_rate
+        discounted_monthly = category.discounted_monthly_rate
+        has_monthly_discount = discounted_monthly != category.monthly_rate
         rooms.append({
             "id": category.pk,
             "name": category.name,
@@ -181,6 +196,8 @@ def _room_types(villa) -> list:
             "minimum_nights": category.minimum_nights,
             "nightly_rate": rupiah(discounted),
             "original_nightly_rate": rupiah(category.nightly_rate) if has_discount else None,
+            "monthly_rate": rupiah(discounted_monthly) if category.monthly_rate else None,
+            "original_monthly_rate": rupiah(category.monthly_rate) if has_monthly_discount else None,
             "amenities": [in_language(a, "name") for a in category.amenities.all()],
             "photo": _photo_dict(first, "(min-width: 1024px) 220px, 90vw") if first else None,
         })
@@ -188,19 +205,32 @@ def _room_types(villa) -> list:
 
 
 def _villa_amenities(villa) -> list:
-    """Everything the property offers, gathered from its room types.
+    """What the operator ticked for the property, in the language of the page.
 
-    Amenities are recorded per room type, but a guest reading the page wants
-    to know what the villa has - so they are pooled and de-duplicated, in the
-    language of the page. Each one carries its icon key (blank for anything
-    an operator typed in themselves) so the template can show a matching mark.
+    This is Villa.amenities - the same list shown ticked on the edit page -
+    so what a guest sees here always matches what the operator picked there.
+    Room types can carry their own, more specific amenities (a bathtub in one
+    suite, a private kitchen in another), but those describe that room type,
+    not the villa as a whole, so they are not pooled in here.
+
+    The one exception is a villa with nothing ticked at its own level yet:
+    existing villas were only ever given room-type amenities, back before the
+    villa-level field existed, so for those this falls back to the pooled
+    room-type list rather than showing nothing. Each one carries its icon key
+    (blank for anything an operator typed in themselves) so the template can
+    show a matching mark.
     """
     by_name = {}
-    for category in villa.room_categories.prefetch_related("amenities"):
-        for amenity in category.amenities.all():
-            name = in_language(amenity, "name")
-            if name:
-                by_name[name] = amenity.icon
+    for amenity in villa.amenities.all():
+        name = in_language(amenity, "name")
+        if name:
+            by_name[name] = amenity.icon
+    if not by_name:
+        for category in villa.room_categories.prefetch_related("amenities"):
+            for amenity in category.amenities.all():
+                name = in_language(amenity, "name")
+                if name:
+                    by_name.setdefault(name, amenity.icon)
     return [{"name": name, "icon": by_name[name]} for name in sorted(by_name)]
 
 
@@ -249,6 +279,31 @@ def _single_original_price(rooms: list, single_price) -> str | None:
     return None
 
 
+def _single_monthly_price(rooms: list) -> str | None:
+    """The monthly rate to show without waiting for a room to be picked - the
+    same agreement rule as `_single_price`, and absent entirely if any room
+    type has no monthly rate set at all.
+    """
+    if not rooms:
+        return None
+    rates = {r["monthly_rate"] for r in rooms}
+    if len(rates) == 1:
+        return next(iter(rates)) or None
+    return None
+
+
+def _single_original_monthly_price(rooms: list, single_monthly_price) -> str | None:
+    """The struck-through "before" monthly price, on the same terms as
+    `_single_original_price`.
+    """
+    if not single_monthly_price:
+        return None
+    originals = {r["original_monthly_rate"] for r in rooms}
+    if len(originals) == 1:
+        return next(iter(originals))
+    return None
+
+
 def page_context(request, villa, form=None, **extra) -> dict:
     """Everything the page renders, as plain values.
 
@@ -264,7 +319,7 @@ def page_context(request, villa, form=None, **extra) -> dict:
     description = in_language(villa, "description")
     context = {
         "villa_name": villa.name,
-        "area": villa.area,
+        "area": villa.address or villa.area,
         "property_type": villa.get_property_type_display(),
         "bedrooms": villa.bedrooms,
         "sleeps": villa.sleeps,
@@ -296,11 +351,20 @@ def page_context(request, villa, form=None, **extra) -> dict:
         # actually changed it - absent (never an empty string) for a room
         # with no coupon, so the template's {% if %} on it just works.
         "room_original_prices": {str(r["id"]): r["original_nightly_rate"] for r in rooms},
+        # Monthly equivalents of the two dicts above - only present for a room
+        # type where the manager actually set one. The booking panel's own JS
+        # switches to these once the chosen dates run past 30 nights.
+        "room_monthly_prices": {str(r["id"]): r["monthly_rate"] for r in rooms},
+        "room_original_monthly_prices": {str(r["id"]): r["original_monthly_rate"] for r in rooms},
         # The one exception: if every room type costs the same (or there's
         # only one to begin with), that price isn't misleading - show it
         # right away, in the panel and the phone bar.
         "single_price": _single_price(rooms),
         "single_original_price": _single_original_price(rooms, _single_price(rooms)),
+        "single_monthly_price": _single_monthly_price(rooms),
+        "single_original_monthly_price": _single_original_monthly_price(
+            rooms, _single_monthly_price(rooms)
+        ),
 
         "page_url": page_url,
         "book_url": reverse(
@@ -373,7 +437,13 @@ class DirectBookingView(View):
         enquiry.organization = villa.organization
         enquiry.villa = villa
         category = form.available_category
-        if category and category.nightly_rate:
+        # Past 30 nights this is a monthly stay, not a run of nightly ones -
+        # quote off the monthly rate (prorated for a partial month) when the
+        # manager has actually set one, and only fall back to the nightly
+        # rate x nights otherwise.
+        if category and enquiry.nights > LONG_STAY_NIGHTS and category.monthly_rate:
+            enquiry.quoted_total = round(category.discounted_monthly_rate * enquiry.nights / 30)
+        elif category and category.nightly_rate:
             enquiry.quoted_total = category.discounted_nightly_rate * enquiry.nights
         enquiry.save()
 

@@ -21,8 +21,8 @@
 (New UI mockups/design_handoff_today_page). Not the generic .card utility:
 that class carries a border and rounded-card (32px), neither of which this
 component uses.{% endcomment %}
-<div class="mb-[18px] flex gap-3">
-  <div class="flex flex-1 items-center gap-[10px] rounded-lg bg-sand-100 p-[14px_16px] shadow-sm">
+<div class="mb-[18px] grid grid-cols-1 gap-4 sm:grid-cols-2">
+  <div class="flex items-center gap-[10px] rounded-lg bg-sand-100 p-[14px_16px] shadow-sm">
     <span class="flex h-[34px] w-[34px] flex-none items-center justify-center rounded-full" style="background:#e1eecc;color:#3d472b;">
       <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
     </span>
@@ -40,14 +40,16 @@ component uses.{% endcomment %}
       {% endif %}
     </div>
   </div>
-  <div class="flex flex-1 items-center gap-[10px] rounded-lg bg-sand-100 p-[14px_16px] shadow-sm">
-    <span class="flex h-[34px] w-[34px] flex-none items-center justify-center rounded-full" style="background:#ffe1d0;color:#643312;">
-      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M9 2H5a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2h-4"/><path d="M9 12h6"/><path d="M9 16h4"/></svg>
-    </span>
-    <div>
-      <div class="text-[10.5px] uppercase tracking-[.05em] opacity-60">{% translate "Needs doing" %}</div>
-      <div class="font-display text-[20px]">{% blocktranslate count n=needs_doing_count %}{{ n }} task{% plural %}{{ n }} tasks{% endblocktranslate %}</div>
-    </div>
+  <div class="overflow-hidden rounded-lg bg-sand-100 shadow-sm">
+    <a href="{% url 'compliance:action_needed' %}" class="flex items-center gap-[10px] p-[14px_16px] hover:bg-ink-900/[.04]">
+      <span class="flex h-[34px] w-[34px] flex-none items-center justify-center rounded-full" style="background:#ffe1d0;color:#643312;">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M9 2H5a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2h-4"/><path d="M9 12h6"/><path d="M9 16h4"/></svg>
+      </span>
+      <div>
+        <div class="text-[10.5px] uppercase tracking-[.05em] opacity-60">{% translate "Needs doing" %}</div>
+        <div class="font-display text-[20px]">{% blocktranslate count n=needs_doing_count %}{{ n }} task{% plural %}{{ n }} tasks{% endblocktranslate %}</div>
+      </div>
+    </a>
   </div>
 </div>
 
@@ -61,16 +63,37 @@ give one a different size or style; that was an earlier version's bug.{% endcomm
     <div class="mb-[10px] flex items-center gap-2">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8c491a" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7"/><path d="M9 22V12h6v10"/></svg>
       <h4 class="m-0">{% translate "Occupied today" %}</h4>
-      <span class="tag tag-neutral ml-auto">{{ bookings_today|length }}</span>
+      <span class="tag tag-neutral ml-auto">{{ occupied_villas }}/{{ total_villas }}</span>
     </div>
     <div class="overflow-hidden rounded-lg bg-sand-100 shadow-sm">
       <div class="max-h-[220px] overflow-y-auto">
-        {% for booking in bookings_today %}
+        {% for row in villa_occupancy %}
           {% cycle "background:#ffe1d0;color:#643312;" "background:#e1eecc;color:#3d472b;" "background:#eee7db;color:#645c50;" as avatar_style silent %}
-          {% blocktranslate asvar meta_text with n=booking.night_of_stay total=booking.nights %}Night {{ n }} of {{ total }}{% endblocktranslate %}
-          {% include "dashboard/_list_row.html" with initial=booking.guest.full_name|slice:":1"|upper|default:"?" name=booking.guest.full_name|default:not_available sub_line=booking.room_label meta=meta_text avatar_style=avatar_style guest_id=booking.guest.pk %}
+          {% blocktranslate asvar sub_line_text with occupied=row.occupied_rooms total=row.total_rooms %}{{ occupied }}/{{ total }} rooms occupied{% endblocktranslate %}
+          {% include "dashboard/_list_row.html" with initial=row.villa.name|slice:":1"|upper name=row.villa.name sub_line=sub_line_text meta=row.occupancy_percent|stringformat:"d"|add:"%" avatar_style=avatar_style %}
         {% empty %}
-          <div class="p-s4 text-[13px] opacity-60">{% translate "No one in-house tonight" %}</div>
+          <div class="p-s4 text-[13px] opacity-60">{% translate "No villas yet" %}</div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  {% comment %}Still owe money{% endcomment %}
+  <div>
+    <div class="mb-[10px] flex items-center gap-2">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8c491a" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>
+      <h4 class="m-0">{% translate "Still owe money" %}</h4>
+      <span class="tag tag-accent ml-auto">{{ outstanding_payments|length }}</span>
+    </div>
+    <div class="overflow-hidden rounded-lg bg-sand-100 shadow-sm">
+      <div class="max-h-[220px] overflow-y-auto">
+        {% for payment in outstanding_payments %}
+          {% cycle "background:#ffe1d0;color:#643312;" "background:#e1eecc;color:#3d472b;" "background:#eee7db;color:#645c50;" as avatar_style silent %}
+          {% with formatted_amount=payment.amount|floatformat:0|intcomma %}
+          {% include "dashboard/_list_row.html" with initial=payment.booking.guest.full_name|slice:":1"|upper|default:"?" name=payment.booking.guest.full_name|default:not_available sub_line=payment.booking.villa.name meta=payment.currency|add:" "|add:formatted_amount avatar_style=avatar_style meta_accent=True guest_id=payment.booking.guest.pk %}
+          {% endwith %}
+        {% empty %}
+          <div class="p-s4 text-[13px] opacity-60">{% translate "Everyone is paid up" %}</div>
         {% endfor %}
       </div>
     </div>
@@ -111,27 +134,6 @@ give one a different size or style; that was an earlier version's bug.{% endcomm
           {% include "dashboard/_list_row.html" with initial=booking.guest.full_name|slice:":1"|upper|default:"?" name=booking.guest.full_name|default:not_available sub_line=booking.villa.name meta=meta_text avatar_style=avatar_style guest_id=booking.guest.pk %}
         {% empty %}
           <div class="p-s4 text-[13px] opacity-60">{% translate "No one leaving today" %}</div>
-        {% endfor %}
-      </div>
-    </div>
-  </div>
-
-  {% comment %}Still owe money{% endcomment %}
-  <div>
-    <div class="mb-[10px] flex items-center gap-2">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8c491a" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>
-      <h4 class="m-0">{% translate "Still owe money" %}</h4>
-      <span class="tag tag-accent ml-auto">{{ outstanding_payments|length }}</span>
-    </div>
-    <div class="overflow-hidden rounded-lg bg-sand-100 shadow-sm">
-      <div class="max-h-[220px] overflow-y-auto">
-        {% for payment in outstanding_payments %}
-          {% cycle "background:#ffe1d0;color:#643312;" "background:#e1eecc;color:#3d472b;" "background:#eee7db;color:#645c50;" as avatar_style silent %}
-          {% with formatted_amount=payment.amount|floatformat:0|intcomma %}
-          {% include "dashboard/_list_row.html" with initial=payment.booking.guest.full_name|slice:":1"|upper|default:"?" name=payment.booking.guest.full_name|default:not_available sub_line=payment.booking.villa.name meta=payment.currency|add:" "|add:formatted_amount avatar_style=avatar_style meta_accent=True guest_id=payment.booking.guest.pk %}
-          {% endwith %}
-        {% empty %}
-          <div class="p-s4 text-[13px] opacity-60">{% translate "Everyone is paid up" %}</div>
         {% endfor %}
       </div>
     </div>

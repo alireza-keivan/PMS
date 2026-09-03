@@ -40,22 +40,32 @@ up the same element becomes the sticky sidebar beside the description. See the
     a plain "we'll be in touch" line instead of a blank space or "Rp 0".
     {% endcomment %}
     {% if single_price %}
-      <p class="font-display text-[22px] leading-none">
-        {% if single_original_price %}
-          <span class="mr-1.5 text-base text-ink-500 line-through">{{ single_original_price }}</span>
-        {% endif %}
-        {{ single_price }}
-      </p>
-      <p class="mt-1 text-xs text-ink-600">{% translate "per night" %}</p>
+      <div id="price-display"
+           data-nightly-price="{{ single_price }}"
+           data-nightly-original="{{ single_original_price|default:"" }}"
+           data-monthly-price="{{ single_monthly_price|default:"" }}"
+           data-monthly-original="{{ single_original_monthly_price|default:"" }}">
+        <p class="font-display text-[22px] leading-none">
+          <span data-original-price class="mr-1.5 text-base font-light text-ink-500 line-through"
+                {% if not single_original_price %}hidden{% endif %}>{{ single_original_price }}</span>
+          <span data-price>{{ single_price }}</span>
+        </p>
+        <p class="mt-1 text-xs text-ink-600" data-price-label>{% translate "per night" %}</p>
+      </div>
     {% elif rooms|length < 2 %}
       {% if rooms.0.nightly_rate %}
-        <p class="font-display text-[22px] leading-none">
-          {% if rooms.0.original_nightly_rate %}
-            <span class="mr-1.5 text-base text-ink-500 line-through">{{ rooms.0.original_nightly_rate }}</span>
-          {% endif %}
-          {{ rooms.0.nightly_rate }}
-        </p>
-        <p class="mt-1 text-xs text-ink-600">{% translate "per night" %}</p>
+        <div id="price-display"
+             data-nightly-price="{{ rooms.0.nightly_rate }}"
+             data-nightly-original="{{ rooms.0.original_nightly_rate|default:"" }}"
+             data-monthly-price="{{ rooms.0.monthly_rate|default:"" }}"
+             data-monthly-original="{{ rooms.0.original_monthly_rate|default:"" }}">
+          <p class="font-display text-[22px] leading-none">
+            <span data-original-price class="mr-1.5 text-base font-light text-ink-500 line-through"
+                  {% if not rooms.0.original_nightly_rate %}hidden{% endif %}>{{ rooms.0.original_nightly_rate }}</span>
+            <span data-price>{{ rooms.0.nightly_rate }}</span>
+          </p>
+          <p class="mt-1 text-xs text-ink-600" data-price-label>{% translate "per night" %}</p>
+        </div>
       {% else %}
         <p class="font-display text-sm leading-snug text-ink-600">
           {% translate "We'll contact you with a price list." %}
@@ -64,6 +74,8 @@ up the same element becomes the sticky sidebar beside the description. See the
     {% else %}
       {{ room_prices|json_script:"room-prices" }}
       {{ room_original_prices|json_script:"room-original-prices" }}
+      {{ room_monthly_prices|json_script:"room-monthly-prices" }}
+      {{ room_original_monthly_prices|json_script:"room-original-monthly-prices" }}
     {% endif %}
 
     {% comment %}
@@ -92,17 +104,13 @@ up the same element becomes the sticky sidebar beside the description. See the
         </div>
       {% endif %}
 
-      <div class="grid grid-cols-2 gap-2.5">
-        {% for field in form.visible_fields %}
-          {% if field.name == "check_in" or field.name == "check_out" %}
-            <div class="field">
-              <label for="{{ field.id_for_label }}" class="text-xs text-ink-600">{{ field.label }}</label>
-              {{ field }}
-              {% for error in field.errors %}<p class="text-xs text-teal-800">{{ error }}</p>{% endfor %}
-            </div>
-          {% endif %}
-        {% endfor %}
-      </div>
+      {% comment %}
+      Arriving and leaving, as the design's date range picker - two summary
+      tabs that open one month with the nights between them shaded. The partial
+      still renders the two real date fields underneath, so with no script this
+      is exactly the pair of date boxes it has always been.
+      {% endcomment %}
+      {% include "partials/_date_range_picker.html" with ci_field=form.check_in co_field=form.check_out min_nights=shortest_stay %}
 
       {% for field in form.visible_fields %}
         {% if field.name != "check_in" and field.name != "check_out" %}
@@ -136,10 +144,10 @@ up the same element becomes the sticky sidebar beside the description. See the
       {% if rooms|length >= 2 %}
         <div id="room-price" hidden>
           <p class="font-display text-[22px] leading-none">
-            <span data-original-price class="mr-1.5 text-base text-ink-500 line-through" hidden></span>
+            <span data-original-price class="mr-1.5 text-base font-light text-ink-500 line-through" hidden></span>
             <span data-price></span>
           </p>
-          <p class="mt-1 text-xs text-ink-600">{% translate "per night" %}</p>
+          <p class="mt-1 text-xs text-ink-600" data-price-label>{% translate "per night" %}</p>
         </div>
         <p id="room-price-contact" class="font-display text-sm leading-snug text-ink-600" hidden>
           {% translate "We'll contact you with a price list." %}
@@ -164,39 +172,100 @@ up the same element becomes the sticky sidebar beside the description. See the
       </p>
     </form>
 
-    {% if rooms|length >= 2 %}
-      {% comment %}
-      Progressive enhancement only: the room picker still submits fine with
-      no JS, this just fills in the price line above once one is chosen.
-      {% endcomment %}
-      <script>
-        (function () {
-          var pricesEl = document.getElementById('room-prices');
+    {% comment %}
+    Progressive enhancement only: the form still submits fine with no JS, and
+    the price shown here is never what decides the total that gets quoted -
+    that's computed server-side in DirectBookingView, off the same 30-night
+    cutoff. This just keeps the displayed price honest before the guest
+    submits: past 30 nights, show the monthly rate instead of the nightly one,
+    when the manager has set one - and for the room picker case, also fill in
+    the price line once a room is chosen.
+    {% endcomment %}
+    {% translate "per night" as per_night_label %}
+    {% translate "per month" as per_month_label %}
+    <script>
+      (function () {
+        var LONG_STAY_NIGHTS = 30;
+        var perNightLabel = "{{ per_night_label|escapejs }}";
+        var perMonthLabel = "{{ per_month_label|escapejs }}";
+        var checkIn = document.getElementById('id_check_in');
+        var checkOut = document.getElementById('id_check_out');
+
+        function nights() {
+          if (!checkIn || !checkOut || !checkIn.value || !checkOut.value) return 0;
+          var diff = (new Date(checkOut.value) - new Date(checkIn.value)) / 86400000;
+          return diff > 0 ? diff : 0;
+        }
+
+        function isLongStay() {
+          return nights() > LONG_STAY_NIGHTS;
+        }
+
+        // The fixed price shown with no room to pick (a single room type, or
+        // every type at the same rate).
+        var fixedBox = document.getElementById('price-display');
+        if (fixedBox) {
+          var fixedPriceText = fixedBox.querySelector('[data-price]');
+          var fixedOriginalText = fixedBox.querySelector('[data-original-price]');
+          var fixedLabel = fixedBox.querySelector('[data-price-label]');
+          var nightly = fixedBox.dataset.nightlyPrice;
+          var nightlyOriginal = fixedBox.dataset.nightlyOriginal;
+          var monthly = fixedBox.dataset.monthlyPrice;
+          var monthlyOriginal = fixedBox.dataset.monthlyOriginal;
+
+          var updateFixed = function () {
+            var useMonthly = isLongStay() && monthly;
+            fixedPriceText.textContent = useMonthly ? monthly : nightly;
+            var original = useMonthly ? monthlyOriginal : nightlyOriginal;
+            fixedOriginalText.hidden = !original;
+            if (original) fixedOriginalText.textContent = original;
+            fixedLabel.textContent = useMonthly ? perMonthLabel : perNightLabel;
+          };
+          updateFixed();
+          if (checkIn) checkIn.addEventListener('change', updateFixed);
+          if (checkOut) checkOut.addEventListener('change', updateFixed);
+        }
+
+        // The room picker (two or more room types): price depends on which
+        // one is chosen, and on whether the chosen dates are a long stay.
+        var pricesEl = document.getElementById('room-prices');
+        var select = document.querySelector('#book select[name="room_category"]');
+        var priceBox = document.getElementById('room-price');
+        var contactBox = document.getElementById('room-price-contact');
+        if (pricesEl && select && priceBox && contactBox) {
           var originalPricesEl = document.getElementById('room-original-prices');
-          var select = document.querySelector('#book select[name="room_category"]');
-          var priceBox = document.getElementById('room-price');
-          var contactBox = document.getElementById('room-price-contact');
-          if (!pricesEl || !select || !priceBox || !contactBox) return;
+          var monthlyPricesEl = document.getElementById('room-monthly-prices');
+          var originalMonthlyPricesEl = document.getElementById('room-original-monthly-prices');
 
           var prices = JSON.parse(pricesEl.textContent);
           var originalPrices = originalPricesEl ? JSON.parse(originalPricesEl.textContent) : {};
+          var monthlyPrices = monthlyPricesEl ? JSON.parse(monthlyPricesEl.textContent) : {};
+          var originalMonthlyPrices = originalMonthlyPricesEl ? JSON.parse(originalMonthlyPricesEl.textContent) : {};
+
           var priceText = priceBox.querySelector('[data-price]');
           var originalPriceText = priceBox.querySelector('[data-original-price]');
+          var priceLabel = priceBox.querySelector('[data-price-label]');
 
-          function update() {
-            var price = select.value ? prices[select.value] : null;
-            var originalPrice = select.value ? originalPrices[select.value] : null;
+          var updateRoomPrice = function () {
+            var useMonthly = isLongStay() && select.value && monthlyPrices[select.value];
+            var price = select.value ? (useMonthly ? monthlyPrices[select.value] : prices[select.value]) : null;
+            var originalPrice = select.value
+              ? (useMonthly ? originalMonthlyPrices[select.value] : originalPrices[select.value])
+              : null;
             priceBox.hidden = !price;
             contactBox.hidden = !select.value || !!price;
             if (price) priceText.textContent = price;
             originalPriceText.hidden = !originalPrice;
             if (originalPrice) originalPriceText.textContent = originalPrice;
-          }
-          select.addEventListener('change', update);
-          update();
-        })();
-      </script>
-    {% endif %}
+            priceLabel.textContent = useMonthly ? perMonthLabel : perNightLabel;
+          };
+          select.addEventListener('change', updateRoomPrice);
+          if (checkIn) checkIn.addEventListener('change', updateRoomPrice);
+          if (checkOut) checkOut.addEventListener('change', updateRoomPrice);
+          updateRoomPrice();
+        }
+      })();
+    </script>
 
   {% endif %}
 </div>

@@ -136,8 +136,10 @@ a local preview so it doesn't look inert in the meantime.
         hx-on::after-request="this.value = ''"
       >
     {% else %}
-      {# No villa row yet, so nowhere to upload to - these ride along with the
-         whole form on the first save, frames and all. #}
+      {% comment %}
+        No villa row yet, so nowhere to upload to - these ride along with the
+        whole form on the first save, frames and all.
+      {% endcomment %}
       <input type="hidden" name="crops" id="crops-new-villa">
       <input
         type="file" name="photos" multiple accept="image/*" class="sr-only"

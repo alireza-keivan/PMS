@@ -51,6 +51,7 @@ class VillaAdmin(admin.ModelAdmin):
     # is_draft is filterable on purpose: an operator asking "where did my villa
     # go" is usually one who never finished adding it.
     list_filter = ("organization", "property_type", "area", "is_draft", "is_active")
+    filter_horizontal = ("amenities",)
     inlines = [VillaPhotoInline, ExperienceInline]
 
     def save_formset(self, request, form, formset, change):
