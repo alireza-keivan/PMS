@@ -252,6 +252,43 @@ class Villa(TenantOwnedModel):
             for category in self.room_categories.all()
         )
 
+    def website_missing_requirements(self) -> list[str]:
+        """What's still missing before this villa's public web page can go
+        live, in plain language. Empty list means it's ready.
+
+        Check-in/check-out time is never in this list - it always falls back
+        to DEFAULT_CHECK_IN_TIME/DEFAULT_CHECK_OUT_TIME above, so it's never
+        actually missing.
+        """
+        missing = []
+        if self.photos.count() < 3:
+            missing.append(_("At least 3 photos of the villa"))
+        if not self.description_en.strip():
+            missing.append(_("An English description of the villa"))
+        if self.amenities.count() < 5:
+            missing.append(_("At least 5 amenities"))
+        if not self.google_maps_url.strip():
+            missing.append(_("A Google Maps location"))
+
+        categories = list(self.room_categories.all())
+        if not categories:
+            missing.append(_("At least one room type"))
+        for category in categories:
+            if not category.nightly_rate and not category.monthly_rate:
+                missing.append(
+                    _("A nightly or monthly rate for the room type \"%(name)s\"")
+                    % {"name": category.name}
+                )
+            if not category.display_photos.exists():
+                missing.append(
+                    _("A photo for the room type \"%(name)s\"") % {"name": category.name}
+                )
+        return missing
+
+    @property
+    def website_ready(self) -> bool:
+        return not self.website_missing_requirements()
+
 
 class RoomCategory(TenantOwnedModel):
     """A room type, defined by one villa rather than shared across all of them.

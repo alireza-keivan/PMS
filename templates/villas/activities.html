@@ -12,6 +12,19 @@ edit page. See apps.villas.views.VillaActivitiesView and friends.
   <h2 class="mb-0.5 text-[32px]">{% translate "Things to do nearby" %}</h2>
   <p class="m-0 mb-6 text-ink-600">{{ villa.name }}</p>
 
+  {% if website_missing_requirements %}
+    <div class="card mb-6 border-teal-300 bg-teal-50">
+      <p class="m-0 mb-2 text-sm font-medium text-teal-800">
+        {% translate "Finish these before turning the website on:" %}
+      </p>
+      <ul class="m-0 list-disc space-y-1 pl-5 text-sm text-teal-800">
+        {% for item in website_missing_requirements %}
+          <li>{{ item }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+  {% endif %}
+
   <div class="card mb-6">
     <div class="mb-3 flex items-center gap-2" x-data="{ copied: false }">
       <input
@@ -60,7 +73,8 @@ edit page. See apps.villas.views.VillaActivitiesView and friends.
           value="1"
           onchange="this.form.submit()"
           {% if villa.is_listed_publicly %}checked{% endif %}
-          class="h-4 w-4 rounded-full border-sand-300 text-teal-600 focus:ring-0 focus:ring-offset-0"
+          {% if website_missing_requirements and not villa.is_listed_publicly %}disabled{% endif %}
+          class="h-4 w-4 rounded-full border-sand-300 text-teal-600 focus:ring-0 focus:ring-offset-0 disabled:cursor-not-allowed disabled:opacity-50"
         >
         {% translate "I want to have my website" %}
       </label>

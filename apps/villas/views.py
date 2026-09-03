@@ -1007,6 +1007,7 @@ class VillaActivitiesView(ManagerRequiredMixin, View):
             "experiences": self.villa.experiences.all(),
             "experience_form": experience_form,
             "website_url": self.request.build_absolute_uri(website_path),
+            "website_missing_requirements": self.villa.website_missing_requirements(),
         })
 
 
@@ -1017,7 +1018,23 @@ class VillaWebsiteToggleView(ManagerRequiredMixin, View):
 
     def post(self, request, slug):
         villa = _get_org_villa(request, slug, drafts_too=False)
-        villa.is_listed_publicly = bool(request.POST.get("want_website"))
+        want_website = bool(request.POST.get("want_website"))
+
+        if want_website:
+            missing = villa.website_missing_requirements()
+            if missing:
+                logger.info(
+                    "Refused to turn on website for villa %s by user %s - missing: %s",
+                    villa.pk, request.user.pk, missing,
+                )
+                messages.error(
+                    request,
+                    _("Add these first before turning the website on: %(items)s")
+                    % {"items": "; ".join(missing)},
+                )
+                return redirect("villas:activities", slug=villa.slug)
+
+        villa.is_listed_publicly = want_website
         villa.save(update_fields=["is_listed_publicly"])
         logger.info(
             "Set is_listed_publicly=%s for villa %s by user %s",
