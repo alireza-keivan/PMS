@@ -1,0 +1,20 @@
+{% load i18n static %}
+{% comment %}
+The framing window's script, plus its words.
+
+The words are handed over from here rather than written into the .js file so
+they go through Django's own translation like every other string on the page -
+one translation system, not a second one for JavaScript (see CLAUDE.md).
+{% endcomment %}
+<script>
+  window.PHOTO_CROPPER_STRINGS = {
+    title: "{% translate 'Choose what shows' %}",
+    help: "{% translate 'Drag the picture to move it. Everything inside the box is what guests see.' %}",
+    zoom: "{% translate 'Zoom' %}",
+    reset: "{% translate 'Center it again' %}",
+    cancel: "{% translate 'Cancel' %}",
+    done: "{% translate 'Use this' %}",
+    save: "{% translate 'Save this view' %}"
+  };
+</script>
+<script src="{% static 'js/photo_cropper.js' %}" defer></script>

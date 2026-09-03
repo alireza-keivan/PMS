@@ -40,11 +40,21 @@ up the same element becomes the sticky sidebar beside the description. See the
     a plain "we'll be in touch" line instead of a blank space or "Rp 0".
     {% endcomment %}
     {% if single_price %}
-      <p class="font-display text-[22px] leading-none">{{ single_price }}</p>
+      <p class="font-display text-[22px] leading-none">
+        {% if single_original_price %}
+          <span class="mr-1.5 text-base text-ink-500 line-through">{{ single_original_price }}</span>
+        {% endif %}
+        {{ single_price }}
+      </p>
       <p class="mt-1 text-xs text-ink-600">{% translate "per night" %}</p>
     {% elif rooms|length < 2 %}
       {% if rooms.0.nightly_rate %}
-        <p class="font-display text-[22px] leading-none">{{ rooms.0.nightly_rate }}</p>
+        <p class="font-display text-[22px] leading-none">
+          {% if rooms.0.original_nightly_rate %}
+            <span class="mr-1.5 text-base text-ink-500 line-through">{{ rooms.0.original_nightly_rate }}</span>
+          {% endif %}
+          {{ rooms.0.nightly_rate }}
+        </p>
         <p class="mt-1 text-xs text-ink-600">{% translate "per night" %}</p>
       {% else %}
         <p class="font-display text-sm leading-snug text-ink-600">
@@ -53,13 +63,7 @@ up the same element becomes the sticky sidebar beside the description. See the
       {% endif %}
     {% else %}
       {{ room_prices|json_script:"room-prices" }}
-      <div id="room-price" hidden>
-        <p class="font-display text-[22px] leading-none" data-price></p>
-        <p class="mt-1 text-xs text-ink-600">{% translate "per night" %}</p>
-      </div>
-      <p id="room-price-contact" class="font-display text-sm leading-snug text-ink-600" hidden>
-        {% translate "We'll contact you with a price list." %}
-      </p>
+      {{ room_original_prices|json_script:"room-original-prices" }}
     {% endif %}
 
     {% comment %}
@@ -110,6 +114,12 @@ up the same element becomes the sticky sidebar beside the description. See the
           {% endcomment %}
           {% if field.name == "room_category" and rooms|length < 2 %}
             <input type="hidden" name="{{ field.name }}" value="">
+          {% elif field.name == "guest_count" %}
+            <div class="field">
+              <label for="{{ field.id_for_label }}" class="text-xs text-ink-600">{{ field.label }}</label>
+              {{ field }}
+              {% for error in field.errors %}<p class="text-xs text-teal-800">{{ error }}</p>{% endfor %}
+            </div>
           {% else %}
             <div class="field">
               <label for="{{ field.id_for_label }}" class="text-xs text-ink-600">
@@ -122,6 +132,19 @@ up the same element becomes the sticky sidebar beside the description. See the
           {% endif %}
         {% endif %}
       {% endfor %}
+
+      {% if rooms|length >= 2 %}
+        <div id="room-price" hidden>
+          <p class="font-display text-[22px] leading-none">
+            <span data-original-price class="mr-1.5 text-base text-ink-500 line-through" hidden></span>
+            <span data-price></span>
+          </p>
+          <p class="mt-1 text-xs text-ink-600">{% translate "per night" %}</p>
+        </div>
+        <p id="room-price-contact" class="font-display text-sm leading-snug text-ink-600" hidden>
+          {% translate "We'll contact you with a price list." %}
+        </p>
+      {% endif %}
 
       <button type="submit" class="btn btn-primary mt-1.5 w-full py-3 text-[15px]">
         {% translate "Ask to book" %}
@@ -149,19 +172,25 @@ up the same element becomes the sticky sidebar beside the description. See the
       <script>
         (function () {
           var pricesEl = document.getElementById('room-prices');
+          var originalPricesEl = document.getElementById('room-original-prices');
           var select = document.querySelector('#book select[name="room_category"]');
           var priceBox = document.getElementById('room-price');
           var contactBox = document.getElementById('room-price-contact');
           if (!pricesEl || !select || !priceBox || !contactBox) return;
 
           var prices = JSON.parse(pricesEl.textContent);
+          var originalPrices = originalPricesEl ? JSON.parse(originalPricesEl.textContent) : {};
           var priceText = priceBox.querySelector('[data-price]');
+          var originalPriceText = priceBox.querySelector('[data-original-price]');
 
           function update() {
             var price = select.value ? prices[select.value] : null;
+            var originalPrice = select.value ? originalPrices[select.value] : null;
             priceBox.hidden = !price;
             contactBox.hidden = !select.value || !!price;
             if (price) priceText.textContent = price;
+            originalPriceText.hidden = !originalPrice;
+            if (originalPrice) originalPriceText.textContent = originalPrice;
           }
           select.addEventListener('change', update);
           update();

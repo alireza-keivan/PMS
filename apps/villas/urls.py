@@ -7,6 +7,7 @@ from apps.villas.views import (
     RoomCategoryCreateView,
     RoomCategoryDeleteView,
     RoomDeleteView,
+    RoomPhotoCropView,
     RoomPhotoDeleteView,
     RoomPhotoUploadView,
     RoomQuickAddView,
@@ -18,6 +19,7 @@ from apps.villas.views import (
     VillaExperienceDeleteView,
     VillaExperienceUpdateView,
     VillaListView,
+    VillaPhotoCropView,
     VillaPhotoDeleteView,
     VillaPhotoUploadView,
     VillaRenameView,
@@ -40,6 +42,12 @@ urlpatterns = [
     path("<slug:slug>/rename/", VillaRenameView.as_view(), name="rename"),
     path("<slug:slug>/photos/add/", VillaPhotoUploadView.as_view(), name="add_villa_photos"),
     path("<slug:slug>/photos/<int:pk>/remove/", VillaPhotoDeleteView.as_view(), name="remove_villa_photo"),
+    # Moving the 16:9 frame on a picture that is already there. No new file -
+    # just which part of it the villa page shows.
+    path(
+        "<slug:slug>/photos/<int:photo_pk>/frame/",
+        VillaPhotoCropView.as_view(), name="crop_villa_photo",
+    ),
 
     # The room blocks: step 2 while the villa is a draft, and step 2 of
     # editing once it is real.
@@ -67,6 +75,10 @@ urlpatterns = [
     path(
         "<slug:slug>/room-types/<int:pk>/photos/<int:photo_pk>/remove/",
         RoomPhotoDeleteView.as_view(), name="remove_room_photo",
+    ),
+    path(
+        "<slug:slug>/room-types/<int:pk>/photos/<int:photo_pk>/frame/",
+        RoomPhotoCropView.as_view(), name="crop_room_photo",
     ),
 
     path("amenities/add/", AmenityCreateView.as_view(), name="add_amenity"),

@@ -203,12 +203,24 @@ class RoomCategoryForm(forms.ModelForm):
         required=False, label=_("Monthly rate (IDR)"),
         widget=IDRInput(attrs={"placeholder": "18000000"}),
     )
+    discount_percent = forms.IntegerField(
+        required=False, label=_("Coupon discount (%)"),
+        min_value=1, max_value=100,
+        widget=forms.NumberInput(attrs={
+            "class": INPUT, "min": 1, "max": 100, "placeholder": "10", "data-coupon-input": "true",
+        }),
+        error_messages={
+            "min_value": _("A coupon discount has to be at least 1%."),
+            "max_value": _("A coupon discount can't be more than 100%."),
+        },
+    )
 
     class Meta:
         model = RoomCategory
         fields = [
             "name", "room_count", "amenities",
             "size_sqm", "max_guests", "nightly_rate", "monthly_rate", "minimum_nights",
+            "discount_percent", "discount_enabled",
             "use_first_category_photos",
         ]
         labels = {
@@ -221,6 +233,7 @@ class RoomCategoryForm(forms.ModelForm):
             "nightly_rate": _("Nightly rate (IDR)"),
             "monthly_rate": _("Monthly rate (IDR)"),
             "minimum_nights": _("Minimum nights"),
+            "discount_enabled": _("Apply this coupon"),
             "use_first_category_photos": _("Use the first room type's photos"),
         }
         widgets = {
@@ -232,6 +245,7 @@ class RoomCategoryForm(forms.ModelForm):
             "size_sqm": forms.NumberInput(attrs={"class": INPUT, "min": 1, "placeholder": "35"}),
             "max_guests": forms.NumberInput(attrs={"class": INPUT, "min": 1}),
             "minimum_nights": forms.NumberInput(attrs={"class": INPUT, "min": 1}),
+            "discount_enabled": forms.CheckboxInput(attrs={"class": CHECKBOX}),
         }
         error_messages = {
             "name": {"required": _("Give this kind of room a name.")},
@@ -261,6 +275,27 @@ class RoomCategoryForm(forms.ModelForm):
         # Optional on the form, but the model column can't be empty - so a
         # blank box means "the usual two", not "unknown".
         return self.cleaned_data.get("max_guests") or 2
+
+    def clean(self):
+        # A coupon only means something once there's a rate to discount - the
+        # field is dimmed and locked on the page until one is typed (see
+        # _room_block.html), but this is what actually stops it server-side.
+        cleaned = super().clean()
+        has_rate = cleaned.get("nightly_rate") or cleaned.get("monthly_rate")
+        if not has_rate:
+            if cleaned.get("discount_percent"):
+                self.add_error(
+                    "discount_percent",
+                    _("Add a nightly or monthly rate first."),
+                )
+            cleaned["discount_percent"] = None
+            cleaned["discount_enabled"] = False
+        elif cleaned.get("discount_enabled") and not cleaned.get("discount_percent"):
+            self.add_error(
+                "discount_percent",
+                _("Say how much the coupon takes off."),
+            )
+        return cleaned
 
 
 class BaseRoomCategoryFormSet(forms.BaseInlineFormSet):

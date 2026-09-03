@@ -4503,3 +4503,38 @@ msgstr ""
 #: venv/lib/python3.12/site-packages/timezone_field/rest_framework.py:10
 msgid "A valid timezone is required."
 msgstr ""
+
+msgid "Choose what shows"
+msgstr "Pilih bagian yang tampil"
+
+
+msgid "Drag the picture to move it. Everything inside the box is what guests see."
+msgstr "Geser fotonya untuk mengatur posisi. Yang ada di dalam kotak itulah yang dilihat tamu."
+
+
+msgid "Zoom"
+msgstr "Perbesar"
+
+
+msgid "Center it again"
+msgstr "Kembalikan ke tengah"
+
+
+msgid "Use this"
+msgstr "Pakai ini"
+
+
+msgid "Save this view"
+msgstr "Simpan tampilan ini"
+
+
+msgid "When you add one, you choose which part of it shows."
+msgstr "Saat menambahkan foto, Anda memilih bagian mana yang tampil."
+
+
+msgid "Choose which part of this picture shows"
+msgstr "Pilih bagian foto ini yang tampil"
+
+
+msgid "Adjust"
+msgstr "Atur"

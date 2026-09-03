@@ -35,7 +35,7 @@ from django.views.generic import TemplateView, View
 
 from apps.marketing.forms import BookingEnquiryForm
 from apps.marketing.models import Experience
-from apps.villas.images import responsive_srcset, webp_variant
+from apps.villas.images import DISPLAY_RATIO, responsive_srcset, webp_variant
 from apps.villas.models import RoomCategory, Villa, VillaPhoto
 
 logger = logging.getLogger(__name__)
@@ -100,10 +100,20 @@ def in_language(obj, base: str) -> str:
 
 
 def _photo_dict(photo, sizes: str) -> dict:
-    """One picture, as the three things the template needs and nothing else."""
+    """One picture, as the three things the template needs and nothing else.
+
+    Every copy is cropped to DISPLAY_RATIO. Operators upload photos in all
+    sorts of shapes, and a row of thumbnails in mixed shapes is what makes the
+    page look untidy - one shape for all of them fixes that at the source
+    rather than asking each template box to hide it.
+
+    Which part of the picture is kept is the operator's own choice, made in
+    the frame on the villa form (`photo.crop`). Without one - photos uploaded
+    before that existed - the middle is used.
+    """
     return {
-        "url": webp_variant(photo.image, 960),
-        "srcset": responsive_srcset(photo.image),
+        "url": webp_variant(photo.image, 960, DISPLAY_RATIO, photo.crop),
+        "srcset": responsive_srcset(photo.image, DISPLAY_RATIO, photo.crop),
         "sizes": sizes,
         "caption": in_language(photo, "caption"),
     }
@@ -124,16 +134,23 @@ def _villa_photos(villa) -> tuple:
     """(cover, gallery). The cover is the one flagged as such, or failing that
     simply the first - a villa whose operator never picked one still gets a
     hero image rather than a hole where it should be.
+
+    The cover picture is also the first one in the gallery, marked as such.
+    Leaving it out made it the one photo a visitor could never get back to
+    after clicking a thumbnail, and made the strip look like it was missing a
+    picture.
     """
     photos = list(_live_photos(VillaPhoto.objects.filter(villa=villa)))
     if not photos:
         return None, []
     cover = next((p for p in photos if p.is_cover), photos[0])
-    gallery = [p for p in photos if p.pk != cover.pk]
-    return (
-        _photo_dict(cover, "(min-width: 1024px) 1100px, 100vw"),
-        [_photo_dict(p, "(min-width: 1024px) 320px, 80vw") for p in gallery],
-    )
+    ordered = [cover] + [p for p in photos if p.pk != cover.pk]
+    gallery = []
+    for photo in ordered:
+        item = _photo_dict(photo, "(min-width: 1024px) 320px, 80vw")
+        item["is_cover"] = photo.pk == cover.pk
+        gallery.append(item)
+    return _photo_dict(cover, "(min-width: 1024px) 1100px, 100vw"), gallery
 
 
 def _room_types(villa) -> list:
@@ -150,13 +167,20 @@ def _room_types(villa) -> list:
         # re-decided here.
         photos = _live_photos(category.display_photos)
         first = photos.first()
+        discounted = category.discounted_nightly_rate
+        # Only worth showing a struck-through "before" price when the coupon
+        # actually changed the number - a coupon ticked on with no percent,
+        # or one that rounds to the same rupiah figure, would just show the
+        # same price twice.
+        has_discount = discounted != category.nightly_rate
         rooms.append({
             "id": category.pk,
             "name": category.name,
             "size_sqm": category.size_sqm,
             "max_guests": category.max_guests,
             "minimum_nights": category.minimum_nights,
-            "nightly_rate": rupiah(category.nightly_rate),
+            "nightly_rate": rupiah(discounted),
+            "original_nightly_rate": rupiah(category.nightly_rate) if has_discount else None,
             "amenities": [in_language(a, "name") for a in category.amenities.all()],
             "photo": _photo_dict(first, "(min-width: 1024px) 220px, 90vw") if first else None,
         })
@@ -212,6 +236,19 @@ def _single_price(rooms: list) -> str | None:
     return None
 
 
+def _single_original_price(rooms: list, single_price) -> str | None:
+    """The struck-through "before" price to pair with `single_price` - only
+    when every room type is showing the same discounted rate AND the same
+    original one, for the same reason `_single_price` requires agreement.
+    """
+    if not single_price:
+        return None
+    originals = {r["original_nightly_rate"] for r in rooms}
+    if len(originals) == 1:
+        return next(iter(originals))
+    return None
+
+
 def page_context(request, villa, form=None, **extra) -> dict:
     """Everything the page renders, as plain values.
 
@@ -255,10 +292,15 @@ def page_context(request, villa, form=None, **extra) -> dict:
         # Keyed by room id as a string since that's how Alpine reads it off
         # the <select>'s value.
         "room_prices": {str(r["id"]): r["nightly_rate"] for r in rooms},
+        # The struck-through "before" price for the same room, when a coupon
+        # actually changed it - absent (never an empty string) for a room
+        # with no coupon, so the template's {% if %} on it just works.
+        "room_original_prices": {str(r["id"]): r["original_nightly_rate"] for r in rooms},
         # The one exception: if every room type costs the same (or there's
         # only one to begin with), that price isn't misleading - show it
         # right away, in the panel and the phone bar.
         "single_price": _single_price(rooms),
+        "single_original_price": _single_original_price(rooms, _single_price(rooms)),
 
         "page_url": page_url,
         "book_url": reverse(
@@ -332,7 +374,7 @@ class DirectBookingView(View):
         enquiry.villa = villa
         category = form.available_category
         if category and category.nightly_rate:
-            enquiry.quoted_total = category.nightly_rate * enquiry.nights
+            enquiry.quoted_total = category.discounted_nightly_rate * enquiry.nights
         enquiry.save()
 
         logger.info(

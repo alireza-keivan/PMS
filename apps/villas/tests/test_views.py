@@ -24,6 +24,7 @@ from apps.organizations.models import Organization
 from apps.villas.models import (
     MAX_PHOTO_SIZE_MB,
     MAX_PHOTOS_PER_OWNER,
+    MIN_PHOTO_WIDTH_PX,
     Amenity,
     RoomCategoryPhoto,
     Villa,
@@ -120,9 +121,14 @@ def test_sleeps_adds_up_every_rooms_guests(owner_client, org):
 
 # ---- step 1: about the villa ---------------------------------------------
 
-def _test_image(name="photo.png") -> SimpleUploadedFile:
+def _test_image(name="photo.png", size=(1600, 1000)) -> SimpleUploadedFile:
+    """A picture big enough to pass MIN_PHOTO_WIDTH_PX.
+
+    Deliberately not 16:9 - the display copies are centre-cropped to that
+    shape, so an off-shape source is the realistic case to test against.
+    """
     buffer = BytesIO()
-    Image.new("RGB", (100, 80), color=(200, 100, 50)).save(buffer, format="PNG")
+    Image.new("RGB", size, color=(200, 100, 50)).save(buffer, format="PNG")
     return SimpleUploadedFile(name, buffer.getvalue(), content_type="image/png")
 
 
@@ -716,6 +722,74 @@ def test_saving_the_villa_really_removes_a_photo_that_was_taken_off(owner_client
     assert villa.photos.count() == 0
 
 
+def test_the_frame_the_operator_chose_is_kept_with_the_picture(owner_client, villa):
+    """The framing window posts a box alongside the file. Kept as four numbers
+    on the row - the file itself is never cut, so the frame can move again."""
+    _htmx(
+        owner_client, reverse("villas:add_villa_photos", args=[villa.slug]),
+        {
+            "photos": [_test_image()],
+            "crops": '[{"x": 0.1, "y": 0.0, "width": 0.8, "height": 0.45}]',
+        },
+    )
+
+    photo = villa.photos.get()
+    assert photo.crop == (0.1, 0.0, 0.8, 0.45)
+
+
+def test_a_picture_uploaded_with_no_frame_falls_back_to_its_middle(owner_client, villa):
+    """Older pictures and anything posted without the window still work - no
+    frame means the middle, exactly as before the window existed."""
+    _htmx(
+        owner_client, reverse("villas:add_villa_photos", args=[villa.slug]),
+        {"photos": [_test_image()]},
+    )
+
+    assert villa.photos.get().crop is None
+
+
+def test_a_nonsense_frame_never_stops_an_upload(owner_client, villa):
+    """The numbers come from a browser. A bad one costs the chosen framing,
+    not the picture - failing the upload over it would be far worse."""
+    _htmx(
+        owner_client, reverse("villas:add_villa_photos", args=[villa.slug]),
+        {"photos": [_test_image()], "crops": "not json at all"},
+    )
+
+    assert villa.photos.count() == 1
+    assert villa.photos.get().crop is None
+
+
+def test_re_framing_a_picture_saves_straight_away(owner_client, org, villa):
+    """Unlike adding or removing, this one does not wait for Save: it changes
+    which part of one picture shows and nothing else on the page."""
+    photo = VillaPhoto.objects.create(organization=org, villa=villa, image=_test_image())
+
+    response = _htmx(
+        owner_client, reverse("villas:crop_villa_photo", args=[villa.slug, photo.pk]),
+        {"crops": '[{"x": 0.0, "y": 0.55, "width": 1.0, "height": 0.45}]'},
+    )
+    assert response.status_code == 200
+
+    photo.refresh_from_db()
+    assert photo.crop == (0.0, 0.55, 1.0, 0.45)
+
+
+def test_a_frame_running_off_the_edge_is_pulled_back_inside(owner_client, org, villa):
+    """A box reaching past the edge would make Pillow raise deep inside a
+    guest's page request, so it is clamped on the way in."""
+    photo = VillaPhoto.objects.create(organization=org, villa=villa, image=_test_image())
+    _htmx(
+        owner_client, reverse("villas:crop_villa_photo", args=[villa.slug, photo.pk]),
+        {"crops": '[{"x": 0.9, "y": 0.9, "width": 0.6, "height": 0.6}]'},
+    )
+
+    photo.refresh_from_db()
+    x, y, width, height = photo.crop
+    assert x + width <= 1.0
+    assert y + height <= 1.0
+
+
 def test_a_photo_added_but_not_saved_is_not_one_of_the_villas_photos(owner_client, villa):
     response = _htmx(
         owner_client, reverse("villas:add_villa_photos", args=[villa.slug]),
@@ -787,6 +861,40 @@ def test_a_room_photo_over_the_size_limit_is_rejected(owner_client, villa):
     )
 
     assert str(MAX_PHOTO_SIZE_MB) in response.content.decode()
+    assert category.photos.count() == 0
+
+
+def test_a_photo_too_small_to_look_sharp_is_rejected(owner_client, villa):
+    """The whole point of the minimum: a small picture blown up to fill the
+    1600px hero looks soft, and the operator should hear about it while they
+    still have the original to hand.
+    """
+    category = villa.room_categories.first()
+    small = _test_image("small.png", size=(MIN_PHOTO_WIDTH_PX - 1, 600))
+
+    response = _htmx(
+        owner_client,
+        reverse("villas:add_room_photos", args=[villa.slug, category.pk]),
+        {"photos": [small]},
+    )
+
+    assert str(MIN_PHOTO_WIDTH_PX) in response.content.decode()
+    assert category.photos.count() == 0
+
+
+def test_a_file_that_is_not_a_picture_is_turned_away_plainly(owner_client, villa):
+    category = villa.room_categories.first()
+    not_a_picture = SimpleUploadedFile(
+        "notes.png", b"this is not an image", content_type="image/png",
+    )
+
+    response = _htmx(
+        owner_client,
+        reverse("villas:add_room_photos", args=[villa.slug, category.pk]),
+        {"photos": [not_a_picture]},
+    )
+
+    assert "not pictures" in response.content.decode()
     assert category.photos.count() == 0
 
 

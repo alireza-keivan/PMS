@@ -1,9 +1,10 @@
-{% load i18n %}
+{% load i18n photo_extras %}
 {% comment %}
-The whole photo row for one villa or one room type: existing pictures as
-square thumbnails, each with its own remove button, then a dashed tile that
-opens the file picker. Swapped in whole by HTMX after a picture is added or
-removed, so it always shows what is really stored.
+The whole photo row for one villa or one room type: the pictures as they will
+really look on the villa page, each with its own remove and re-frame buttons,
+then a dashed tile that opens the file picker. Swapped in whole by HTMX after
+a picture is added, removed or re-framed, so it always shows what is really
+stored.
 
 Include with:
   photos           - the pictures to show
@@ -12,19 +13,33 @@ Include with:
   category         - only for a room type's pictures
   error            - optional, something that went wrong while uploading
 
-Picking a file still uploads it there and then - the file has to go somewhere -
-but the picture is only held aside until the page is saved, and taking one off
+Every tile is 16:9, not square, and shows the cropped copy - because 16:9 is
+what the public villa page shows. A square thumbnail here was quietly lying:
+an operator lined a photo up against this box and then found the top of it
+gone on the real page.
+
+Picking a file opens the framing window first (static/js/photo_cropper.js):
+the operator drags and zooms the picture inside a 16:9 frame, exactly the
+shape guests will see, and only then does it upload. The frame they chose
+rides along in the hidden "crops" box next to the file input.
+
+Uploading still happens there and then - the file has to go somewhere - but
+the picture is only held aside until the page is saved, and taking one off
 only marks it. Nothing on this row is real until Save is pressed; leaving the
 page instead puts everything back. See PhotoQuerySet in apps/villas/models.py.
 
 So a held-aside picture is drawn plainly as "Not saved yet" with its own Undo,
 rather than looking identical to the ones that are really there.
 
-The add tile is the one exception: on a villa that doesn't exist yet (the very
-first step 1, before anything is saved) there is no row to attach a photo to,
-so the tile is a plain field that rides along with the whole form when it is
-submitted, and static/js/villa_form.js gives it a local preview so it doesn't
-look inert in the meantime.
+Re-framing is the one thing here that does save straight away: it changes
+which part of one picture shows and nothing else on the page, so holding it
+back would mean a second set of staged fields for very little.
+
+The add tile is the one exception to uploading immediately: on a villa that
+doesn't exist yet (the very first step 1, before anything is saved) there is
+no row to attach a photo to, so the tile is a plain field that rides along
+with the whole form when it is submitted, and static/js/villa_form.js gives it
+a local preview so it doesn't look inert in the meantime.
 {% endcomment %}
 
 {% if error %}
@@ -33,12 +48,34 @@ look inert in the meantime.
 
 <p class="mb-1.5 text-xs text-ink-500">
   {% blocktranslate %}Up to 20 pictures, 2 MB or smaller each.{% endblocktranslate %}
+  {% translate "When you add one, you choose which part of it shows." %}
 </p>
 
 <div class="flex flex-wrap gap-2">
+
   {% for photo in photos %}
-    <div class="group relative h-[74px] w-[74px] flex-none overflow-hidden rounded-sm border {% if photo.is_pending %}border-teal-600 ring-1 ring-teal-600{% else %}border-sand-300{% endif %}">
-      <img src="{{ photo.image.url }}" alt="" class="h-full w-full object-cover" loading="lazy">
+    <div class="group relative h-[74px] w-[132px] flex-none overflow-hidden rounded-sm border {% if photo.is_pending %}border-teal-600 ring-1 ring-teal-600{% else %}border-sand-300{% endif %}">
+      <img src="{% photo_thumb photo %}" alt="" class="h-full w-full object-cover" loading="lazy">
+
+      <button
+        type="button"
+        class="absolute left-1 top-1 flex h-5 items-center gap-1 rounded-full bg-ink-900/65 px-1.5 text-[10px] font-medium text-sand-50 opacity-0 transition-opacity hover:bg-ink-900 focus:opacity-100 group-hover:opacity-100"
+        data-adjust-photo
+        data-image="{{ photo.image.url }}"
+        {% if photo.crop %}data-crop="{{ photo.crop_x }},{{ photo.crop_y }},{{ photo.crop_width }},{{ photo.crop_height }}"{% endif %}
+        {% if category %}
+          data-url="{% url 'villas:crop_room_photo' villa.slug category.pk photo.pk %}"
+          data-target="#photos-room-{{ category.pk }}"
+        {% else %}
+          data-url="{% url 'villas:crop_villa_photo' villa.slug photo.pk %}"
+          data-target="#photos-villa"
+        {% endif %}
+        title="{% translate 'Choose which part of this picture shows' %}"
+      >
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 2v14a2 2 0 0 0 2 2h14"/><path d="M18 22V8a2 2 0 0 0-2-2H2"/></svg>
+        {% translate "Adjust" %}
+      </button>
+
       <button
         type="button"
         class="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-ink-900/65 text-sand-50 opacity-0 transition-opacity hover:bg-ink-900 focus:opacity-100 group-hover:opacity-100"
@@ -75,25 +112,37 @@ look inert in the meantime.
     </div>
   {% endfor %}
 
-  <label class="relative flex h-[74px] w-[74px] flex-none cursor-pointer items-center justify-center rounded-sm border-[1.5px] border-dashed border-sand-400 text-ink-600 hover:bg-sand-100 focus-within:ring-2 focus-within:ring-teal-600">
+  <label class="relative flex h-[74px] w-[132px] flex-none cursor-pointer items-center justify-center rounded-sm border-[1.5px] border-dashed border-sand-400 text-ink-600 hover:bg-sand-100 focus-within:ring-2 focus-within:ring-teal-600">
     {% if category %}
+      <input type="hidden" name="crops" id="crops-room-{{ category.pk }}">
       <input
-        type="file" name="photos" multiple accept="image/*" class="sr-only"
+        type="file" name="photos" multiple accept="image/*" class="sr-only" data-cropper
+        data-crops="#crops-room-{{ category.pk }}"
         hx-post="{% url 'villas:add_room_photos' villa.slug category.pk %}"
-        hx-encoding="multipart/form-data" hx-trigger="change"
+        hx-encoding="multipart/form-data" hx-trigger="framed"
+        hx-include="#crops-room-{{ category.pk }}"
         hx-target="#photos-room-{{ category.pk }}" hx-swap="innerHTML"
         hx-on::after-request="this.value = ''"
       >
     {% elif villa.pk %}
+      <input type="hidden" name="crops" id="crops-villa">
       <input
-        type="file" name="photos" multiple accept="image/*" class="sr-only"
+        type="file" name="photos" multiple accept="image/*" class="sr-only" data-cropper
+        data-crops="#crops-villa"
         hx-post="{% url 'villas:add_villa_photos' villa.slug %}"
-        hx-encoding="multipart/form-data" hx-trigger="change"
+        hx-encoding="multipart/form-data" hx-trigger="framed"
+        hx-include="#crops-villa"
         hx-target="#photos-villa" hx-swap="innerHTML"
         hx-on::after-request="this.value = ''"
       >
     {% else %}
-      <input type="file" name="photos" multiple accept="image/*" class="sr-only" data-blob-preview>
+      {# No villa row yet, so nowhere to upload to - these ride along with the
+         whole form on the first save, frames and all. #}
+      <input type="hidden" name="crops" id="crops-new-villa">
+      <input
+        type="file" name="photos" multiple accept="image/*" class="sr-only"
+        data-blob-preview data-cropper data-crops="#crops-new-villa"
+      >
     {% endif %}
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
   </label>

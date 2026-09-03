@@ -9,6 +9,7 @@ the moment it is picked. A draft is invisible everywhere else in the app and
 does not use up a villa slot on the operator's plan: see VillaQuerySet.live().
 """
 
+import json
 import logging
 
 from django.contrib import messages
@@ -22,6 +23,7 @@ from django.utils import timezone
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView, TemplateView, View
+from PIL import Image
 
 from apps.bookings.models import Booking
 from apps.core.utils import safe_next
@@ -42,6 +44,7 @@ from apps.villas.models import (
     MAX_PHOTO_SIZE_MB,
     MAX_PHOTOS_PER_OWNER,
     MAX_ROOMS_PER_TYPE,
+    MIN_PHOTO_WIDTH_PX,
     Amenity,
     Room,
     RoomCategory,
@@ -162,10 +165,15 @@ def _villa_photo_count(villa):
 
 
 def _check_photo_limits(files, existing_count):
-    """Catch too-many or too-big pictures before any conversion is attempted.
+    """Catch too-many, too-big and too-small pictures before any conversion.
 
     Checked ahead of _convert_photos so a violation is reported plainly
     instead of surfacing as a WebP conversion failure.
+
+    The minimum width is the fussy one, and it is deliberate: the villa page
+    serves a 1600px hero, so a small picture gets blown up and looks soft. The
+    file handles are rewound after measuring, because _convert_photos reads
+    the very same ones straight afterwards.
     """
     if existing_count + len(files) > MAX_PHOTOS_PER_OWNER:
         return _("You can only have up to %(max)s pictures. Remove some before adding more.") % {
@@ -176,7 +184,66 @@ def _check_photo_limits(files, existing_count):
         return _("These pictures are bigger than %(max)s MB: %(names)s. Use smaller files.") % {
             "max": MAX_PHOTO_SIZE_MB, "names": ", ".join(oversized),
         }
+
+    unreadable, too_small = [], []
+    for uploaded in files:
+        try:
+            # Not closed, and not a `with` block: closing the Pillow image
+            # would close the upload's own handle, and _convert_photos still
+            # has to read it. Only the header is read to get the size.
+            width = Image.open(uploaded).width
+        except Exception:
+            unreadable.append(uploaded.name)
+            continue
+        finally:
+            uploaded.seek(0)
+        if width < MIN_PHOTO_WIDTH_PX:
+            too_small.append(uploaded.name)
+
+    if unreadable:
+        return _("These files are not pictures: %(names)s. Upload photos only.") % {
+            "names": ", ".join(unreadable),
+        }
+    if too_small:
+        return _(
+            "These pictures are too small to look sharp on the villa page: "
+            "%(names)s. Please upload bigger ones, at least %(min)s pixels wide."
+        ) % {"names": ", ".join(too_small), "min": MIN_PHOTO_WIDTH_PX}
     return None
+
+
+def _parse_crops(post, expected: int):
+    """Read the frames the operator lined each picture up in, off the form.
+
+    The cropper in static/js/photo_cropper.js posts one JSON list alongside
+    the files, in the same order: either a {x, y, width, height} box, all
+    fractions of the picture, or null for a picture whose frame was left
+    alone. Anything unreadable comes back as a list of Nones rather than an
+    error - a picture with no chosen frame simply falls back to the middle of
+    itself, which is what the villa page always did before this existed. A
+    bad crop must never be the reason an upload fails.
+    """
+    raw = post.get("crops")
+    if not raw:
+        return [None] * expected
+    try:
+        boxes = json.loads(raw)
+        if not isinstance(boxes, list):
+            raise ValueError("crops must be a list")
+        parsed = [
+            None if box is None else (
+                float(box["x"]), float(box["y"]), float(box["width"]), float(box["height"])
+            )
+            for box in boxes
+        ]
+    except (ValueError, TypeError, KeyError):
+        logger.warning("Ignoring unreadable crop boxes on an upload: %r", raw[:200])
+        return [None] * expected
+
+    # Length is not trusted either: the browser could have sent fewer or more
+    # than the files that actually arrived.
+    parsed = parsed[:expected]
+    return parsed + [None] * (expected - len(parsed))
 
 
 def _convert_photos(files):
@@ -190,7 +257,7 @@ def _convert_photos(files):
     return [to_webp(uploaded) for uploaded in files]
 
 
-def _store_photos(organization, owner, webp_files, photo_model, owner_field, pending=False):
+def _store_photos(organization, owner, webp_files, photo_model, owner_field, pending=False, crops=None):
     """File already-converted pictures against a villa or a room type.
 
     `pending=True` means these were picked on a form that hasn't been saved
@@ -199,15 +266,21 @@ def _store_photos(organization, owner, webp_files, photo_model, owner_field, pen
 
     Order and cover are worked out here for the straight-to-live case, and
     re-worked by _resequence_photos at commit time for the staged one.
+
+    `crops` lines up one-for-one with `webp_files` - the frame the operator
+    dragged each picture into, or None to keep the middle of it.
     """
     start = photo_model.objects.filter(**{owner_field: owner}).count()
-    saved = [
-        photo_model.objects.create(
+    crops = crops or [None] * len(webp_files)
+    saved = []
+    for offset, webp in enumerate(webp_files):
+        photo = photo_model(
             organization=organization, image=webp, sort_order=start + offset,
             is_cover=(start + offset == 0), is_pending=pending, **{owner_field: owner},
         )
-        for offset, webp in enumerate(webp_files)
-    ]
+        photo.set_crop(crops[offset])
+        photo.save()
+        saved.append(photo)
     if saved:
         logger.info(
             "Stored %s photo(s) as WebP for %s %s - pending=%s",
@@ -435,7 +508,10 @@ class VillaDetailsView(ManagerRequiredMixin, View):
                 # with the form because there was no villa to attach them to
                 # when they were picked, so they are already what was asked
                 # for and go straight in.
-                _store_photos(self.organization, villa, webp_photos, VillaPhoto, "villa")
+                _store_photos(
+                    self.organization, villa, webp_photos, VillaPhoto, "villa",
+                    crops=_parse_crops(request.POST, len(webp_photos)),
+                )
             # Anything picked or taken off through the picture row on this
             # page has been waiting for exactly this moment.
             commit_photos(villa, VillaPhoto, "villa")
@@ -702,6 +778,7 @@ class RoomPhotoUploadView(ManagerRequiredMixin, View):
                     _store_photos(
                         request.organization, category, _convert_photos(files),
                         RoomCategoryPhoto, "category", pending=True,
+                        crops=_parse_crops(request.POST, len(files)),
                     )
                 except WebPUnavailable:
                     logger.exception("WebP conversion is unavailable - room type %s", category.pk)
@@ -756,6 +833,7 @@ class VillaPhotoUploadView(ManagerRequiredMixin, View):
                     _store_photos(
                         request.organization, villa, _convert_photos(files),
                         VillaPhoto, "villa", pending=True,
+                        crops=_parse_crops(request.POST, len(files)),
                     )
                 except WebPUnavailable:
                     logger.exception("WebP conversion is unavailable - villa %s", villa.pk)
@@ -780,6 +858,59 @@ class VillaPhotoDeleteView(ManagerRequiredMixin, View):
             "remove_url_name": "villas:remove_villa_photo",
             "villa": villa,
         })
+
+
+class PhotoCropView(ManagerRequiredMixin, View):
+    """Moves the 16:9 frame on a picture that is already uploaded.
+
+    Nothing is re-uploaded and nothing is cut out of the file: only the four
+    numbers saying which part of the original the villa page should show move,
+    so the same picture can be re-framed as many times as the operator likes
+    without ever losing quality. The new display copies are built on the next
+    guest request that asks for them - see webp_variant in images.py.
+
+    Unlike adding or removing a picture, this is not held back until Save. It
+    changes one picture's framing and nothing else on the page, and holding it
+    would mean a second set of staged fields for very little.
+    """
+
+    photo_model = None
+    owner_field = None
+    remove_url_name = None
+
+    def post(self, request, slug, pk=None, photo_pk=None):
+        villa = _get_org_villa(request, slug)
+        context = {"villa": villa, "remove_url_name": self.remove_url_name}
+
+        if self.owner_field == "category":
+            owner = get_object_or_404(RoomCategory.objects.filter(villa=villa), pk=pk)
+            context["category"] = owner
+        else:
+            owner = villa
+
+        photo = get_object_or_404(self.photo_model.objects.filter(**{self.owner_field: owner}), pk=photo_pk)
+        box = _parse_crops(request.POST, 1)[0]
+        photo.set_crop(box)
+        photo.save(update_fields=["crop_x", "crop_y", "crop_width", "crop_height", "updated_at"])
+        logger.info(
+            "Re-framed photo %s on %s %s - box %s",
+            photo.pk, self.owner_field, owner.pk, photo.crop,
+        )
+
+        context["photos"] = owner.photos.on_the_form()
+        return _photo_grid(request, context)
+
+
+class VillaPhotoCropView(PhotoCropView):
+    photo_model = VillaPhoto
+    owner_field = "villa"
+    remove_url_name = "villas:remove_villa_photo"
+
+
+class RoomPhotoCropView(PhotoCropView):
+    photo_model = RoomCategoryPhoto
+    owner_field = "category"
+    remove_url_name = "villas:remove_room_photo"
 
 
 # ---------------------------------------------------------------------------

@@ -23,6 +23,7 @@ from urllib.parse import urlparse
 
 import httpx
 from django.core.cache import cache
+from django.core.validators import MaxValueValidator
 from django.db import models
 from django.db.models import ProtectedError
 from django.db.models.signals import post_delete, post_save
@@ -103,7 +104,14 @@ MAX_ROOMS_PER_TYPE = 60
 # room type never needs more than this many pictures to show what it looks
 # like, and a picture this big is almost always an accidental full-res upload.
 MAX_PHOTOS_PER_OWNER = 20
-MAX_PHOTO_SIZE_MB = 2
+MAX_PHOTO_SIZE_MB = 8
+
+# The smallest picture worth putting on a villa page. The desktop hero is
+# served at 1600px wide, so anything narrower than this gets stretched to fill
+# it and looks soft - which is exactly the "the photos look bad" complaint.
+# Better to turn it away at upload, while the operator still has the original
+# to hand, than to let it through and blur it in front of a guest.
+MIN_PHOTO_WIDTH_PX = 1600
 
 # What almost every Bali villa uses. Named here rather than written straight
 # into the field, because the add form falls back to them when the operator
@@ -276,6 +284,21 @@ class RoomCategory(TenantOwnedModel):
     )
     minimum_nights = models.PositiveSmallIntegerField(default=1)
 
+    # A percentage off the rate above - e.g. a repeat-guest or off-season
+    # coupon. Only meaningful once a rate exists to discount, so the form
+    # only lets this be filled in alongside one (see RoomCategoryForm), and
+    # `discount_enabled` is the switch that decides whether it actually
+    # applies rather than just being typed in and forgotten.
+    discount_percent = models.PositiveSmallIntegerField(
+        null=True, blank=True,
+        validators=[MaxValueValidator(100)],
+        help_text=_("Coupon discount, as a percentage of the rate."),
+    )
+    discount_enabled = models.BooleanField(
+        default=False,
+        help_text=_("Apply the coupon discount to this room type's rates."),
+    )
+
     # Lets the second and later room types skip their own photo shoot and
     # just show the villa's first room type's pictures instead. Meaningless
     # on the first room type itself - there is nothing before it to copy.
@@ -296,6 +319,21 @@ class RoomCategory(TenantOwnedModel):
     def room_count(self) -> int:
         """How many rooms of this type the villa has. Counted, never stored."""
         return self.rooms.count()
+
+    def _discounted(self, rate):
+        if rate is None or not self.discount_enabled or not self.discount_percent:
+            return rate
+        return round(rate * (100 - self.discount_percent) / 100)
+
+    @property
+    def discounted_nightly_rate(self):
+        """The nightly rate after the coupon, or the plain rate if none applies."""
+        return self._discounted(self.nightly_rate)
+
+    @property
+    def discounted_monthly_rate(self):
+        """The monthly rate after the coupon, or the plain rate if none applies."""
+        return self._discounted(self.monthly_rate)
 
     @property
     def display_photos(self):
@@ -374,7 +412,18 @@ class PhotoQuerySet(TenantQuerySet):
 
 
 class StagedPhotoFields(models.Model):
-    """The two staging flags, shared by villa and room-type pictures."""
+    """The staging flags and the chosen crop, shared by villa and room pictures.
+
+    The crop is stored as a box, not baked into the file. Four fractions of
+    the original picture - left, top, width, height - saying which part of it
+    the operator lined up inside the 16:9 frame when they uploaded it. The
+    file on disk stays whole, so the box can be moved again later without the
+    picture losing anything, and the display copies in images.py are cut from
+    the original every time.
+
+    All four empty means "nobody has chosen" - the middle of the picture is
+    used, exactly as before this existed.
+    """
 
     is_pending = models.BooleanField(
         default=False,
@@ -385,10 +434,41 @@ class StagedPhotoFields(models.Model):
         help_text=_("Taken off the form but not saved yet - kept until Save."),
     )
 
+    # Fractions, 0-1, of the *original* picture. Fractions rather than pixels
+    # so the same box still means the same thing on every display copy, from
+    # the 480px phone one to the 1600px desktop hero.
+    crop_x = models.FloatField(null=True, blank=True)
+    crop_y = models.FloatField(null=True, blank=True)
+    crop_width = models.FloatField(null=True, blank=True)
+    crop_height = models.FloatField(null=True, blank=True)
+
     objects = PhotoQuerySet.as_manager()
 
     class Meta:
         abstract = True
+
+    @property
+    def crop(self):
+        """The chosen box as (x, y, width, height), or None if there isn't one."""
+        box = (self.crop_x, self.crop_y, self.crop_width, self.crop_height)
+        if any(value is None for value in box):
+            return None
+        return box
+
+    def set_crop(self, box):
+        """Take a (x, y, width, height) box, or None to go back to the middle.
+
+        Values are clamped here rather than trusted: they arrive from the
+        browser, and a box reaching outside the picture would make Pillow
+        raise deep inside a guest's page request.
+        """
+        if not box:
+            self.crop_x = self.crop_y = self.crop_width = self.crop_height = None
+            return
+        x, y, width, height = (max(0.0, min(1.0, float(value))) for value in box)
+        self.crop_x, self.crop_y = x, y
+        self.crop_width = min(width, 1.0 - x)
+        self.crop_height = min(height, 1.0 - y)
 
 
 class VillaPhoto(StagedPhotoFields, TenantOwnedModel):

@@ -76,9 +76,10 @@ class RoomAdmin(admin.ModelAdmin):
 class RoomCategoryAdmin(admin.ModelAdmin):
     list_display = (
         "name", "villa", "room_count", "max_guests",
-        "nightly_rate", "minimum_nights", "sort_order",
+        "nightly_rate", "minimum_nights", "discount_percent", "discount_enabled",
+        "sort_order",
     )
-    list_filter = ("organization", "villa")
+    list_filter = ("organization", "villa", "discount_enabled")
     filter_horizontal = ("amenities",)
     inlines = [RoomCategoryPhotoInline]
 

@@ -69,6 +69,76 @@
     if (evt.detail && evt.detail.target) initIdrPreviews(evt.detail.target);
   });
 
+  // ---- 2b. coupon discount: lock until a rate exists, preview the result --
+
+  // A coupon only means something once there's a rate to take it off of - see
+  // the matching check in RoomCategoryForm.clean() in forms.py, which is what
+  // actually enforces it. This just keeps the box from inviting a number that
+  // would be dropped on save.
+  function updateCoupon(block) {
+    var percentInput = block.querySelector("[data-coupon-input]");
+    var checkbox = block.querySelector("[data-coupon-enable]");
+    var preview = block.querySelector("[data-coupon-preview]");
+    if (!percentInput || !checkbox || !preview) return;
+
+    var card = block.closest(".card") || document;
+    var rateInputs = card.querySelectorAll("[data-idr-input]");
+    var rates = [];
+    rateInputs.forEach(function (input) {
+      var digits = String(input.value || "").replace(/\D/g, "");
+      if (digits) rates.push(Number(digits));
+    });
+
+    var hasRate = rates.length > 0;
+    percentInput.disabled = !hasRate;
+    checkbox.disabled = !hasRate;
+    if (!hasRate) {
+      checkbox.checked = false;
+      preview.textContent = "";
+      return;
+    }
+
+    var percent = Number(percentInput.value);
+    if (!checkbox.checked || !percent) {
+      preview.textContent = "";
+      return;
+    }
+
+    var lang = document.documentElement.lang || "en";
+    var readings = rates.map(function (rate) {
+      var final = Math.round(rate * (100 - percent) / 100);
+      return "Rp " + final.toLocaleString(lang);
+    });
+    preview.textContent = readings.join(" / ");
+  }
+
+  function initCoupons(root) {
+    root.querySelectorAll("[data-coupon-block]").forEach(updateCoupon);
+  }
+
+  document.body.addEventListener("input", function (evt) {
+    var block = evt.target.closest && evt.target.closest("[data-coupon-block]");
+    if (block) { updateCoupon(block); return; }
+    // A rate box living outside the coupon block itself still has to refresh
+    // the coupon preview sitting below it in the same card.
+    if (evt.target.matches && evt.target.matches("[data-idr-input]")) {
+      var card = evt.target.closest(".card");
+      var couponBlock = card && card.querySelector("[data-coupon-block]");
+      if (couponBlock) updateCoupon(couponBlock);
+    }
+  });
+  document.body.addEventListener("change", function (evt) {
+    if (evt.target.matches && evt.target.matches("[data-coupon-enable]")) {
+      updateCoupon(evt.target.closest("[data-coupon-block]"));
+    }
+  });
+  document.addEventListener("DOMContentLoaded", function () {
+    initCoupons(document);
+  });
+  document.body.addEventListener("htmx:afterSwap", function (evt) {
+    if (evt.detail && evt.detail.target) initCoupons(evt.detail.target);
+  });
+
   // ---- 3. local preview for a not-yet-uploaded villa photo ------------
 
   document.body.addEventListener("change", function (evt) {
