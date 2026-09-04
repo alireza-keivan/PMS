@@ -16,7 +16,7 @@ from apps.bookings.models import Booking
 from apps.bookings.services import find_available_room
 from apps.guests.constants import NATIONALITY_CHOICES
 from apps.villas.forms import INPUT, TEXTAREA, IDRField, IDRInput
-from apps.villas.models import RoomCategory, Villa
+from apps.villas.models import Room, RoomCategory, Villa
 
 logger = logging.getLogger(__name__)
 
@@ -182,5 +182,98 @@ class ReservationForm(forms.Form):
 
         if not cleaned_data.get("phone") and not cleaned_data.get("email"):
             self.add_error(None, _("Add a phone number or email so staff can reach the guest."))
+
+        return cleaned_data
+
+
+class BlockDatesForm(forms.Form):
+    """Block a room for dates that aren't a guest stay - maintenance, a deep
+    clean, the owner using the villa themselves.
+
+    Deliberately much smaller than ReservationForm above: no guest, no money,
+    no channel. It writes a Booking with status BLOCKED, which is the same
+    thing an iCal feed writes for a date range it knows nothing about - see
+    Booking.Status.BLOCKED. Blocked rows already count as occupied everywhere
+    (apps.reporting.views.OCCUPYING_STATUSES) and carry no payments, so
+    nothing downstream needs to change to understand one.
+
+    A room is picked by name rather than by type: someone blocking a room for
+    repairs knows exactly which room it is, so there's nothing for
+    find_available_room to choose here.
+    """
+
+    villa = forms.ModelChoiceField(
+        queryset=Villa.objects.none(), label=_("Villa"),
+        empty_label=_("Choose a villa"),
+        widget=forms.Select(attrs={"class": INPUT, "x-model": "villaId", "@change": "onVillaChange()"}),
+        error_messages={"required": _("Choose which villa this is for.")},
+    )
+    # Rendered by hand in block.html (x-for over block_form.js's roomOptions)
+    # so the list follows the chosen villa without a server round trip. The
+    # field still exists here regardless - it's what validates the posted
+    # value against the villas this user may actually see.
+    room = forms.ModelChoiceField(
+        queryset=Room.objects.none(), label=_("Room"),
+        empty_label=_("Choose a room"),
+        error_messages={"required": _("Choose which room to block.")},
+    )
+    check_in = forms.DateField(
+        label=_("First night"),
+        widget=forms.DateInput(attrs={"class": INPUT, "type": "date"}),
+        error_messages={"required": _("Say which day the block starts.")},
+    )
+    check_out = forms.DateField(
+        label=_("Free again on"),
+        widget=forms.DateInput(attrs={"class": INPUT, "type": "date"}),
+        error_messages={"required": _("Say which day the room is free again.")},
+    )
+    reason = forms.CharField(
+        label=_("Reason"), required=False, max_length=200,
+        widget=forms.TextInput(attrs={
+            "class": INPUT, "placeholder": _("e.g. Pool repair, owner staying"),
+        }),
+    )
+
+    def __init__(self, *args, villas, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.villas = villas
+        villa_ids = [v.id for v in villas]
+        self.fields["villa"].queryset = Villa.objects.filter(id__in=villa_ids)
+        self.fields["room"].queryset = Room.objects.filter(
+            villa_id__in=villa_ids, is_active=True
+        ).select_related("villa")
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        villa = cleaned_data.get("villa")
+        room = cleaned_data.get("room")
+        if villa and room and room.villa_id != villa.id:
+            self.add_error("room", _("Choose a room that belongs to the selected villa."))
+            room = None
+
+        check_in = cleaned_data.get("check_in")
+        check_out = cleaned_data.get("check_out")
+        if check_in and check_out and check_out <= check_in:
+            self.add_error("check_out", _("The room has to be free again after the first night."))
+            check_out = None
+
+        # Same overlap rule the drag-to-reschedule path enforces
+        # (apps.bookings.views.BookingRescheduleView): one room, one thing at
+        # a time. Blocking dates a guest is already booked into would hide a
+        # real stay behind a hatched bar on the calendar.
+        if room and check_in and check_out:
+            clash = (
+                Booking.objects.filter(
+                    organization=room.organization_id, room=room,
+                    check_in__lt=check_out, check_out__gt=check_in,
+                )
+                .exclude(status=Booking.Status.CANCELLED)
+                .exists()
+            )
+            if clash:
+                self.add_error(None, _(
+                    "That room already has something on those dates. Check the calendar first."
+                ))
 
         return cleaned_data

@@ -16,8 +16,8 @@ enctype="multipart/form-data".
 </div>
 
 <div class="grid gap-4 sm:grid-cols-2">
-  {% include "villas/_field.html" with field=form.description_en %}
-  {% include "villas/_field.html" with field=form.description_id %}
+  {% include "villas/_field.html" with field=form.description_en counter_max=form.description_max_length %}
+  {% include "villas/_field.html" with field=form.description_id counter_max=form.description_max_length %}
 </div>
 
 <div class="field">

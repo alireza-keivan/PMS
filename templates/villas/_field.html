@@ -8,6 +8,11 @@ split into separate sections - and are told apart only by what's next to the
 label: a plain asterisk for required, a quiet "(optional)" for everything
 else.
 
+Pass `counter_max` to add a live letter counter under a text box. It stays
+quiet until they get close to the limit, then turns into a warning once they
+go over - the box itself never blocks typing, so nobody loses words
+mid-sentence.
+
 Errors are hidden when `hide_errors` is set, which is how the room blocks come
 back after one is added or removed: that is work in progress, not a rejected
 submission.
@@ -21,7 +26,23 @@ submission.
       <span class="text-xs text-ink-500">({% translate "optional" %})</span>
     {% endif %}
   </label>
-  {{ field }}
+  {% if counter_max %}
+    {% blocktranslate asvar counter_ok_msg with limit=counter_max %}NUM of {{ limit }} letters{% endblocktranslate %}
+    {% blocktranslate asvar counter_over_msg %}Too long by NUM letters. Please shorten it before saving.{% endblocktranslate %}
+    <div x-data="{ used: 0, max: {{ counter_max }} }"
+         x-init="const box = $el.querySelector('textarea, input');
+                 used = box.value.length;
+                 box.addEventListener('input', () => used = box.value.length)">
+      {{ field }}
+      <p class="mt-1 text-xs"
+         :class="used > max ? 'font-medium text-teal-700' : (used > max - 30 ? 'text-ink-800' : 'text-ink-600')"
+         x-text="used > max
+                   ? '{{ counter_over_msg|escapejs }}'.replace('NUM', used - max)
+                   : '{{ counter_ok_msg|escapejs }}'.replace('NUM', used)"></p>
+    </div>
+  {% else %}
+    {{ field }}
+  {% endif %}
   {% if hint %}
     <p class="mt-1 text-xs text-ink-600">{{ hint }}</p>
   {% elif field.help_text %}

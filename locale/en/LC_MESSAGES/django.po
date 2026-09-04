@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-02 20:07+0800\n"
+"POT-Creation-Date: 2026-09-04 16:11+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -26,7 +26,7 @@ msgstr ""
 msgid "Permissions"
 msgstr ""
 
-#: apps/accounts/admin.py:17
+#: apps/accounts/admin.py:17 templates/partials/_date_range_picker.html:68
 msgid "Dates"
 msgstr ""
 
@@ -46,7 +46,7 @@ msgstr ""
 msgid "full name"
 msgstr ""
 
-#: apps/accounts/models.py:47 apps/marketing/forms.py:67
+#: apps/accounts/models.py:47 apps/marketing/forms.py:71
 msgid "WhatsApp number"
 msgstr ""
 
@@ -69,13 +69,13 @@ msgstr ""
 msgid "Cancelled"
 msgstr ""
 
-#: apps/bookings/forms.py:41 apps/villas/models.py:86
-#: templates/compliance/document_form.html:42
+#: apps/bookings/forms.py:41 apps/bookings/forms.py:206
+#: apps/villas/models.py:157 templates/compliance/document_form.html:42
 #: templates/compliance/documents.html:33
 msgid "Villa"
 msgstr ""
 
-#: apps/bookings/forms.py:42
+#: apps/bookings/forms.py:42 apps/bookings/forms.py:207
 msgid "Choose a villa"
 msgstr ""
 
@@ -135,7 +135,7 @@ msgstr ""
 msgid "Phone number"
 msgstr ""
 
-#: apps/bookings/forms.py:82 apps/marketing/forms.py:66
+#: apps/bookings/forms.py:82 apps/marketing/forms.py:70
 #: templates/guests/detail.html:97 templates/organizations/staff_list.html:20
 #: templates/registration/login.html:39
 msgid "Email"
@@ -174,7 +174,7 @@ msgstr ""
 msgid "Status"
 msgstr ""
 
-#: apps/bookings/forms.py:108 apps/villas/forms.py:199 apps/villas/forms.py:221
+#: apps/bookings/forms.py:108 apps/villas/forms.py:206 apps/villas/forms.py:240
 msgid "Nightly rate (IDR)"
 msgstr ""
 
@@ -213,6 +213,59 @@ msgstr ""
 msgid "Add a phone number or email so staff can reach the guest."
 msgstr ""
 
+#: apps/bookings/forms.py:209
+msgid "Choose which villa this is for."
+msgstr ""
+
+#: apps/bookings/forms.py:216
+msgid "Room"
+msgstr ""
+
+#: apps/bookings/forms.py:217 apps/bookings/views.py:348
+msgid "Choose a room"
+msgstr ""
+
+#: apps/bookings/forms.py:218
+msgid "Choose which room to block."
+msgstr ""
+
+#: apps/bookings/forms.py:221
+msgid "First night"
+msgstr ""
+
+#: apps/bookings/forms.py:223
+msgid "Say which day the block starts."
+msgstr ""
+
+#: apps/bookings/forms.py:226
+msgid "Free again on"
+msgstr ""
+
+#: apps/bookings/forms.py:228
+msgid "Say which day the room is free again."
+msgstr ""
+
+#: apps/bookings/forms.py:231
+msgid "Reason"
+msgstr ""
+
+#: apps/bookings/forms.py:233
+msgid "e.g. Pool repair, owner staying"
+msgstr ""
+
+#: apps/bookings/forms.py:252
+msgid "Choose a room that belongs to the selected villa."
+msgstr ""
+
+#: apps/bookings/forms.py:258
+msgid "The room has to be free again after the first night."
+msgstr ""
+
+#: apps/bookings/forms.py:276
+msgid ""
+"That room already has something on those dates. Check the calendar first."
+msgstr ""
+
 #: apps/bookings/models.py:22
 msgid "Direct"
 msgstr ""
@@ -222,12 +275,13 @@ msgid "Walk-in"
 msgstr ""
 
 #: apps/bookings/models.py:25 apps/bookings/services.py:205
-#: apps/bookings/services.py:381
+#: apps/bookings/services.py:391
 msgid "Other"
 msgstr ""
 
 #: apps/bookings/models.py:30 apps/bookings/models.py:98
-#: apps/bookings/services.py:37 templates/dashboard/dashboard.html:7
+#: apps/bookings/services.py:37 apps/bookings/services.py:263
+#: templates/dashboard/dashboard.html:7
 msgid "Not available"
 msgstr ""
 
@@ -295,20 +349,20 @@ msgstr ""
 msgid "Payment incomplete"
 msgstr ""
 
-#: apps/bookings/services.py:257 apps/bookings/services.py:419
+#: apps/bookings/services.py:263 apps/bookings/services.py:429
 msgid "Booked"
 msgstr ""
 
-#: apps/bookings/services.py:412
+#: apps/bookings/services.py:422
 msgid "Unassigned"
 msgstr ""
 
-#: apps/bookings/services.py:425
+#: apps/bookings/services.py:435
 #, python-format
 msgid "%(start)s – %(end)s"
 msgstr ""
 
-#: apps/bookings/services.py:429
+#: apps/bookings/services.py:439
 #: templates/bookings/_reservation_availability.html:19
 #, python-format
 msgid "%(n)s night"
@@ -320,19 +374,23 @@ msgstr[1] ""
 msgid "Reservation saved."
 msgstr ""
 
-#: apps/bookings/views.py:258
+#: apps/bookings/views.py:258 apps/bookings/views.py:347
 msgid "Choose a villa first"
 msgstr ""
 
-#: apps/bookings/views.py:346
+#: apps/bookings/views.py:326
+msgid "Those dates are now marked as not available."
+msgstr ""
+
+#: apps/bookings/views.py:425
 msgid "Booking removed."
 msgstr ""
 
-#: apps/bookings/views.py:365
+#: apps/bookings/views.py:444
 msgid "Invalid dates."
 msgstr ""
 
-#: apps/bookings/views.py:383
+#: apps/bookings/views.py:462
 msgid "That room is already booked for part of those dates."
 msgstr ""
 
@@ -696,6 +754,7 @@ msgstr ""
 
 #: apps/guests/models.py:148 templates/guests/_request_row.html:30
 #: templates/guests/_request_row.html:43
+#: templates/partials/_date_range_picker.html:136
 #: templates/portal/_requests_list.html:33
 msgid "Done"
 msgstr ""
@@ -716,121 +775,126 @@ msgstr ""
 msgid "You have a few requests open already. The team is on them."
 msgstr ""
 
-#: apps/marketing/forms.py:61
+#: apps/marketing/forms.py:65
 msgid "Which room"
 msgstr ""
 
-#: apps/marketing/forms.py:62 apps/messaging/views.py:135
+#: apps/marketing/forms.py:66 apps/messaging/views.py:135
 msgid "Arriving"
 msgstr ""
 
-#: apps/marketing/forms.py:63
+#: apps/marketing/forms.py:67
 msgid "Leaving"
 msgstr ""
 
-#: apps/marketing/forms.py:64 templates/bookings/_side_panel.html:38
+#: apps/marketing/forms.py:68 templates/bookings/_side_panel.html:43
 msgid "Guests"
 msgstr ""
 
-#: apps/marketing/forms.py:65
+#: apps/marketing/forms.py:69
 msgid "Your name"
 msgstr ""
 
-#: apps/marketing/forms.py:68
+#: apps/marketing/forms.py:72
 msgid "Anything we should know?"
 msgstr ""
 
-#: apps/marketing/forms.py:78
+#: apps/marketing/forms.py:82
 msgid "Any room"
 msgstr ""
 
-#: apps/marketing/forms.py:95
+#: apps/marketing/forms.py:99
 msgid "That date has already passed."
 msgstr ""
 
-#: apps/marketing/forms.py:106
+#: apps/marketing/forms.py:110
 msgid "Please leave an email or a WhatsApp number so we can reply."
 msgstr ""
 
-#: apps/marketing/forms.py:114
+#: apps/marketing/forms.py:118
 msgid "The leaving date has to be after the arriving date."
 msgstr ""
 
-#: apps/marketing/forms.py:119
+#: apps/marketing/forms.py:123
 msgid "That is a very long stay. Please message the owner directly instead."
 msgstr ""
 
-#: apps/marketing/forms.py:126
+#: apps/marketing/forms.py:130
 msgid "This villa is not taking bookings right now."
 msgstr ""
 
-#: apps/marketing/forms.py:134
+#: apps/marketing/forms.py:138
 #, python-format
 msgid "The shortest stay here is %(nights)s nights."
 msgstr ""
 
-#: apps/marketing/forms.py:143
+#: apps/marketing/forms.py:147
 #, python-format
 msgid "These rooms sleep %(count)s people at most."
 msgstr ""
 
-#: apps/marketing/forms.py:164
+#: apps/marketing/forms.py:168
 msgid "These dates are not available. Try a few days earlier or later."
 msgstr ""
 
-#: apps/marketing/forms.py:191
+#: apps/marketing/forms.py:198
 msgid "e.g. Sunset cooking class"
 msgstr ""
 
-#: apps/marketing/forms.py:200
+#: apps/marketing/forms.py:211
 msgid "Name (English)"
 msgstr ""
 
-#: apps/marketing/forms.py:201
+#: apps/marketing/forms.py:212
 msgid "Name (Indonesian)"
 msgstr ""
 
-#: apps/marketing/forms.py:202 apps/villas/forms.py:127
+#: apps/marketing/forms.py:213 apps/villas/forms.py:127
 msgid "Description (English)"
 msgstr ""
 
-#: apps/marketing/forms.py:203 apps/villas/forms.py:128
+#: apps/marketing/forms.py:214 apps/villas/forms.py:128
 msgid "Description (Indonesian)"
 msgstr ""
 
-#: apps/marketing/forms.py:204
+#: apps/marketing/forms.py:215
 msgid "Photo"
 msgstr ""
 
-#: apps/marketing/forms.py:205
+#: apps/marketing/forms.py:216
 msgid "Operator name"
 msgstr ""
 
-#: apps/marketing/forms.py:206
+#: apps/marketing/forms.py:217
 msgid "Operator phone"
 msgstr ""
 
-#: apps/marketing/forms.py:207
+#: apps/marketing/forms.py:218
 msgid "Commission (%)"
 msgstr ""
 
-#: apps/marketing/forms.py:210
+#: apps/marketing/forms.py:221
 msgid "Give this activity a name."
 msgstr ""
 
-#: apps/marketing/models.py:84
+#: apps/marketing/forms.py:222 apps/marketing/forms.py:223
+#, python-format
+msgid "Please keep this to %(limit_value)d letters or fewer."
+msgstr ""
+
+#: apps/marketing/models.py:90
 msgid "Which room type the visitor was looking at."
 msgstr ""
 
-#: apps/marketing/models.py:94
+#: apps/marketing/models.py:100
 msgid "WhatsApp number, if they left one."
 msgstr ""
 
-#: apps/marketing/models.py:104
+#: apps/marketing/models.py:110
 msgid "Someone has replied to this."
 msgstr ""
 
-#: apps/marketing/models.py:116
+#: apps/marketing/models.py:122
 msgid "booking enquiries"
 msgstr ""
 
@@ -839,7 +903,7 @@ msgstr ""
 msgid "Marketing"
 msgstr ""
 
-#: apps/marketing/views.py:331
+#: apps/marketing/views.py:469
 msgid "Thanks - the owner has your request and will get back to you."
 msgstr ""
 
@@ -987,7 +1051,7 @@ msgstr ""
 msgid "things to do nearby"
 msgstr ""
 
-#: apps/villas/admin.py:85
+#: apps/villas/admin.py:87
 msgid "rooms"
 msgstr ""
 
@@ -1023,258 +1087,346 @@ msgstr ""
 msgid "Check-out time"
 msgstr ""
 
-#: apps/villas/forms.py:131
+#: apps/villas/forms.py:129 apps/villas/forms.py:237
+#: templates/public/villa_page.html:227
+msgid "Amenities"
+msgstr ""
+
+#: apps/villas/forms.py:132
 msgid "e.g. Villa Kenanga"
 msgstr ""
 
-#: apps/villas/forms.py:135
+#: apps/villas/forms.py:136
 msgid "e.g. Canggu"
 msgstr ""
 
-#: apps/villas/forms.py:138
+#: apps/villas/forms.py:139
 msgid "Street address"
 msgstr ""
 
-#: apps/villas/forms.py:146 apps/villas/forms.py:149
+#: apps/villas/forms.py:147 apps/villas/forms.py:150
 msgid "A few sentences guests will see"
 msgstr ""
 
-#: apps/villas/forms.py:153
+#: apps/villas/forms.py:155
 msgid "Give the villa a name."
 msgstr ""
 
-#: apps/villas/forms.py:154
+#: apps/villas/forms.py:156
 msgid "That doesn't look like a link. It should start with https://"
 msgstr ""
 
-#: apps/villas/forms.py:163
+#: apps/villas/forms.py:166
 msgid "Say which area it's in."
 msgstr ""
 
-#: apps/villas/forms.py:189
+#: apps/villas/forms.py:196
 msgid "Number of rooms"
 msgstr ""
 
-#: apps/villas/forms.py:193
+#: apps/villas/forms.py:200
 msgid "Say how many rooms of this kind there are."
 msgstr ""
 
-#: apps/villas/forms.py:194
+#: apps/villas/forms.py:201
 msgid "There has to be at least one room of this kind."
 msgstr ""
 
-#: apps/villas/forms.py:195
+#: apps/villas/forms.py:202
 msgid ""
 "That's more rooms than we can add at once. Split it into two room types."
 msgstr ""
 
-#: apps/villas/forms.py:203 apps/villas/forms.py:222
+#: apps/villas/forms.py:210 apps/villas/forms.py:241
 msgid "Monthly rate (IDR)"
 msgstr ""
 
-#: apps/villas/forms.py:218 templates/public/villa_page.html:216
-msgid "Amenities"
-msgstr ""
-
-#: apps/villas/forms.py:219
-msgid "Size (m²)"
+#: apps/villas/forms.py:214
+msgid "Coupon discount (%)"
 msgstr ""
 
 #: apps/villas/forms.py:220
-msgid "Max guests"
+msgid "A coupon discount has to be at least 1%."
 msgstr ""
 
-#: apps/villas/forms.py:223
-msgid "Minimum nights"
-msgstr ""
-
-#: apps/villas/forms.py:224 templates/villas/_room_block.html:127
-msgid "Use the first room type's photos"
-msgstr ""
-
-#: apps/villas/forms.py:230
-msgid "Standard"
-msgstr ""
-
-#: apps/villas/forms.py:237
-msgid "Give this kind of room a name."
+#: apps/villas/forms.py:221
+msgid "A coupon discount can't be more than 100%."
 msgstr ""
 
 #: apps/villas/forms.py:238
+msgid "Size (m²)"
+msgstr ""
+
+#: apps/villas/forms.py:239
+msgid "Max guests"
+msgstr ""
+
+#: apps/villas/forms.py:242
+msgid "Minimum nights"
+msgstr ""
+
+#: apps/villas/forms.py:243
+msgid "Apply this coupon"
+msgstr ""
+
+#: apps/villas/forms.py:244 templates/villas/_room_block.html:149
+msgid "Use the first room type's photos"
+msgstr ""
+
+#: apps/villas/forms.py:250
+msgid "Standard"
+msgstr ""
+
+#: apps/villas/forms.py:258
+msgid "Give this kind of room a name."
+msgstr ""
+
+#: apps/villas/forms.py:259
 msgid "Say the fewest nights someone can book."
 msgstr ""
 
-#: apps/villas/forms.py:257
+#: apps/villas/forms.py:278
 msgid "Keep the room name to 10 letters or fewer."
 msgstr ""
 
-#: apps/villas/forms.py:302
+#: apps/villas/forms.py:296
+msgid "Add a nightly or monthly rate first."
+msgstr ""
+
+#: apps/villas/forms.py:303
+msgid "Say how much the coupon takes off."
+msgstr ""
+
+#: apps/villas/forms.py:344
 #, python-format
 msgid ""
 "You already have a room type called \"%(name)s\". Give this one a different "
 "name."
 msgstr ""
 
-#: apps/villas/forms.py:331
+#: apps/villas/forms.py:373
 msgid "e.g. Yoga deck"
 msgstr ""
 
-#: apps/villas/forms.py:334
+#: apps/villas/forms.py:376
 msgid "Type what it is first."
 msgstr ""
 
-#: apps/villas/forms.py:343
+#: apps/villas/forms.py:385
 msgid "That one is already on the list."
 msgstr ""
 
-#: apps/villas/models.py:87
+#: apps/villas/models.py:158
 msgid "Guesthouse"
 msgstr ""
 
-#: apps/villas/models.py:88
+#: apps/villas/models.py:159
 msgid "Apartment"
 msgstr ""
 
-#: apps/villas/models.py:89
+#: apps/villas/models.py:160
 msgid "House"
 msgstr ""
 
-#: apps/villas/models.py:93
+#: apps/villas/models.py:164
 msgid "Used in the villa's public web address."
 msgstr ""
 
-#: apps/villas/models.py:100
+#: apps/villas/models.py:171
 msgid "Canggu, Ubud, Uluwatu, Seminyak."
 msgstr ""
 
-#: apps/villas/models.py:104
+#: apps/villas/models.py:175
 msgid "Paste a Google Maps link so staff and guests can find it."
 msgstr ""
 
-#: apps/villas/models.py:131
+#: apps/villas/models.py:202
 msgid "Show this villa's own web page and direct booking."
 msgstr ""
 
-#: apps/villas/models.py:190
+#: apps/villas/models.py:265
+msgid "At least 3 photos of the villa"
+msgstr ""
+
+#: apps/villas/models.py:267
+msgid "An English description of the villa"
+msgstr ""
+
+#: apps/villas/models.py:269
+msgid "At least 5 amenities"
+msgstr ""
+
+#: apps/villas/models.py:271
+msgid "A Google Maps location"
+msgstr ""
+
+#: apps/villas/models.py:275
+msgid "At least one room type"
+msgstr ""
+
+#: apps/villas/models.py:279
+#, python-format
+msgid "A nightly or monthly rate for the room type \"%(name)s\""
+msgstr ""
+
+#: apps/villas/models.py:284
+#, python-format
+msgid "A photo for the room type \"%(name)s\""
+msgstr ""
+
+#: apps/villas/models.py:318
 msgid "size (m²)"
 msgstr ""
 
-#: apps/villas/models.py:202
+#: apps/villas/models.py:330
 msgid "Price for one night, in rupiah."
 msgstr ""
 
-#: apps/villas/models.py:205
+#: apps/villas/models.py:333
 msgid "Price for a whole month, in rupiah."
 msgstr ""
 
-#: apps/villas/models.py:214
+#: apps/villas/models.py:345
+msgid "Coupon discount, as a percentage of the rate."
+msgstr ""
+
+#: apps/villas/models.py:349
+msgid "Apply the coupon discount to this room type's rates."
+msgstr ""
+
+#: apps/villas/models.py:357
 msgid "Show the first room type's photos here instead of its own."
 msgstr ""
 
-#: apps/villas/models.py:220
+#: apps/villas/models.py:363
 msgid "room categories"
 msgstr ""
 
-#: apps/villas/models.py:258
+#: apps/villas/models.py:416
 msgid "One of this villa's own room types."
 msgstr ""
 
-#: apps/villas/models.py:277
+#: apps/villas/models.py:435
 msgid "Pick a room type that belongs to this villa."
 msgstr ""
 
-#: apps/villas/models.py:311
+#: apps/villas/models.py:480
 msgid "Uploaded but not saved yet - discarded if the page is left."
 msgstr ""
 
-#: apps/villas/models.py:315
+#: apps/villas/models.py:484
 msgid "Taken off the form but not saved yet - kept until Save."
 msgstr ""
 
-#: apps/villas/models.py:381
+#: apps/villas/models.py:581
 msgid "Leave empty for an amenity every operator can pick."
 msgstr ""
 
-#: apps/villas/models.py:386
+#: apps/villas/models.py:586
 msgid "amenities"
 msgstr ""
 
-#: apps/villas/views.py:171
+#: apps/villas/views.py:183
 #, python-format
 msgid ""
 "You can only have up to %(max)s pictures. Remove some before adding more."
 msgstr ""
 
-#: apps/villas/views.py:176
+#: apps/villas/views.py:188
 #, python-format
 msgid ""
 "These pictures are bigger than %(max)s MB: %(names)s. Use smaller files."
 msgstr ""
 
-#: apps/villas/views.py:387
+#: apps/villas/views.py:208
+#, python-format
+msgid "These files are not pictures: %(names)s. Upload photos only."
+msgstr ""
+
+#: apps/villas/views.py:213
+#, python-format
+msgid ""
+"These pictures are too small to look sharp on the villa page: %(names)s. "
+"Please upload bigger ones, at least %(min)s pixels wide."
+msgstr ""
+
+#: apps/villas/views.py:464
 #, python-format
 msgid ""
 "You've reached your plan's limit of %(limit)s villas. Contact us to add more."
 msgstr ""
 
-#: apps/villas/views.py:414
+#: apps/villas/views.py:491
 msgid ""
 "Those pictures couldn't be processed. Try different ones, or carry on "
 "without them and add them later."
 msgstr ""
 
-#: apps/villas/views.py:449 apps/villas/views.py:537 apps/villas/views.py:924
+#: apps/villas/views.py:530 apps/villas/views.py:624 apps/villas/views.py:1108
 msgid "Saved"
 msgstr ""
 
-#: apps/villas/views.py:526
+#: apps/villas/views.py:613
 #, python-format
 msgid "%(count)s room(s) were kept because they still have bookings on them."
 msgstr ""
 
-#: apps/villas/views.py:535
+#: apps/villas/views.py:622
 #, python-format
 msgid "%(name)s is ready."
 msgstr ""
 
-#: apps/villas/views.py:629
+#: apps/villas/views.py:716
 msgid ""
 "A villa needs at least one room type - add another before removing this one."
 msgstr ""
 
-#: apps/villas/views.py:651
+#: apps/villas/views.py:738
 #, python-format
 msgid "%(count)s room(s) moved to %(name)s."
 msgstr ""
 
-#: apps/villas/views.py:708 apps/villas/views.py:762
+#: apps/villas/views.py:796 apps/villas/views.py:851
 msgid "Those pictures couldn't be processed. Try different ones."
 msgstr ""
 
-#: apps/villas/views.py:891
+#: apps/villas/views.py:1032
+#, python-format
+msgid "Add these first before turning the website on: %(items)s"
+msgstr ""
+
+#: apps/villas/views.py:1044
+msgid "Your villa's website is now on."
+msgstr ""
+
+#: apps/villas/views.py:1046
+msgid "Your villa's website is now off."
+msgstr ""
+
+#: apps/villas/views.py:1075
 #, python-format
 msgid "Added \"%(name)s\"."
 msgstr ""
 
-#: apps/villas/views.py:955
+#: apps/villas/views.py:1139
 #, python-format
 msgid "Removed \"%(name)s\"."
 msgstr ""
 
-#: apps/villas/views.py:994
+#: apps/villas/views.py:1178
 #, python-format
 msgid "%(name)s was removed from your villas."
 msgstr ""
 
-#: apps/villas/views.py:1039
+#: apps/villas/views.py:1223
 msgid "Pick a room type first."
 msgstr ""
 
-#: apps/villas/views.py:1054
+#: apps/villas/views.py:1238
 msgid "A villa needs at least one room - add another before removing this one."
 msgstr ""
 
-#: apps/villas/views.py:1060
+#: apps/villas/views.py:1244
 msgid "This room still has bookings - move or remove those first."
 msgstr ""
 
@@ -1291,7 +1443,7 @@ msgid "You can change this later."
 msgstr ""
 
 #: templates/accounts/onboarding.html:26
-#: templates/bookings/_calendar_panel.html:370
+#: templates/bookings/_calendar_panel.html:379 templates/villas/list.html:195
 msgid "Continue"
 msgstr ""
 
@@ -1348,123 +1500,138 @@ msgid "Search bookings or guests"
 msgstr ""
 
 #: templates/bookings/_calendar_panel.html:82
+msgid "Mark a room as not available?"
+msgstr ""
+
+#: templates/bookings/_calendar_panel.html:85 templates/bookings/block.html:4
+#: templates/bookings/block.html:20
+msgid "Block dates"
+msgstr ""
+
+#: templates/bookings/_calendar_panel.html:89
 msgid "Start a new booking?"
 msgstr ""
 
-#: templates/bookings/_calendar_panel.html:85
+#: templates/bookings/_calendar_panel.html:92
 msgid "New booking"
 msgstr ""
 
-#: templates/bookings/_calendar_panel.html:111
+#: templates/bookings/_calendar_panel.html:118
 #, python-format
 msgid "Move %%(guest)s's booking to %%(dates)s?"
 msgstr ""
 
-#: templates/bookings/_calendar_panel.html:112
+#: templates/bookings/_calendar_panel.html:119
 #, python-format
 msgid "Move %%(guest)s's booking to %%(room)s, %%(dates)s?"
 msgstr ""
 
-#: templates/bookings/_calendar_panel.html:113
+#: templates/bookings/_calendar_panel.html:120
 #, python-format
 msgid "Change %%(guest)s's stay to %%(dates)s?"
 msgstr ""
 
-#: templates/bookings/_calendar_panel.html:114
+#: templates/bookings/_calendar_panel.html:121
 #, python-format
 msgid ""
 "This booking is synced from %%(channel)s - changes here may be overwritten "
 "by the next sync."
 msgstr ""
 
-#: templates/bookings/_calendar_panel.html:115
+#: templates/bookings/_calendar_panel.html:122
 msgid "Couldn't save that change. Try again."
 msgstr ""
 
-#: templates/bookings/_calendar_panel.html:158
+#: templates/bookings/_calendar_panel.html:165
 #, python-format
 msgid "Show or hide rooms in %(name)s"
 msgstr ""
 
-#: templates/bookings/_calendar_panel.html:175
-#: templates/bookings/_calendar_panel.html:206
+#: templates/bookings/_calendar_panel.html:182
+#: templates/bookings/_calendar_panel.html:213
 #, python-format
 msgid "Remove %(name)s"
 msgstr ""
 
-#: templates/bookings/_calendar_panel.html:176
+#: templates/bookings/_calendar_panel.html:183
 #, python-format
 msgid "Remove %(name)s? This can't be undone."
 msgstr ""
 
-#: templates/bookings/_calendar_panel.html:195
-#: templates/bookings/_calendar_panel.html:203
+#: templates/bookings/_calendar_panel.html:202
+#: templates/bookings/_calendar_panel.html:210
 #, python-format
 msgid "Room type: %(name)s"
 msgstr ""
 
-#: templates/bookings/_calendar_panel.html:207
+#: templates/bookings/_calendar_panel.html:214
 #, python-format
 msgid "Remove room %(name)s? This can't be undone."
 msgstr ""
 
-#: templates/bookings/_calendar_panel.html:231
+#: templates/bookings/_calendar_panel.html:238
+msgid "Free these dates up again?"
+msgstr ""
+
+#: templates/bookings/_calendar_panel.html:238
 #, python-format
 msgid "Remove %(name)s's booking? This can't be undone."
 msgstr ""
 
-#: templates/bookings/_calendar_panel.html:264
-#: templates/bookings/_calendar_panel.html:271
+#: templates/bookings/_calendar_panel.html:273
+#: templates/bookings/_calendar_panel.html:280
 msgid "Add room"
 msgstr ""
 
-#: templates/bookings/_calendar_panel.html:293
+#: templates/bookings/_calendar_panel.html:302
 msgid "Which room type is the new room?"
 msgstr ""
 
-#: templates/bookings/_calendar_panel.html:310
+#: templates/bookings/_calendar_panel.html:319
 #, python-format
 msgid "%(n)s room of this type so far"
 msgid_plural "%(n)s rooms of this type so far"
 msgstr[0] ""
 msgstr[1] ""
 
-#: templates/bookings/_calendar_panel.html:312
+#: templates/bookings/_calendar_panel.html:321
 #, python-format
 msgid "Sleeps up to %(n)s"
 msgstr ""
 
-#: templates/bookings/_calendar_panel.html:315
+#: templates/bookings/_calendar_panel.html:324
 #, python-format
 msgid "Rp %(amount)s a night"
 msgstr ""
 
-#: templates/bookings/_calendar_panel.html:322
-#: templates/bookings/_calendar_panel.html:367 templates/bookings/add.html:188
-#: templates/compliance/document_form.html:81
+#: templates/bookings/_calendar_panel.html:331
+#: templates/bookings/_calendar_panel.html:376 templates/bookings/add.html:197
+#: templates/bookings/block.html:68 templates/compliance/document_form.html:81
 #: templates/organizations/staff_form.html:55
 #: templates/organizations/staff_villas_form.html:31
+#: templates/villas/_photo_cropper_js.html:15
 #: templates/villas/add_details.html:33 templates/villas/confirm_delete.html:20
-#: templates/villas/list.html:167
+#: templates/villas/list.html:193
 msgid "Cancel"
 msgstr ""
 
-#: templates/bookings/_calendar_panel.html:327
+#: templates/bookings/_calendar_panel.html:336
 #: templates/villas/_amenity_checkboxes.html:47
-#: templates/villas/activities.html:68
+#: templates/villas/activities.html:137
 msgid "Add"
 msgstr ""
 
-#: templates/bookings/_calendar_panel.html:337
+#: templates/bookings/_calendar_panel.html:346
 msgid "No villas match what you searched for."
 msgstr ""
 
-#: templates/bookings/_calendar_panel.html:374
+#: templates/bookings/_calendar_panel.html:383
 msgid "Confirm"
 msgstr ""
 
-#: templates/bookings/_calendar_panel.html:381
-#: templates/villas/activities.html:43 templates/villas/activities.html:44
+#: templates/bookings/_calendar_panel.html:390
+#: templates/villas/activities.html:112 templates/villas/activities.html:113
+#: templates/villas/list.html:200
 msgid "Remove"
 msgstr ""
 
@@ -1492,32 +1659,37 @@ msgid "No guests or bookings match."
 msgstr ""
 
 #: templates/bookings/_side_panel.html:29
+#: templates/partials/_date_range_picker.html:134
 msgid "nights"
 msgstr ""
 
-#: templates/bookings/_side_panel.html:33
+#: templates/bookings/_side_panel.html:35
 msgid ""
 "This villa is on a basic calendar link - guest details aren't available, "
 "only the dates."
 msgstr ""
 
-#: templates/bookings/_side_panel.html:42
+#: templates/bookings/_side_panel.html:47
 msgid "Booked via"
 msgstr ""
 
-#: templates/bookings/_side_panel.html:47
+#: templates/bookings/_side_panel.html:52
 msgid "Still owed"
 msgstr ""
 
-#: templates/bookings/_side_panel.html:56
+#: templates/bookings/_side_panel.html:61
 msgid "Remove booking"
 msgstr ""
 
-#: templates/bookings/_side_panel.html:60
+#: templates/bookings/_side_panel.html:62
+msgid "Free these dates"
+msgstr ""
+
+#: templates/bookings/_side_panel.html:66
 msgid "Guest details"
 msgstr ""
 
-#: templates/bookings/_side_panel.html:62
+#: templates/bookings/_side_panel.html:68
 msgid "Close"
 msgstr ""
 
@@ -1545,44 +1717,63 @@ msgstr ""
 msgid "The stay"
 msgstr ""
 
-#: templates/bookings/add.html:83
+#: templates/bookings/add.html:92
 msgid "The guest"
 msgstr ""
 
-#: templates/bookings/add.html:98 templates/bookings/add.html:134
-#: templates/bookings/add.html:145 templates/bookings/add.html:156
+#: templates/bookings/add.html:107 templates/bookings/add.html:143
+#: templates/bookings/add.html:154 templates/bookings/add.html:165
 #: templates/portal/_request_form.html:42
-#: templates/villas/_experience_fields.html:29 templates/villas/_field.html:21
+#: templates/villas/_experience_fields.html:29 templates/villas/_field.html:26
 #: templates/villas/_room_block.html:91 templates/villas/_room_block.html:102
-#: templates/villas/_room_block.html:117 templates/villas/_villa_fields.html:50
+#: templates/villas/_room_block.html:115 templates/villas/_room_block.html:139
+#: templates/villas/_villa_fields.html:52
 msgid "optional"
 msgstr ""
 
-#: templates/bookings/add.html:112
+#: templates/bookings/add.html:121
 msgid ""
 "This guest is foreign — a police report will be needed within 24 hours of "
 "check-in."
 msgstr ""
 
-#: templates/bookings/add.html:120
+#: templates/bookings/add.html:129
 msgid "Booking details"
 msgstr ""
 
-#: templates/bookings/add.html:167
+#: templates/bookings/add.html:176
 #, python-format
 msgid "Rp %(amount)s still owed"
 msgstr ""
 
-#: templates/bookings/add.html:174
+#: templates/bookings/add.html:183
 msgid "Paid in full"
 msgstr ""
 
-#: templates/bookings/add.html:179
+#: templates/bookings/add.html:188
 msgid "Pricing is only visible to owners and managers."
 msgstr ""
 
-#: templates/bookings/add.html:187
+#: templates/bookings/add.html:196
 msgid "Save reservation"
+msgstr ""
+
+#: templates/bookings/block.html:22
+msgid ""
+"Mark a room as not available — for repairs, a deep clean, or when the owner "
+"is staying."
+msgstr ""
+
+#: templates/bookings/block.html:60
+msgid "Dates to block"
+msgstr ""
+
+#: templates/bookings/block.html:62
+msgid "Only staff see this. It shows on the block when someone opens it."
+msgstr ""
+
+#: templates/bookings/block.html:67
+msgid "Block these dates"
 msgstr ""
 
 #: templates/bookings/calendar.html:4 templates/bookings/calendar.html:26
@@ -1758,62 +1949,63 @@ msgid_plural ""
 msgstr[0] ""
 msgstr[1] ""
 
-#: templates/dashboard/dashboard.html:49
+#: templates/dashboard/dashboard.html:50
 msgid "Needs doing"
 msgstr ""
 
-#: templates/dashboard/dashboard.html:50
+#: templates/dashboard/dashboard.html:51
 #, python-format
 msgid "%(n)s task"
 msgid_plural "%(n)s tasks"
 msgstr[0] ""
 msgstr[1] ""
 
-#: templates/dashboard/dashboard.html:66
+#: templates/dashboard/dashboard.html:68
 msgid "Occupied today"
 msgstr ""
 
-#: templates/dashboard/dashboard.html:73
+#: templates/dashboard/dashboard.html:75
 #, python-format
-msgid "Night %(n)s of %(total)s"
+msgid "%(occupied)s/%(total)s rooms occupied"
 msgstr ""
 
-#: templates/dashboard/dashboard.html:76
-msgid "No one in-house tonight"
+#: templates/dashboard/dashboard.html:78
+#: templates/organizations/staff_list.html:45
+msgid "No villas yet"
 msgstr ""
 
-#: templates/dashboard/dashboard.html:87
+#: templates/dashboard/dashboard.html:89
+msgid "Still owe money"
+msgstr ""
+
+#: templates/dashboard/dashboard.html:100
+msgid "Everyone is paid up"
+msgstr ""
+
+#: templates/dashboard/dashboard.html:111
 msgid "Arriving today"
 msgstr ""
 
-#: templates/dashboard/dashboard.html:94
+#: templates/dashboard/dashboard.html:118
 #, python-format
 msgid "Check-in %(time)s"
 msgstr ""
 
-#: templates/dashboard/dashboard.html:97
+#: templates/dashboard/dashboard.html:121
 msgid "No one arriving today"
 msgstr ""
 
-#: templates/dashboard/dashboard.html:108
+#: templates/dashboard/dashboard.html:132
 msgid "Leaving today"
 msgstr ""
 
-#: templates/dashboard/dashboard.html:115
+#: templates/dashboard/dashboard.html:139
 #, python-format
 msgid "Check-out %(time)s"
 msgstr ""
 
-#: templates/dashboard/dashboard.html:118
+#: templates/dashboard/dashboard.html:142
 msgid "No one leaving today"
-msgstr ""
-
-#: templates/dashboard/dashboard.html:129
-msgid "Still owe money"
-msgstr ""
-
-#: templates/dashboard/dashboard.html:140
-msgid "Everyone is paid up"
 msgstr ""
 
 #: templates/guests/_request_row.html:24
@@ -1852,7 +2044,7 @@ msgstr[1] ""
 msgid "Copy guest link"
 msgstr ""
 
-#: templates/guests/detail.html:32
+#: templates/guests/detail.html:32 templates/villas/activities.html:48
 msgid "Copied"
 msgstr ""
 
@@ -2074,10 +2266,6 @@ msgstr ""
 msgid "All villas"
 msgstr ""
 
-#: templates/organizations/staff_list.html:45
-msgid "No villas yet"
-msgstr ""
-
 #: templates/organizations/staff_list.html:50
 msgid "Edit villas"
 msgstr ""
@@ -2099,6 +2287,40 @@ msgstr ""
 #: templates/villas/add_details.html:42
 #: templates/villas/experience_form.html:18
 msgid "Save"
+msgstr ""
+
+#: templates/partials/_date_range_picker.html:73
+msgid "Add your dates"
+msgstr ""
+
+#: templates/partials/_date_range_picker.html:83
+msgid "Pick your dates"
+msgstr ""
+
+#: templates/partials/_date_range_picker.html:94
+#: templates/partials/_date_range_picker.html:98
+msgid "Pick a date"
+msgstr ""
+
+#: templates/partials/_date_range_picker.html:104
+msgid "Previous month"
+msgstr ""
+
+#: templates/partials/_date_range_picker.html:112
+msgid "Next month"
+msgstr ""
+
+#: templates/partials/_date_range_picker.html:128
+msgid "Grey days are already booked."
+msgstr ""
+
+#: templates/partials/_date_range_picker.html:133
+#: templates/public/villa_page.html:308
+msgid "night"
+msgstr ""
+
+#: templates/partials/_date_range_picker.html:135
+msgid "Pick arriving and leaving"
 msgstr ""
 
 #: templates/partials/_sync_badge.html:5
@@ -2179,7 +2401,7 @@ msgstr ""
 msgid "Where"
 msgstr ""
 
-#: templates/portal/home.html:44 templates/public/villa_page.html:413
+#: templates/portal/home.html:44 templates/public/villa_page.html:441
 msgid "Open in Maps"
 msgstr ""
 
@@ -2201,30 +2423,33 @@ msgstr ""
 msgid "Message the villa on WhatsApp and ask them to send you a new one."
 msgstr ""
 
-#: templates/public/_booking_panel.html:23
+#: templates/public/_booking_panel.html:28
 msgid "Request sent"
 msgstr ""
 
-#: templates/public/_booking_panel.html:41
-#: templates/public/_booking_panel.html:51
+#: templates/public/_booking_panel.html:55
+#: templates/public/_booking_panel.html:69
+#: templates/public/_booking_panel.html:164
+#: templates/public/_booking_panel.html:200
+#: templates/public/villa_page.html:489
 msgid "per night"
 msgstr ""
 
-#: templates/public/_booking_panel.html:44
-#: templates/public/_booking_panel.html:54
+#: templates/public/_booking_panel.html:73
+#: templates/public/_booking_panel.html:167
 msgid "We'll contact you with a price list."
 msgstr ""
 
-#: templates/public/_booking_panel.html:113
+#: templates/public/_booking_panel.html:149
 msgid "(optional)"
 msgstr ""
 
-#: templates/public/_booking_panel.html:123
-#: templates/public/villa_page.html:486
+#: templates/public/_booking_panel.html:172
+#: templates/public/villa_page.html:500
 msgid "Ask to book"
 msgstr ""
 
-#: templates/public/_booking_panel.html:133
+#: templates/public/_booking_panel.html:182
 #, python-format
 msgid ""
 "Shortest stay is %(nights)s night. No payment now - the owner replies to "
@@ -2234,6 +2459,10 @@ msgid_plural ""
 "confirm."
 msgstr[0] ""
 msgstr[1] ""
+
+#: templates/public/_booking_panel.html:201
+msgid "per month"
+msgstr ""
 
 #: templates/public/villa_page.html:18
 #, python-format
@@ -2249,75 +2478,66 @@ msgid_plural "%(count)s bedrooms"
 msgstr[0] ""
 msgstr[1] ""
 
-#: templates/public/villa_page.html:71 templates/public/villa_page.html:274
+#: templates/public/villa_page.html:71 templates/public/villa_page.html:290
 #, python-format
 msgid "Sleeps %(count)s"
 msgid_plural "Sleeps %(count)s"
 msgstr[0] ""
 msgstr[1] ""
 
-#: templates/public/villa_page.html:129 templates/public/villa_page.html:298
-#: templates/public/villa_page.html:393
+#: templates/public/villa_page.html:138 templates/public/villa_page.html:323
+#: templates/public/villa_page.html:414
 msgid "Previous"
 msgstr ""
 
-#: templates/public/villa_page.html:134 templates/public/villa_page.html:303
-#: templates/public/villa_page.html:398
+#: templates/public/villa_page.html:143 templates/public/villa_page.html:328
+#: templates/public/villa_page.html:419
 msgid "Next"
 msgstr ""
 
-#: templates/public/villa_page.html:202
+#: templates/public/villa_page.html:213
 msgid "About this villa"
 msgstr ""
 
-#: templates/public/villa_page.html:236
+#: templates/public/villa_page.html:247
 msgid "Show everything"
 msgstr ""
 
-#: templates/public/villa_page.html:239
+#: templates/public/villa_page.html:250
 msgid "Show less"
 msgstr ""
 
-#: templates/public/villa_page.html:248
+#: templates/public/villa_page.html:259
 #: templates/villas/_step_indicator.html:39
 #: templates/villas/_step_indicator.html:43 templates/villas/add_rooms.html:4
 msgid "Rooms"
 msgstr ""
 
-#: templates/public/villa_page.html:289
-#, python-format
-msgid "%(price)s a night"
+#: templates/public/villa_page.html:316
+msgid "month"
 msgstr ""
 
-#: templates/public/villa_page.html:367 templates/villas/activities.html:12
-msgid "Things to do nearby"
+#: templates/public/villa_page.html:386
+msgid "Experiences we provide for you"
 msgstr ""
 
-#: templates/public/villa_page.html:408
+#: templates/public/villa_page.html:429
 msgid "Where it is"
 msgstr ""
 
-#: templates/public/villa_page.html:418
-msgid "Check-in"
+#: templates/public/villa_page.html:436
+msgid "Map"
 msgstr ""
 
-#: templates/public/villa_page.html:422
-msgid "Check-out"
-msgstr ""
-
-#: templates/public/villa_page.html:433
-msgid "The exact address is shared once you have booked."
-msgstr ""
-
-#: templates/public/villa_page.html:446
+#: templates/public/villa_page.html:455
 msgid "Message the owner"
 msgstr ""
 
-#: templates/public/villa_page.html:478
+#: templates/public/villa_page.html:491
 msgid "Want a stay to remember?"
 msgstr ""
 
-#: templates/public/villa_page.html:665
+#: templates/public/villa_page.html:684
 #, python-format
 msgid "%(operator)s - booked direct, no booking fees."
 msgstr ""
@@ -2367,23 +2587,69 @@ msgstr ""
 msgid "Replace"
 msgstr ""
 
-#: templates/villas/_photo_grid.html:35
+#: templates/villas/_field.html:30
+#, python-format
+msgid "NUM of %(limit)s letters"
+msgstr ""
+
+#: templates/villas/_field.html:31
+msgid "Too long by NUM letters. Please shorten it before saving."
+msgstr ""
+
+#: templates/villas/_photo_cropper_js.html:11
+msgid "Choose what shows"
+msgstr ""
+
+#: templates/villas/_photo_cropper_js.html:12
+msgid ""
+"Drag the picture to move it. Everything inside the box is what guests see."
+msgstr ""
+
+#: templates/villas/_photo_cropper_js.html:13
+msgid "Zoom"
+msgstr ""
+
+#: templates/villas/_photo_cropper_js.html:14
+msgid "Center it again"
+msgstr ""
+
+#: templates/villas/_photo_cropper_js.html:16
+msgid "Use this"
+msgstr ""
+
+#: templates/villas/_photo_cropper_js.html:17
+msgid "Save this view"
+msgstr ""
+
+#: templates/villas/_photo_grid.html:50
 msgid "Up to 20 pictures, 2 MB or smaller each."
 msgstr ""
 
-#: templates/villas/_photo_grid.html:45 templates/villas/_photo_grid.html:46
+#: templates/villas/_photo_grid.html:51
+msgid "When you add one, you choose which part of it shows."
+msgstr ""
+
+#: templates/villas/_photo_grid.html:73
+msgid "Choose which part of this picture shows"
+msgstr ""
+
+#: templates/villas/_photo_grid.html:76
+msgid "Adjust"
+msgstr ""
+
+#: templates/villas/_photo_grid.html:82 templates/villas/_photo_grid.html:83
 msgid "Remove this picture"
 msgstr ""
 
-#: templates/villas/_photo_grid.html:61
+#: templates/villas/_photo_grid.html:98
 msgid "Not saved"
 msgstr ""
 
-#: templates/villas/_photo_grid.html:72
+#: templates/villas/_photo_grid.html:109
 msgid "Undo"
 msgstr ""
 
-#: templates/villas/_photo_grid.html:104
+#: templates/villas/_photo_grid.html:156
 msgid "Picture changes are kept when you save this page."
 msgstr ""
 
@@ -2422,7 +2688,7 @@ msgstr ""
 msgid "Remove %(name)s?"
 msgstr ""
 
-#: templates/villas/_room_block.html:116 templates/villas/_villa_fields.html:49
+#: templates/villas/_room_block.html:138 templates/villas/_villa_fields.html:51
 msgid "Photos"
 msgstr ""
 
@@ -2453,28 +2719,51 @@ msgstr ""
 msgid "Activities"
 msgstr ""
 
-#: templates/villas/activities.html:17
+#: templates/villas/activities.html:12
+msgid "Things to do nearby"
+msgstr ""
+
+#: templates/villas/activities.html:18
+msgid "Finish these before turning the website on:"
+msgstr ""
+
+#: templates/villas/activities.html:41 templates/villas/activities.html:42
+msgid "Copy website link"
+msgstr ""
+
+#: templates/villas/activities.html:55 templates/villas/activities.html:56
+#: templates/villas/list.html:100 templates/villas/list.html:101
+msgid "View website"
+msgstr ""
+
+#: templates/villas/activities.html:79
+msgid "I want to have my website"
+msgstr ""
+
+#: templates/villas/activities.html:86
 msgid "Tours, classes, and activities shown on this villa's public page."
 msgstr ""
 
-#: templates/villas/activities.html:36 templates/villas/list.html:97
+#: templates/villas/activities.html:105 templates/villas/list.html:85
+#: templates/villas/list.html:86
 msgid "Edit"
 msgstr ""
 
-#: templates/villas/activities.html:53
+#: templates/villas/activities.html:122
 msgid "Nothing added yet."
 msgstr ""
 
-#: templates/villas/activities.html:58
+#: templates/villas/activities.html:127
 msgid "Add an activity"
 msgstr ""
 
-#: templates/villas/activities.html:67 templates/villas/experience_form.html:17
+#: templates/villas/activities.html:136
+#: templates/villas/experience_form.html:17
 msgid "Back"
 msgstr ""
 
 #: templates/villas/add_details.html:4 templates/villas/add_details.html:12
-#: templates/villas/add_rooms.html:9 templates/villas/list.html:121
+#: templates/villas/add_rooms.html:9 templates/villas/list.html:155
 msgid "Add a villa"
 msgstr ""
 
@@ -2557,18 +2846,18 @@ msgstr ""
 msgid "Delete villa"
 msgstr ""
 
-#: templates/villas/confirm_delete.html:9 templates/villas/list.html:102
+#: templates/villas/confirm_delete.html:9
 #, python-format
 msgid "Delete %(name)s?"
 msgstr ""
 
-#: templates/villas/confirm_delete.html:12 templates/villas/list.html:158
+#: templates/villas/confirm_delete.html:12
 msgid ""
 "This takes it off your villa list. Its bookings, guests, and documents are "
 "kept, not deleted."
 msgstr ""
 
-#: templates/villas/confirm_delete.html:18 templates/villas/list.html:164
+#: templates/villas/confirm_delete.html:18
 msgid "Yes, delete it"
 msgstr ""
 
@@ -2605,20 +2894,16 @@ msgstr ""
 msgid "Discard"
 msgstr ""
 
-#: templates/villas/list.html:70
-msgid "View website"
-msgstr ""
-
-#: templates/villas/list.html:77
+#: templates/villas/list.html:67
 #, python-format
 msgid "Available %(date)s"
 msgstr ""
 
-#: templates/villas/list.html:80
+#: templates/villas/list.html:70
 msgid "Available now"
 msgstr ""
 
-#: templates/villas/list.html:85
+#: templates/villas/list.html:75
 #, python-format
 msgid ""
 "\n"
@@ -2631,12 +2916,28 @@ msgid_plural ""
 msgstr[0] ""
 msgstr[1] ""
 
-#: templates/villas/list.html:106
+#: templates/villas/list.html:113
+msgid ""
+"This villa does not have a website yet. Go to its activities page instead?"
+msgstr ""
+
+#: templates/villas/list.html:114 templates/villas/list.html:115
+msgid "No website yet"
+msgstr ""
+
+#: templates/villas/list.html:128
+#, python-format
+msgid ""
+"Delete %(name)s? This takes it off your villa list. Its bookings, guests, "
+"and documents are kept, not deleted."
+msgstr ""
+
+#: templates/villas/list.html:130 templates/villas/list.html:131
 #: venv/lib/python3.12/site-packages/django/forms/formsets.py:499
 msgid "Delete"
 msgstr ""
 
-#: templates/villas/list.html:128
+#: templates/villas/list.html:162
 #, python-format
 msgid ""
 "\n"
@@ -2645,15 +2946,15 @@ msgid ""
 "        "
 msgstr ""
 
-#: templates/villas/list.html:136
+#: templates/villas/list.html:170
 msgid "You haven't added a villa yet."
 msgstr ""
 
-#: templates/villas/list.html:137
+#: templates/villas/list.html:171
 msgid "Add your first one to get started."
 msgstr ""
 
-#: templates/villas/list.html:143
+#: templates/villas/list.html:177
 msgid "Add your first villa"
 msgstr ""
 

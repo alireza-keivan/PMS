@@ -1,6 +1,7 @@
 from django.urls import path
 
 from apps.bookings.views import (
+    BlockDatesView,
     BookingRemoveView,
     BookingRescheduleView,
     BookingSearchSuggestionsView,
@@ -17,6 +18,7 @@ urlpatterns = [
     path("calendar/", CalendarView.as_view(), name="calendar"),
     path("calendar/search/", BookingSearchSuggestionsView.as_view(), name="calendar_search"),
     path("bookings/add/", ReservationCreateView.as_view(), name="add"),
+    path("bookings/block/", BlockDatesView.as_view(), name="block"),
     path("bookings/add/availability/", ReservationAvailabilityView.as_view(), name="reservation_availability"),
     path("bookings/<int:pk>/remove/", BookingRemoveView.as_view(), name="remove"),
     path("bookings/<int:pk>/reschedule/", BookingRescheduleView.as_view(), name="reschedule"),

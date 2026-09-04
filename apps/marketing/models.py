@@ -32,6 +32,12 @@ class RateSnapshot(TenantOwnedModel, Money):
         indexes = [models.Index(fields=["organization", "villa", "stay_date"])]
 
 
+# Descriptions show as short cards on the public villa page, so they are
+# capped to keep every card the same height. 200 fits about two short
+# sentences - enough for the Indonesian text too, which runs longer.
+EXPERIENCE_DESCRIPTION_MAX_LENGTH = 200
+
+
 class Experience(TenantOwnedModel):
     """A local activity offered on the villa's experience page (feature #8).
 
@@ -41,8 +47,8 @@ class Experience(TenantOwnedModel):
 
     name_en = models.CharField(max_length=160)
     name_id = models.CharField(max_length=160, blank=True)
-    description_en = models.TextField(blank=True)
-    description_id = models.TextField(blank=True)
+    description_en = models.TextField(blank=True, max_length=EXPERIENCE_DESCRIPTION_MAX_LENGTH)
+    description_id = models.TextField(blank=True, max_length=EXPERIENCE_DESCRIPTION_MAX_LENGTH)
     operator_name = models.CharField(max_length=160, blank=True)
     operator_phone = models.CharField(max_length=32, blank=True)
     commission_percent = models.DecimalField(

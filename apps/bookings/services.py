@@ -254,7 +254,13 @@ def _build_bar(booking, today, payment, can_see_money, start, days) -> dict:
     day still shows up.
     """
     status = calendar_status(booking, today, payment.get("amount_owed") or Decimal("0"))
-    label = booking.guest.full_name if booking.has_guest_details else gettext("Booked")
+    is_block = booking.status == Booking.Status.BLOCKED
+    # A blocked range has no guest behind it by definition, so "Booked" would
+    # be a small lie on the bar - it says the same thing the legend does.
+    if booking.has_guest_details:
+        label = booking.guest.full_name
+    else:
+        label = gettext("Not available") if is_block else gettext("Booked")
 
     start_offset = max(0, (booking.check_in - start).days)
     end_offset = min(days, (booking.check_out - start).days)
@@ -285,6 +291,10 @@ def _build_bar(booking, today, payment, can_see_money, start, days) -> dict:
         "guest_count": booking.guest_count,
         "channel_display": booking.get_channel_display(),
         "has_guest_details": booking.has_guest_details,
+        "is_block": is_block,
+        # Only ever staff-written text (BlockDatesForm's "reason"), never
+        # anything a guest typed.
+        "reason": booking.notes if is_block else "",
         "guest_url": (
             reverse("guests:detail", args=[booking.guest_id])
             if booking.has_guest_details and booking.guest_id

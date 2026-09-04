@@ -76,7 +76,14 @@
   <input type="hidden" name="days" value="{{ days }}">
   <input type="hidden" name="start" value="{{ start|date:'Y-m-d' }}">
 
-  <button type="button" class="btn btn-primary order-2 flex-none whitespace-nowrap md:order-none md:ml-auto md:w-auto"
+  <button type="button" class="btn btn-ghost order-2 flex-none whitespace-nowrap border border-sand-300 md:order-none md:ml-auto"
+          data-confirm-message="{% translate 'Mark a room as not available?' %}"
+          data-confirm-url="{% url 'bookings:block' %}"
+          @click="confirmTarget = { message: $el.dataset.confirmMessage, mode: 'navigate', url: $el.dataset.confirmUrl }">
+    {% translate "Block dates" %}
+  </button>
+
+  <button type="button" class="btn btn-primary order-2 flex-none whitespace-nowrap md:order-none md:w-auto"
           data-confirm-message="{% translate 'Start a new booking?' %}"
           data-confirm-url="{% url 'bookings:add' %}"
           @click="confirmTarget = { message: $el.dataset.confirmMessage, mode: 'navigate', url: $el.dataset.confirmUrl }">
@@ -222,7 +229,7 @@ so both languages go through the normal .po catalog like everywhere else.
               data-check-out="{{ bar.check_out_iso }}"
               data-reschedule-url="{% url 'bookings:reschedule' bar.id %}"
               data-remove-url="{% url 'bookings:remove' bar.id %}"
-              data-remove-message="{% blocktranslate with name=bar.label %}Remove {{ name }}'s booking? This can't be undone.{% endblocktranslate %}"
+              data-remove-message="{% if bar.is_block %}{% translate "Free these dates up again?" %}{% else %}{% blocktranslate with name=bar.label %}Remove {{ name }}'s booking? This can't be undone.{% endblocktranslate %}{% endif %}"
               data-guest="{{ bar.label }}"
               data-villa="{{ bar.villa_name }}"
               data-room="{{ bar.room_name }}"
@@ -232,6 +239,8 @@ so both languages go through the normal .po catalog like everywhere else.
               data-channel="{{ bar.channel_display }}"
               data-status="{{ bar.status_display }}"
               data-detail="{{ bar.has_guest_details|yesno:'1,' }}"
+              data-block="{{ bar.is_block|yesno:'1,' }}"
+              data-reason="{{ bar.reason }}"
               data-guest-url="{{ bar.guest_url }}"
               data-money="{{ bar.can_see_money|yesno:'1,' }}"
               data-owed="{{ bar.amount_owed|default:'' }}"

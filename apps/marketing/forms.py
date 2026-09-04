@@ -18,7 +18,11 @@ from django import forms
 from django.utils.translation import gettext_lazy as _
 
 from apps.bookings.services import find_available_room
-from apps.marketing.models import BookingEnquiry, Experience
+from apps.marketing.models import (
+    EXPERIENCE_DESCRIPTION_MAX_LENGTH,
+    BookingEnquiry,
+    Experience,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -181,6 +185,9 @@ class ExperienceForm(forms.ModelForm):
     apps.villas.views - rather than only through the admin.
     """
 
+    # Read by the template to draw the live letter counter.
+    description_max_length = EXPERIENCE_DESCRIPTION_MAX_LENGTH
+
     class Meta:
         model = Experience
         fields = [
@@ -190,6 +197,10 @@ class ExperienceForm(forms.ModelForm):
         widgets = {
             "name_en": forms.TextInput(attrs={"class": "input", "placeholder": _("e.g. Sunset cooking class")}),
             "name_id": forms.TextInput(attrs={"class": "input"}),
+            # Deliberately no "maxlength" attribute: the browser would
+            # silently swallow the extra letters mid-word. Letting people go
+            # over and showing a warning is clearer than a box that just
+            # stops accepting typing with no explanation.
             "description_en": forms.Textarea(attrs={"class": "input rounded-md", "rows": 3}),
             "description_id": forms.Textarea(attrs={"class": "input rounded-md", "rows": 3}),
             "operator_name": forms.TextInput(attrs={"class": "input"}),
@@ -208,6 +219,8 @@ class ExperienceForm(forms.ModelForm):
         }
         error_messages = {
             "name_en": {"required": _("Give this activity a name.")},
+            "description_en": {"max_length": _("Please keep this to %(limit_value)d letters or fewer.")},
+            "description_id": {"max_length": _("Please keep this to %(limit_value)d letters or fewer.")},
         }
 
     def __init__(self, *args, **kwargs):

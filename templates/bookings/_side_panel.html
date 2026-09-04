@@ -29,16 +29,20 @@ through the shared confirmTarget dialog (mode "form") - see CLAUDE.md rule 5.
           (<span x-text="detail.nights"></span> {% translate "nights" %})
         </div>
 
-        <p x-show="!detail.detail" class="mb-s3 rounded-md bg-teal-50 p-s3 text-xs text-teal-800">
+        <p x-show="detail.reason" class="mb-s3 rounded-md bg-sand-200 p-s3 text-xs text-ink-800" x-text="detail.reason"></p>
+
+        <p x-show="!detail.detail && !detail.block" class="mb-s3 rounded-md bg-teal-50 p-s3 text-xs text-teal-800">
           {% translate "This villa is on a basic calendar link - guest details aren't available, only the dates." %}
         </p>
 
         <dl class="mb-s4 divide-y divide-sand-300/60 text-sm">
-          <div class="flex justify-between py-2">
+          {% comment %}A block has no guests and came through no channel -
+          showing "0 guests, booked via Other" would just be noise.{% endcomment %}
+          <div class="flex justify-between py-2" x-show="!detail.block">
             <dt class="opacity-65">{% translate "Guests" %}</dt>
             <dd x-text="detail.guests"></dd>
           </div>
-          <div class="flex justify-between py-2">
+          <div class="flex justify-between py-2" x-show="!detail.block">
             <dt class="opacity-65">{% translate "Booked via" %}</dt>
             <dd x-text="detail.channel"></dd>
           </div>
@@ -53,7 +57,8 @@ through the shared confirmTarget dialog (mode "form") - see CLAUDE.md rule 5.
         <div class="flex items-center justify-between">
           <button type="button" class="btn btn-ghost whitespace-nowrap px-0 text-red-700"
                   @click="confirmTarget = { message: detail.removeMessage, url: detail.removeUrl, mode: 'form' }; detail = null">
-            {% translate "Remove booking" %}
+            <span x-show="!detail.block">{% translate "Remove booking" %}</span>
+            <span x-show="detail.block">{% translate "Free these dates" %}</span>
           </button>
           <div class="flex items-center gap-2">
             <a x-show="detail.guestUrl" :href="detail.guestUrl" class="btn border border-sand-300 text-orange-600 justify-center text-center hover:bg-sand-200 no-underline">
