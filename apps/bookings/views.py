@@ -279,34 +279,48 @@ class BlockDatesView(LoginRequiredMixin, View):
     """"Block dates" - mark a room as not available without inventing a fake
     guest for it. Maintenance, a deep clean, the owner staying themselves.
 
+    There is no page for this: the user drags across empty days on a room's
+    row in the calendar and confirms, and the drag posts here (see the
+    block-drag section of static/js/calendar.js). Like the drag-to-reschedule
+    path, the client only *proposes* the room and dates - everything is
+    re-checked here through BlockDatesForm, including the overlap check, so a
+    block can never be laid over a real stay (CLAUDE.md rule 5).
+
     Writes a Booking with status BLOCKED and no guest, which is exactly the
     shape an iCal feed already produces, so the calendar draws it with the
     same hatched "Not available" bar and the reports already count it as
     occupied without earning anything. Removing one goes through
     BookingRemoveView like any other booking.
-
-    Like ReservationCreateView, everything is re-checked server-side in
-    BlockDatesForm.clean() - including the overlap check, so a block can
-    never be laid over a real stay (CLAUDE.md rule 5).
     """
-
-    template_name = "bookings/block.html"
 
     def dispatch(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
             return super().dispatch(request, *args, **kwargs)  # LoginRequiredMixin handles it
         if request.organization is None:
-            return redirect("bookings:calendar")
+            return JsonResponse({"ok": False, "error": str(_("No property linked to your account."))}, status=403)
         self.villas, self.membership = scoped_villas(request)
         return super().dispatch(request, *args, **kwargs)
 
-    def get(self, request):
-        return self._render(BlockDatesForm(villas=self.villas))
-
     def post(self, request):
-        form = BlockDatesForm(request.POST, villas=self.villas)
+        # The drag only knows a room and two dates; the villa is whatever
+        # that room belongs to, so it's filled in here rather than asked for.
+        room = Room.objects.filter(
+            villa__in=self.villas, is_active=True, pk=request.POST.get("room") or None,
+        ).first()
+        form = BlockDatesForm(
+            {
+                "villa": room.villa_id if room else "",
+                "room": room.id if room else "",
+                "check_in": request.POST.get("check_in", ""),
+                "check_out": request.POST.get("check_out", ""),
+            },
+            villas=self.villas,
+        )
         if not form.is_valid():
-            return self._render(form)
+            errors = sum((list(v) for v in form.errors.values()), [])
+            return JsonResponse(
+                {"ok": False, "error": " ".join(str(e) for e in errors)}, status=400
+            )
 
         data = form.cleaned_data
         booking = Booking.objects.create(
@@ -316,42 +330,13 @@ class BlockDatesView(LoginRequiredMixin, View):
             guest_count=0,
             status=Booking.Status.BLOCKED,
             source_detail=Booking.SourceDetail.MANUAL,
-            notes=data.get("reason", ""),
         )
         logger.info(
-            "Room %s (villa %s) blocked %s to %s by user %s - reason: %s",
+            "Room %s (villa %s) blocked %s to %s by user %s",
             booking.room_id, booking.villa_id, booking.check_in, booking.check_out,
-            request.user.pk, booking.notes or "(none given)",
+            request.user.pk,
         )
-        messages.success(request, _("Those dates are now marked as not available."))
-        return redirect(
-            f"{reverse('bookings:calendar')}?start={booking.check_in.isoformat()}"
-        )
-
-    def _render(self, form):
-        rooms_by_villa: dict = {}
-        for room in form.fields["room"].queryset:
-            rooms_by_villa.setdefault(room.villa_id, []).append(
-                {"id": room.id, "name": room.name}
-            )
-        villas_json = [
-            {"id": v.id, "name": v.name, "rooms": rooms_by_villa.get(v.id, [])}
-            for v in self.villas
-        ]
-        # Same json_script route the reservation form uses - never
-        # interpolated into an x-data attribute string, so a villa or room
-        # name can't break out of the JS it sits in.
-        block_config = {
-            "villaId": form["villa"].value() or "",
-            "roomId": form["room"].value() or "",
-            "roomNoVillaLabel": str(_("Choose a villa first")),
-            "roomReadyLabel": str(_("Choose a room")),
-        }
-        return render(self.request, self.template_name, {
-            "form": form,
-            "villas_json": villas_json,
-            "block_config": block_config,
-        })
+        return JsonResponse({"ok": True})
 
 
 def _reservation_preview(villas, room_type_id, check_in, check_out):
@@ -511,11 +496,9 @@ def _tab_href(request, **overrides) -> str:
 def _nav_hrefs(request, start, days) -> dict:
     today = timezone.localdate()
     return {
-        # Centers today in the visible range (e.g. 7-day view: 3 days back, 3
-        # forward) rather than pinning it as the first column, so jumping back
-        # from a future month lands the way the button is drawn - today in
-        # the middle, not at the left edge.
-        "today": _tab_href(request, start=(today - timedelta(days=days // 2)).isoformat(), q=None, focus=None),
+        # Today is the first column of the visible range - the calendar starts
+        # at today and looks forward, which is what operators care about.
+        "today": _tab_href(request, start=today.isoformat(), q=None, focus=None),
         "day_back": _tab_href(request, start=(start - timedelta(days=1)).isoformat(), q=None, focus=None),
         "day_forward": _tab_href(request, start=(start + timedelta(days=1)).isoformat(), q=None, focus=None),
         "range_back": _tab_href(request, start=(start - timedelta(days=days)).isoformat(), q=None, focus=None),

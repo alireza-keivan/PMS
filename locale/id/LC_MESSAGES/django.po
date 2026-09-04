@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Bali Villa Dashboard\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-04 16:11+0800\n"
+"POT-Creation-Date: 2026-09-04 20:23+0800\n"
 "PO-Revision-Date: 2026-08-30 12:00+0800\n"
 "Last-Translator: \n"
 "Language-Team: Bahasa Indonesia\n"
@@ -68,13 +68,13 @@ msgstr "Terkonfirmasi"
 msgid "Cancelled"
 msgstr "Dibatalkan"
 
-#: apps/bookings/forms.py:41 apps/bookings/forms.py:206
+#: apps/bookings/forms.py:41 apps/bookings/forms.py:210
 #: apps/villas/models.py:157 templates/compliance/document_form.html:42
 #: templates/compliance/documents.html:33
 msgid "Villa"
 msgstr "Villa"
 
-#: apps/bookings/forms.py:42 apps/bookings/forms.py:207
+#: apps/bookings/forms.py:42 apps/bookings/forms.py:211
 #, fuzzy
 #| msgid "Add a villa"
 msgid "Choose a villa"
@@ -242,57 +242,49 @@ msgstr ""
 msgid "Add a phone number or email so staff can reach the guest."
 msgstr ""
 
-#: apps/bookings/forms.py:209
+#: apps/bookings/forms.py:212
 msgid "Choose which villa this is for."
 msgstr "Pilih vila mana ini untuk."
 
-#: apps/bookings/forms.py:216
+#: apps/bookings/forms.py:215
 #, fuzzy
 #| msgid "Rooms"
 msgid "Room"
 msgstr "Kamar"
 
-#: apps/bookings/forms.py:217 apps/bookings/views.py:348
+#: apps/bookings/forms.py:216
 msgid "Choose a room"
 msgstr "Pilih kamar"
 
-#: apps/bookings/forms.py:218
+#: apps/bookings/forms.py:217
 msgid "Choose which room to block."
 msgstr "Pilih kamar mana yang ditutup."
 
-#: apps/bookings/forms.py:221
+#: apps/bookings/forms.py:220
 msgid "First night"
 msgstr "Malam pertama"
 
-#: apps/bookings/forms.py:223
+#: apps/bookings/forms.py:221
 msgid "Say which day the block starts."
 msgstr "Sebutkan hari pertama kamar ditutup."
 
-#: apps/bookings/forms.py:226
+#: apps/bookings/forms.py:224
 msgid "Free again on"
 msgstr "Bisa dipakai lagi pada"
 
-#: apps/bookings/forms.py:228
+#: apps/bookings/forms.py:225
 msgid "Say which day the room is free again."
 msgstr "Sebutkan hari kamar bisa dipakai lagi."
 
-#: apps/bookings/forms.py:231
-msgid "Reason"
-msgstr "Alasan"
-
-#: apps/bookings/forms.py:233
-msgid "e.g. Pool repair, owner staying"
-msgstr "mis. Perbaikan kolam, pemilik menginap"
-
-#: apps/bookings/forms.py:252
+#: apps/bookings/forms.py:243
 msgid "Choose a room that belongs to the selected villa."
 msgstr "Pilih kamar yang ada di vila yang dipilih."
 
-#: apps/bookings/forms.py:258
+#: apps/bookings/forms.py:249
 msgid "The room has to be free again after the first night."
 msgstr "Kamar harus bisa dipakai lagi setelah malam pertama."
 
-#: apps/bookings/forms.py:276
+#: apps/bookings/forms.py:267
 msgid ""
 "That room already has something on those dates. Check the calendar first."
 msgstr "Kamar itu sudah terisi pada tanggal tersebut. Cek kalender dulu."
@@ -416,25 +408,25 @@ msgstr[1] "%(n)s malam"
 msgid "Reservation saved."
 msgstr "Reservasi"
 
-#: apps/bookings/views.py:258 apps/bookings/views.py:347
+#: apps/bookings/views.py:258
 msgid "Choose a villa first"
 msgstr "Pilih vila dulu"
 
-#: apps/bookings/views.py:326
-msgid "Those dates are now marked as not available."
-msgstr "Tanggal tersebut sekarang ditandai tidak tersedia."
+#: apps/bookings/views.py:300
+msgid "No property linked to your account."
+msgstr ""
 
-#: apps/bookings/views.py:425
+#: apps/bookings/views.py:410
 #, fuzzy
 #| msgid "Booking reference"
 msgid "Booking removed."
 msgstr "Nomor referensi pemesanan"
 
-#: apps/bookings/views.py:444
+#: apps/bookings/views.py:429
 msgid "Invalid dates."
 msgstr ""
 
-#: apps/bookings/views.py:462
+#: apps/bookings/views.py:447
 #, fuzzy
 #| msgid "That one is already on the list."
 msgid "That room is already booked for part of those dates."
@@ -1562,7 +1554,7 @@ msgid "You can change this later."
 msgstr "Anda bisa mengubahnya nanti."
 
 #: templates/accounts/onboarding.html:26
-#: templates/bookings/_calendar_panel.html:379 templates/villas/list.html:195
+#: templates/bookings/_calendar_panel.html:403 templates/villas/list.html:195
 msgid "Continue"
 msgstr "Lanjut"
 
@@ -1591,146 +1583,63 @@ msgstr "Akun Anda belum terhubung ke properti mana pun."
 msgid "%(n)s days"
 msgstr "%(n)s hari"
 
-#: templates/bookings/_calendar_panel.html:22
+#: templates/bookings/_calendar_panel.html:27
 #: templates/dashboard/dashboard.html:4 templates/dashboard/dashboard.html:17
 #: templates/partials/_sidebar.html:29 templates/partials/_topnav.html:26
 #: templates/partials/_topnav.html:84
 msgid "Today"
 msgstr "Hari ini"
 
-#: templates/bookings/_calendar_panel.html:25
+#: templates/bookings/_calendar_panel.html:30
 msgid "Back one range"
 msgstr "Mundur satu rentang"
 
-#: templates/bookings/_calendar_panel.html:29
+#: templates/bookings/_calendar_panel.html:34
 msgid "Back one day"
 msgstr "Mundur satu hari"
 
-#: templates/bookings/_calendar_panel.html:36
+#: templates/bookings/_calendar_panel.html:41
 msgid "Forward one day"
 msgstr "Maju satu hari"
 
-#: templates/bookings/_calendar_panel.html:40
+#: templates/bookings/_calendar_panel.html:45
 msgid "Forward one range"
 msgstr "Maju satu rentang"
 
-#: templates/bookings/_calendar_panel.html:59
+#: templates/bookings/_calendar_panel.html:64
 msgid "Search bookings or guests"
 msgstr "Cari pemesanan atau tamu"
 
-#: templates/bookings/_calendar_panel.html:82
+#: templates/bookings/_calendar_panel.html:93
+#, fuzzy
+#| msgid "Mark %%(room)s as not available, %%(dates)s?"
 msgid "Mark a room as not available?"
-msgstr "Tandai kamar sebagai tidak tersedia?"
+msgstr "Tandai %%(room)s tidak tersedia, %%(dates)s?"
 
-#: templates/bookings/_calendar_panel.html:85 templates/bookings/block.html:4
-#: templates/bookings/block.html:20
+#: templates/bookings/_calendar_panel.html:95
+#, fuzzy
+#| msgid "Check-out time"
 msgid "Block dates"
-msgstr "Tutup tanggal"
+msgstr "Waktu check-out"
 
-#: templates/bookings/_calendar_panel.html:89
+#: templates/bookings/_calendar_panel.html:99
 #, fuzzy
 #| msgid "New booking"
 msgid "Start a new booking?"
 msgstr "Pemesanan baru"
 
-#: templates/bookings/_calendar_panel.html:92
+#: templates/bookings/_calendar_panel.html:102
 msgid "New booking"
 msgstr "Pemesanan baru"
 
-#: templates/bookings/_calendar_panel.html:118
-#, python-format
-msgid "Move %%(guest)s's booking to %%(dates)s?"
-msgstr ""
+#: templates/bookings/_calendar_panel.html:128
+msgid "Now drag across the days you want to hold on a room's row."
+msgstr "Sekarang geser di hari yang ingin ditahan pada baris kamar."
 
-#: templates/bookings/_calendar_panel.html:119
-#, python-format
-msgid "Move %%(guest)s's booking to %%(room)s, %%(dates)s?"
-msgstr ""
-
-#: templates/bookings/_calendar_panel.html:120
-#, python-format
-msgid "Change %%(guest)s's stay to %%(dates)s?"
-msgstr ""
-
-#: templates/bookings/_calendar_panel.html:121
-#, python-format
-msgid ""
-"This booking is synced from %%(channel)s - changes here may be overwritten "
-"by the next sync."
-msgstr ""
-
-#: templates/bookings/_calendar_panel.html:122
-msgid "Couldn't save that change. Try again."
-msgstr ""
-
-#: templates/bookings/_calendar_panel.html:165
-#, python-format
-msgid "Show or hide rooms in %(name)s"
-msgstr "Tampilkan atau sembunyikan kamar di %(name)s"
-
-#: templates/bookings/_calendar_panel.html:182
-#: templates/bookings/_calendar_panel.html:213
-#, python-format
-msgid "Remove %(name)s"
-msgstr "Hapus %(name)s"
-
-#: templates/bookings/_calendar_panel.html:183
-#, python-format
-msgid "Remove %(name)s? This can't be undone."
-msgstr "Hapus %(name)s? Tindakan ini tidak bisa dibatalkan."
-
-#: templates/bookings/_calendar_panel.html:202
-#: templates/bookings/_calendar_panel.html:210
-#, fuzzy, python-format
-#| msgid "Remove %(name)s"
-msgid "Room type: %(name)s"
-msgstr "Hapus %(name)s"
-
-#: templates/bookings/_calendar_panel.html:214
-#, python-format
-msgid "Remove room %(name)s? This can't be undone."
-msgstr "Hapus kamar %(name)s? Tindakan ini tidak bisa dibatalkan."
-
-#: templates/bookings/_calendar_panel.html:238
-msgid "Free these dates up again?"
-msgstr "Buka lagi tanggal ini?"
-
-#: templates/bookings/_calendar_panel.html:238
-#, fuzzy, python-format
-#| msgid "Remove %(name)s? This can't be undone."
-msgid "Remove %(name)s's booking? This can't be undone."
-msgstr "Hapus %(name)s? Tindakan ini tidak bisa dibatalkan."
-
-#: templates/bookings/_calendar_panel.html:273
-#: templates/bookings/_calendar_panel.html:280
-msgid "Add room"
-msgstr "Tambah kamar"
-
-#: templates/bookings/_calendar_panel.html:302
-msgid "Which room type is the new room?"
-msgstr ""
-
-#: templates/bookings/_calendar_panel.html:319
-#, python-format
-msgid "%(n)s room of this type so far"
-msgid_plural "%(n)s rooms of this type so far"
-msgstr[0] ""
-
-#: templates/bookings/_calendar_panel.html:321
-#, python-format
-msgid "Sleeps up to %(n)s"
-msgstr ""
-
-#: templates/bookings/_calendar_panel.html:324
-#, fuzzy, python-format
-#| msgid "%(n)s night"
-#| msgid_plural "%(n)s nights"
-msgid "Rp %(amount)s a night"
-msgstr "%(n)s malam"
-
-#: templates/bookings/_calendar_panel.html:331
-#: templates/bookings/_calendar_panel.html:376 templates/bookings/add.html:197
-#: templates/bookings/block.html:68 templates/compliance/document_form.html:81
+#: templates/bookings/_calendar_panel.html:130
+#: templates/bookings/_calendar_panel.html:355
+#: templates/bookings/_calendar_panel.html:400 templates/bookings/add.html:197
+#: templates/compliance/document_form.html:81
 #: templates/organizations/staff_form.html:55
 #: templates/organizations/staff_villas_form.html:31
 #: templates/villas/_photo_cropper_js.html:15
@@ -1739,23 +1648,123 @@ msgstr "%(n)s malam"
 msgid "Cancel"
 msgstr "Batal"
 
-#: templates/bookings/_calendar_panel.html:336
+#: templates/bookings/_calendar_panel.html:139
+#, python-format
+msgid "Move %%(guest)s's booking to %%(dates)s?"
+msgstr ""
+
+#: templates/bookings/_calendar_panel.html:140
+#, python-format
+msgid "Move %%(guest)s's booking to %%(room)s, %%(dates)s?"
+msgstr ""
+
+#: templates/bookings/_calendar_panel.html:141
+#, python-format
+msgid "Change %%(guest)s's stay to %%(dates)s?"
+msgstr ""
+
+#: templates/bookings/_calendar_panel.html:142
+#, python-format
+msgid ""
+"This booking is synced from %%(channel)s - changes here may be overwritten "
+"by the next sync."
+msgstr ""
+
+#: templates/bookings/_calendar_panel.html:143
+msgid "Couldn't save that change. Try again."
+msgstr ""
+
+#: templates/bookings/_calendar_panel.html:145
+#, python-format
+msgid "Mark %%(room)s as not available, %%(dates)s?"
+msgstr "Tandai %%(room)s tidak tersedia, %%(dates)s?"
+
+#: templates/bookings/_calendar_panel.html:146
+msgid "Couldn't block those dates. Try again."
+msgstr "Tanggal itu tidak bisa ditutup. Coba lagi."
+
+#: templates/bookings/_calendar_panel.html:189
+#, python-format
+msgid "Show or hide rooms in %(name)s"
+msgstr "Tampilkan atau sembunyikan kamar di %(name)s"
+
+#: templates/bookings/_calendar_panel.html:206
+#: templates/bookings/_calendar_panel.html:237
+#, python-format
+msgid "Remove %(name)s"
+msgstr "Hapus %(name)s"
+
+#: templates/bookings/_calendar_panel.html:207
+#, python-format
+msgid "Remove %(name)s? This can't be undone."
+msgstr "Hapus %(name)s? Tindakan ini tidak bisa dibatalkan."
+
+#: templates/bookings/_calendar_panel.html:226
+#: templates/bookings/_calendar_panel.html:234
+#, fuzzy, python-format
+#| msgid "Remove %(name)s"
+msgid "Room type: %(name)s"
+msgstr "Hapus %(name)s"
+
+#: templates/bookings/_calendar_panel.html:238
+#, python-format
+msgid "Remove room %(name)s? This can't be undone."
+msgstr "Hapus kamar %(name)s? Tindakan ini tidak bisa dibatalkan."
+
+#: templates/bookings/_calendar_panel.html:262
+msgid "Free these dates up again?"
+msgstr "Buka lagi tanggal ini?"
+
+#: templates/bookings/_calendar_panel.html:262
+#, fuzzy, python-format
+#| msgid "Remove %(name)s? This can't be undone."
+msgid "Remove %(name)s's booking? This can't be undone."
+msgstr "Hapus %(name)s? Tindakan ini tidak bisa dibatalkan."
+
+#: templates/bookings/_calendar_panel.html:297
+#: templates/bookings/_calendar_panel.html:304
+msgid "Add room"
+msgstr "Tambah kamar"
+
+#: templates/bookings/_calendar_panel.html:326
+msgid "Which room type is the new room?"
+msgstr ""
+
+#: templates/bookings/_calendar_panel.html:343
+#, python-format
+msgid "%(n)s room of this type so far"
+msgid_plural "%(n)s rooms of this type so far"
+msgstr[0] ""
+
+#: templates/bookings/_calendar_panel.html:345
+#, python-format
+msgid "Sleeps up to %(n)s"
+msgstr ""
+
+#: templates/bookings/_calendar_panel.html:348
+#, fuzzy, python-format
+#| msgid "%(n)s night"
+#| msgid_plural "%(n)s nights"
+msgid "Rp %(amount)s a night"
+msgstr "%(n)s malam"
+
+#: templates/bookings/_calendar_panel.html:360
 #: templates/villas/_amenity_checkboxes.html:47
 #: templates/villas/activities.html:137
 msgid "Add"
 msgstr "Tambah"
 
-#: templates/bookings/_calendar_panel.html:346
+#: templates/bookings/_calendar_panel.html:370
 msgid "No villas match what you searched for."
 msgstr "Tidak ada villa yang cocok dengan pencarian Anda."
 
-#: templates/bookings/_calendar_panel.html:383
+#: templates/bookings/_calendar_panel.html:407
 #, fuzzy
 #| msgid "Confirmed"
 msgid "Confirm"
 msgstr "Terkonfirmasi"
 
-#: templates/bookings/_calendar_panel.html:390
+#: templates/bookings/_calendar_panel.html:414
 #: templates/villas/activities.html:112 templates/villas/activities.html:113
 #: templates/villas/list.html:200
 msgid "Remove"
@@ -1903,26 +1912,6 @@ msgstr ""
 #| msgid "Create reservation"
 msgid "Save reservation"
 msgstr "Buat reservasi"
-
-#: templates/bookings/block.html:22
-msgid ""
-"Mark a room as not available — for repairs, a deep clean, or when the owner "
-"is staying."
-msgstr ""
-"Tandai kamar sebagai tidak tersedia — untuk perbaikan, bersih-bersih besar, "
-"atau saat pemilik menginap."
-
-#: templates/bookings/block.html:60
-msgid "Dates to block"
-msgstr "Tanggal yang ditutup"
-
-#: templates/bookings/block.html:62
-msgid "Only staff see this. It shows on the block when someone opens it."
-msgstr "Hanya staf yang melihat ini. Muncul saat seseorang membuka tanggal yang ditutup."
-
-#: templates/bookings/block.html:67
-msgid "Block these dates"
-msgstr "Tutup tanggal ini"
 
 #: templates/bookings/calendar.html:4 templates/bookings/calendar.html:26
 msgid "Booking calendar"

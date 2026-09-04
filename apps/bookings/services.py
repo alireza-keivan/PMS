@@ -7,6 +7,7 @@ Two presenters over one query:
   - build_calendar_data() backs the JSON endpoint (apps.bookings.api).
 """
 
+import math
 from datetime import timedelta
 from decimal import Decimal
 
@@ -164,10 +165,14 @@ def _category_style(room) -> str:
 
 # Bar fills, straight from the design handoff's status table. Blocked is a
 # hatch rather than a flat fill so "not available" never reads as a real stay.
+# Every status now carries its own border too - with bars able to sit flush
+# against each other at a same-day changeover (see _bar_shape_style), a
+# border is what keeps two touching bars reading as two separate bookings
+# instead of one continuous blob.
 STATUS_BAR_STYLE = {
-    "confirmed": "background:#e1eecc;color:#3d472b;",
-    "checked_in": "background:#8fa073;color:#f5ead8;",
-    "checked_out": "background:#eee7db;color:#82796a;",
+    "confirmed": "background:#e1eecc;color:#3d472b;border:1px solid #b3cb8c;",
+    "checked_in": "background:#8fa073;color:#f5ead8;border:1px solid #6d7d55;",
+    "checked_out": "background:#eee7db;color:#82796a;border:1px solid #cfc4b0;",
     "blocked": (
         "background:repeating-linear-gradient(135deg,#dcd3c4 0 6px,#eee7db 6px 12px);"
         "color:#645c50;border:1px dashed #a19786;"
@@ -198,6 +203,17 @@ def build_calendar_rows(request, start, days, q) -> dict:
     for booking in bookings:
         bookings_by_room.setdefault(booking.room_id, []).append(booking)
 
+    # Whether a room can actually be removed - RoomDeleteView blocks on ANY
+    # booking ever made against it (even cancelled or long past), since the
+    # room FK is PROTECT. bookings_by_room above only covers this calendar's
+    # visible date window, so that can't answer this - a separate all-time
+    # existence check is needed to warn honestly in the remove-room dialog
+    # instead of promising a removal the server will then refuse.
+    all_room_ids = [room.id for rooms in rooms_by_villa.values() for room in rooms]
+    rooms_with_bookings = set(
+        Booking.objects.filter(room_id__in=all_room_ids).values_list("room_id", flat=True).distinct()
+    )
+
     # Area buckets, alphabetical, with the catch-all "Other" pinned last.
     buckets: dict = {}
     for villa in villas:
@@ -223,6 +239,16 @@ def build_calendar_rows(request, start, days, q) -> dict:
             })
             swatch_index += 1
             for room in rooms:
+                room_bookings = sorted(bookings_by_room.get(room.id, []), key=lambda b: b.check_in)
+                # Same-day changeovers (one guest's morning check-out is another's
+                # noon check-in) are common and, drawn as two bars with a plain
+                # vertical seam, read as if that day belongs to nobody or to
+                # both at once. adjoins_next/adjoins_prev flag those touching
+                # pairs so _build_bar can draw a diagonal seam through the
+                # shared day instead - see the split-day sketch this was built
+                # from.
+                checkout_dates = {b.check_out for b in room_bookings}
+                checkin_dates = {b.check_in for b in room_bookings}
                 rows.append({
                     "kind": "room",
                     "id": room.id,
@@ -231,9 +257,14 @@ def build_calendar_rows(request, start, days, q) -> dict:
                     "name": room.name,
                     "category_label": room.category.name if room.category_id else "",
                     "category_style": _category_style(room),
+                    "has_bookings": room.id in rooms_with_bookings,
                     "bars": [
-                        _build_bar(b, today, payments.get(b.id, {}), can_see_money, start, days)
-                        for b in bookings_by_room.get(room.id, [])
+                        _build_bar(
+                            b, today, payments.get(b.id, {}), can_see_money, start, days,
+                            adjoins_prev=b.check_in in checkout_dates,
+                            adjoins_next=b.check_out in checkin_dates,
+                        )
+                        for b in room_bookings
                     ],
                 })
             rows.append({
@@ -246,7 +277,76 @@ def build_calendar_rows(request, start, days, q) -> dict:
     return {"day_columns": day_columns, "rows": rows}
 
 
-def _build_bar(booking, today, payment, can_see_money, start, days) -> dict:
+_CHANGEOVER_NOTCH_PX = 9
+
+
+_NOTCH_ARC_STEPS = 8
+
+
+def _notch_arc_points(radius, corner) -> str:
+    """Polygon points tracing a quarter-circle of the given radius, cut into
+    one corner of the bar's box. `corner` is "top-right" or "bottom-left" -
+    the two corners where a bar can touch a back-to-back booking (see
+    _bar_shape_style). Walking theta from 0 to 90 degrees always produces
+    points in the same order the enclosing polygon visits that corner
+    (top edge -> down, or bottom edge -> up), so callers can drop the list
+    straight into their point sequence.
+    """
+    points = []
+    for step in range(_NOTCH_ARC_STEPS + 1):
+        theta = math.radians(90 * step / _NOTCH_ARC_STEPS)
+        if corner == "top-right":
+            x = f"calc(100% - {radius * math.cos(theta):.2f}px)"
+            y = f"{radius * math.sin(theta):.2f}px"
+        else:
+            x = f"{radius * math.cos(theta):.2f}px"
+            y = f"calc(100% - {radius * math.sin(theta):.2f}px)"
+        points.append(f"{x} {y}")
+    return ",".join(points)
+
+
+def _bar_shape_style(left, width, adjoins_prev, adjoins_next) -> str:
+    """left/width plus, on any edge that touches a back-to-back booking, a
+    rounded notch cut into that corner - the check-out bar's top-right
+    corner and the check-in bar's bottom-left corner each curve back a few
+    pixels, so the two bars meet on a rounded seam instead of a flat one.
+
+    Deliberately stays inside each bar's own day range rather than
+    stretching bars into each other's space - an earlier version of this
+    extended both bars half a day into the shared cell to draw a full
+    diagonal "cross", but with two independently-labelled bars overlapping
+    the same pixels their text collided and it read as broken/messy rather
+    than intentional. This trades the full-cross look for one that stays
+    legible: a corner notch plus a solid border (see STATUS_BAR_STYLE) is
+    enough to show "this day is shared" without stacking two labels. The
+    notch itself is a quarter-circle arc (approximated with straight
+    polygon segments, since clip-path can't mix arcs with the percentage
+    coordinates a variable-width bar needs) rather than a straight diagonal
+    cut, so the seam reads as rounded.
+    """
+    left_pad = 0 if adjoins_prev else 3
+    right_pad = 0 if adjoins_next else 3
+    notch = _CHANGEOVER_NOTCH_PX
+
+    if not adjoins_prev and not adjoins_next:
+        clip = ""
+    else:
+        top_right = (
+            _notch_arc_points(notch, "top-right") if adjoins_next else "100% 0"
+        )
+        bottom_left = (
+            _notch_arc_points(notch, "bottom-left") if adjoins_prev else "0 100%"
+        )
+        clip = f"clip-path:polygon(0 0,{top_right},100% 100%,{bottom_left});"
+
+    return (
+        f"left:calc({left:.4f}% + {left_pad}px);"
+        f"width:calc({width:.4f}% - {left_pad + right_pad}px);"
+        + clip
+    )
+
+
+def _build_bar(booking, today, payment, can_see_money, start, days, adjoins_prev=False, adjoins_next=False) -> dict:
     """One booking bar, positioned as a percentage of the visible window.
 
     A stay that starts before the window (or ends after it) is clamped to the
@@ -269,6 +369,12 @@ def _build_bar(booking, today, payment, can_see_money, start, days) -> dict:
     left = (start_offset / days) * 100
     width = (span / days) * 100
 
+    # Only notch the corner against a neighbour actually visible in this
+    # window - a booking clamped to the window edge isn't really touching
+    # anything on screen.
+    shape_adjoins_prev = adjoins_prev and start_offset > 0
+    shape_adjoins_next = adjoins_next and end_offset < days
+
     bar = {
         "id": booking.id,
         "room_id": booking.room_id,
@@ -281,7 +387,7 @@ def _build_bar(booking, today, payment, can_see_money, start, days) -> dict:
         "status": status,
         "status_display": str(CALENDAR_STATUS_LABELS[status]),
         "style": (
-            f"left:calc({left:.4f}% + 3px);width:calc({width:.4f}% - 6px);"
+            _bar_shape_style(left, width, shape_adjoins_prev, shape_adjoins_next)
             + STATUS_BAR_STYLE[status]
         ),
         "villa_name": booking.villa.name,
@@ -292,8 +398,8 @@ def _build_bar(booking, today, payment, can_see_money, start, days) -> dict:
         "channel_display": booking.get_channel_display(),
         "has_guest_details": booking.has_guest_details,
         "is_block": is_block,
-        # Only ever staff-written text (BlockDatesForm's "reason"), never
-        # anything a guest typed.
+        # Only ever staff-written text (notes on a blocked range, e.g. from an
+        # imported iCal feed), never anything a guest typed.
         "reason": booking.notes if is_block else "",
         "guest_url": (
             reverse("guests:detail", args=[booking.guest_id])

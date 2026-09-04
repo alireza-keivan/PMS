@@ -197,6 +197,10 @@ class BlockDatesForm(forms.Form):
     (apps.reporting.views.OCCUPYING_STATUSES) and carry no payments, so
     nothing downstream needs to change to understand one.
 
+    There is no page rendering this form: it is the server-side check behind
+    the drag-across-empty-days gesture on the calendar (BlockDatesView), so
+    the fields carry no widgets or Alpine wiring - only validation.
+
     A room is picked by name rather than by type: someone blocking a room for
     repairs knows exactly which room it is, so there's nothing for
     find_available_room to choose here.
@@ -205,13 +209,8 @@ class BlockDatesForm(forms.Form):
     villa = forms.ModelChoiceField(
         queryset=Villa.objects.none(), label=_("Villa"),
         empty_label=_("Choose a villa"),
-        widget=forms.Select(attrs={"class": INPUT, "x-model": "villaId", "@change": "onVillaChange()"}),
         error_messages={"required": _("Choose which villa this is for.")},
     )
-    # Rendered by hand in block.html (x-for over block_form.js's roomOptions)
-    # so the list follows the chosen villa without a server round trip. The
-    # field still exists here regardless - it's what validates the posted
-    # value against the villas this user may actually see.
     room = forms.ModelChoiceField(
         queryset=Room.objects.none(), label=_("Room"),
         empty_label=_("Choose a room"),
@@ -219,19 +218,11 @@ class BlockDatesForm(forms.Form):
     )
     check_in = forms.DateField(
         label=_("First night"),
-        widget=forms.DateInput(attrs={"class": INPUT, "type": "date"}),
         error_messages={"required": _("Say which day the block starts.")},
     )
     check_out = forms.DateField(
         label=_("Free again on"),
-        widget=forms.DateInput(attrs={"class": INPUT, "type": "date"}),
         error_messages={"required": _("Say which day the room is free again.")},
-    )
-    reason = forms.CharField(
-        label=_("Reason"), required=False, max_length=200,
-        widget=forms.TextInput(attrs={
-            "class": INPUT, "placeholder": _("e.g. Pool repair, owner staying"),
-        }),
     )
 
     def __init__(self, *args, villas, **kwargs):

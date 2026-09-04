@@ -17,7 +17,11 @@
   </div>
 
   <div class="order-1 flex flex-none items-center gap-0.5 whitespace-nowrap md:order-none">
+    {% comment %}data-cal-today tells calendar.js (revealToday) that this
+    particular swap came from the Today button, so it can slide the grid over
+    to today's column and flash it - see the comment there.{% endcomment %}
     <a href="{{ nav.today }}" hx-get="{{ nav.today }}" hx-target="#calendar-panel" hx-push-url="true"
+       data-cal-today
        class="btn btn-ghost mr-1 h-[30px] px-s3 text-[13px] font-semibold">
       {% translate "Today" %}
     </a>
@@ -76,10 +80,14 @@
   <input type="hidden" name="days" value="{{ days }}">
   <input type="hidden" name="start" value="{{ start|date:'Y-m-d' }}">
 
+  {% comment %}Blocking dates has no page of its own any more. Saying yes here
+  arms the calendar itself: the cursor turns into a hand and the next drag
+  across empty days on a room's row picks the range - see startBlockMode in
+  static/js/calendar.js.{% endcomment %}
   <button type="button" class="btn btn-ghost order-2 flex-none whitespace-nowrap border border-sand-300 md:order-none md:ml-auto"
+          :class="blockMode ? 'bg-teal-50 border-teal-500' : ''"
           data-confirm-message="{% translate 'Mark a room as not available?' %}"
-          data-confirm-url="{% url 'bookings:block' %}"
-          @click="confirmTarget = { message: $el.dataset.confirmMessage, mode: 'navigate', url: $el.dataset.confirmUrl }">
+          @click="blockMode ? endBlockMode() : (confirmTarget = { message: $el.dataset.confirmMessage, mode: 'callback', onConfirm: () => startBlockMode() })">
     {% translate "Block dates" %}
   </button>
 
@@ -108,6 +116,16 @@ not Django template variables - translate keeps them untouched, JS fills them
 in with String.replace after the fact. Kept here rather than hardcoded in JS
 so both languages go through the normal .po catalog like everywhere else.
 {% endcomment %}
+{% comment %}Only on screen while the calendar is armed for blocking, so the
+toolbar isn't carrying a permanent instruction nobody needs.{% endcomment %}
+<div class="mx-auto mb-s3 flex max-w-md items-center gap-s3 rounded-md bg-teal-50 px-s3 py-s2 text-xs text-ink-800"
+     x-show="blockMode" x-cloak>
+  <span>{% translate "Now drag across the days you want to hold on a room's row." %}</span>
+  <button type="button" class="btn btn-ghost ml-auto flex items-center px-2 py-0.5 text-xs" @click="endBlockMode()" aria-label="{% translate "Cancel" %}" title="{% translate "Cancel" %}">
+    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+  </button>
+</div>
+
 <div class="cal-scroll mx-s4 md:mx-s6">
 <div class="cal-grid-min rounded-lg bg-sand-100 shadow-sm" id="calendar-grid"
      style="--cal-min-w: calc(var(--cal-name-w) + {{ days }} * var(--cal-day-w));"
@@ -117,7 +135,10 @@ so both languages go through the normal .po catalog like everywhere else.
      data-msg-move-new-room="{% translate "Move %(guest)s's booking to %(room)s, %(dates)s?" %}"
      data-msg-resize="{% translate "Change %(guest)s's stay to %(dates)s?" %}"
      data-msg-sync-warning="{% translate "This booking is synced from %(channel)s - changes here may be overwritten by the next sync." %}"
-     data-msg-reschedule-failed="{% translate "Couldn't save that change. Try again." %}">
+     data-msg-reschedule-failed="{% translate "Couldn't save that change. Try again." %}"
+     data-block-url="{% url 'bookings:block' %}"
+     data-msg-block="{% translate "Mark %(room)s as not available, %(dates)s?" %}"
+     data-msg-block-failed="{% translate "Couldn't block those dates. Try again." %}">
 
   {% comment %}Date header. Sticky under the 64px top bar so the columns stay
   readable while scrolling a long villa list. Its rendered height is measured
@@ -129,7 +150,7 @@ so both languages go through the normal .po catalog like everywhere else.
     <div class="cal-namecol flex-none bg-sand-100 md:w-[210px]"></div>
     <div class="grid flex-1" style="grid-template-columns: repeat({{ days }}, minmax(0, 1fr));">
       {% for day in day_columns %}
-        <div class="py-s2 text-center {% if day.is_today %}bg-teal-100{% endif %}">
+        <div class="py-s2 text-center {% if day.is_today %}bg-teal-100{% endif %}"{% if day.is_today %} data-today-col{% endif %}>
           <div class="text-[10px] uppercase tracking-[.06em] opacity-55">{{ day.date|date:"D" }}</div>
           <div class="font-display text-[15px]">{{ day.date|date:"j" }}</div>
         </div>
@@ -205,9 +226,14 @@ so both languages go through the normal .po catalog like everywhere else.
           {% endif %}
           <button type="button" class="btn btn-icon btn-ghost h-[22px] w-[22px] flex-none opacity-55"
                   aria-label="{% blocktranslate with name=row.name %}Remove {{ name }}{% endblocktranslate %}"
+                  {% if row.has_bookings %}
+                  data-remove-message="{% blocktranslate with name=row.name %}{{ name }} still has bookings against it (current, upcoming, or past) and can't be removed. Move or cancel those first.{% endblocktranslate %}"
+                  @click="confirmTarget = { message: $el.dataset.removeMessage, mode: 'blocked' }">
+                  {% else %}
                   data-remove-message="{% blocktranslate with name=row.name %}Remove room {{ name }}? This can't be undone.{% endblocktranslate %}"
                   data-remove-url="{% url 'villas:remove_room' row.villa_slug row.id %}"
                   @click="confirmTarget = { message: $el.dataset.removeMessage, url: $el.dataset.removeUrl, mode: 'form' }">
+                  {% endif %}
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
           </button>
         </div>
@@ -366,7 +392,11 @@ on screen at the last full page load.
       <div>
         <p class="mb-s4 text-sm" x-text="confirmTarget.message"></p>
         <div class="flex justify-end gap-2">
-          <button type="button" class="btn btn-ghost" @click="cancelConfirm()">{% translate "Cancel" %}</button>
+          <button type="button" class="btn btn-ghost" x-show="confirmTarget.mode !== 'blocked'" @click="cancelConfirm()">{% translate "Cancel" %}</button>
+
+          <template x-if="confirmTarget.mode === 'blocked'">
+            <button type="button" class="btn btn-primary" @click="cancelConfirm()">{% translate "OK" %}</button>
+          </template>
 
           <template x-if="confirmTarget.mode === 'navigate'">
             <button type="button" class="btn btn-primary" @click="confirmNavigate()">{% translate "Continue" %}</button>

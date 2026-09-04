@@ -237,6 +237,34 @@
     .cal-namecol { position: relative; }
   }
 
+  /* Once "Block dates" is confirmed the grid becomes a drag surface: press on
+     an empty day in a room's row and pull sideways to mark that stretch as
+     not available (static/js/calendar.js). The open-hand cursor is what tells
+     you the grid is waiting for that drag, so it only appears while the mode
+     is on. Bars keep their own cursor - they belong to the reschedule drag. */
+  body.cal-block-mode [data-room-row-id] { cursor: grab; }
+  body.cal-block-mode [data-room-row-id] [data-booking-id] { cursor: default; }
+  body.cal-dragging, body.cal-dragging * { cursor: grabbing !important; }
+
+  /* The range being dragged out, drawn in the row while the pointer is down.
+     Hatched like a real blocked bar so what you are proposing looks like what
+     you will get. */
+  .cal-block-ghost {
+    position: absolute;
+    top: 9px;
+    bottom: 9px;
+    z-index: 3;
+    pointer-events: none;
+    border-radius: 2px;
+    border: 1px solid rgb(130 121 106 / 55%);
+    background-color: rgb(130 121 106 / 18%);
+    background-image: repeating-linear-gradient(
+      45deg,
+      rgb(130 121 106 / 30%) 0 4px,
+      transparent 4px 8px
+    );
+  }
+
   /* The bar you were just sent to by the search box: a single quick ring
      pulse plus a light sweeping across it, long enough to catch the eye in a
      grid full of other bars and short enough to be out of the way before
@@ -275,6 +303,23 @@
   @media (prefers-reduced-motion: reduce) {
     .cal-search-focus { animation: none; }
     .cal-search-focus::after { animation: none; background: none; }
+  }
+
+  /* The Today button's landing flash. Pressing Today reloads the grid at a
+     new range, which on its own just blinks - nothing tells you where today
+     went. So today's date column glows for a moment after it arrives (the
+     sideways slide to it is done in calendar.js), long enough to follow and
+     short enough to be gone before anyone reads the row. */
+  .cal-today-flash {
+    animation: cal-today-flash 0.9s ease-out 1;
+  }
+  @keyframes cal-today-flash {
+    0% { box-shadow: inset 0 0 0 2px theme("colors.teal.600"); transform: scale(1.06); }
+    60% { box-shadow: inset 0 0 0 2px theme("colors.teal.400"); transform: scale(1); }
+    100% { box-shadow: inset 0 0 0 0 transparent; transform: scale(1); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .cal-today-flash { animation: none; }
   }
 
   /* The room-type card's title: reads as plain bold text until it's touched,

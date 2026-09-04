@@ -95,6 +95,23 @@
     return {
       collapsed: readCollapsed(),
       detail: null,
+      // Armed by the "Block dates" button (after its confirm dialog). While
+      // it's on, the cursor over the grid turns into a hand and the next drag
+      // across empty days picks the range to hold - see the block-drag
+      // section at the bottom of this file. It switches itself off again once
+      // that drag is done with, so it's never a mode you get stuck in.
+      blockMode: false,
+
+      startBlockMode: function () {
+        this.blockMode = true;
+        document.body.classList.add("cal-block-mode");
+      },
+
+      endBlockMode: function () {
+        this.blockMode = false;
+        document.body.classList.remove("cal-block-mode");
+      },
+
       // { message, mode, url, onConfirm, onCancel } for the one shared
       // confirm dialog in _calendar_panel.html. mode is one of:
       //   "form"     - a real POST via the dialog's own <form>, e.g. remove
@@ -156,8 +173,60 @@
     var swapped = evt.detail && evt.detail.target;
     if (swapped && swapped.id !== "calendar-search-suggestions") {
       focusSearchedBooking();
+      var trigger = evt.detail.requestConfig && evt.detail.requestConfig.elt;
+      if (trigger && trigger.hasAttribute && trigger.hasAttribute("data-cal-today")) {
+        revealToday();
+      }
     }
   });
+
+  // ---- the Today button's landing ---------------------------------------
+  //
+  // Today reloads the grid at a range starting on today, so the whole panel
+  // is replaced at once and the change reads as a blink with nothing saying
+  // where today ended up. This eases that: the date strip glides sideways to
+  // today's column (on phones, where the grid really does scroll - on
+  // desktop the whole range is already on screen and there is nothing to
+  // slide) and the column glows for a moment as it settles.
+  //
+  // Only runs on swaps started by the Today button itself, never on a plain
+  // page load or the arrow buttons - a flash on every navigation would stop
+  // meaning anything.
+
+  function revealToday() {
+    var col = document.querySelector("[data-today-col]");
+    if (!col) return; // today is outside the rendered range - nothing to show
+
+    var scroller = col.closest(".cal-scroll");
+    if (scroller) {
+      // Line the column up just right of the pinned villa-name column rather
+      // than under it. getBoundingClientRect over offsetLeft because the
+      // sticky name column and the grid's own offset parents make offsetLeft
+      // unreliable here.
+      var nameCol = scroller.querySelector(".cal-namecol");
+      var nameWidth = nameCol ? nameCol.getBoundingClientRect().width : 0;
+      var left =
+        scroller.scrollLeft +
+        col.getBoundingClientRect().left -
+        scroller.getBoundingClientRect().left -
+        nameWidth;
+      try {
+        scroller.scrollTo({ left: left, behavior: "smooth" });
+      } catch (err) {
+        scroller.scrollLeft = left; // older browsers: jump, no glide
+      }
+    }
+
+    col.classList.remove("cal-today-flash");
+    // Restart the animation on a repeat press: the class has to actually
+    // leave the element for a frame or the browser keeps the finished run.
+    window.requestAnimationFrame(function () {
+      col.classList.add("cal-today-flash");
+      window.setTimeout(function () {
+        col.classList.remove("cal-today-flash");
+      }, 950);
+    });
+  }
 
   // ---- jump to a guest picked from the search dropdown -------------------
   //
@@ -328,6 +397,19 @@
     return str;
   }
 
+  // Re-fetching the whole panel replaces content above the fold too, which
+  // otherwise leaves the browser's own scroll-anchor logic free to reset the
+  // page to the top - restore the scroll position the user was looking at.
+  function reloadPanel() {
+    var scrollX = window.scrollX;
+    var scrollY = window.scrollY;
+    return window.htmx.ajax("GET", window.location.pathname + window.location.search, {
+      target: "#calendar-panel", swap: "innerHTML",
+    }).then(function () {
+      window.scrollTo(scrollX, scrollY);
+    });
+  }
+
   function alpineData() {
     var root = panel.closest("[x-data]");
     return root && window.Alpine ? window.Alpine.$data(root) : null;
@@ -478,17 +560,7 @@
             .then(function (r) { return r.json().then(function (body) { return { ok: r.ok && body.ok, body: body }; }); })
             .then(function (result) {
               if (result.ok) {
-                // Re-fetching the whole panel replaces content above the fold
-                // too, which otherwise leaves the browser's own scroll-anchor
-                // logic free to reset the page to the top - restore the
-                // scroll position the user was actually looking at.
-                var scrollX = window.scrollX;
-                var scrollY = window.scrollY;
-                window.htmx.ajax("GET", window.location.pathname + window.location.search, {
-                  target: "#calendar-panel", swap: "innerHTML",
-                }).then(function () {
-                  window.scrollTo(scrollX, scrollY);
-                });
+                reloadPanel();
               } else {
                 revert();
                 window.alert(result.body.error || grid.dataset.msgRescheduleFailed);
@@ -498,6 +570,130 @@
               revert();
               window.alert(grid.dataset.msgRescheduleFailed);
             });
+        },
+      };
+    }
+
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp);
+  });
+
+  /* Drag across empty days to block a room.
+   *
+   * "Block dates" used to be a separate page with its own villa/room/date
+   * form. It isn't any more: you press on an empty day in a room's row, drag
+   * to the last day you want held, and confirm - which is where you were
+   * already looking, and needs no re-typing of what the grid already knows.
+   *
+   * Same rule as the reschedule drag above: this only ever *proposes* a
+   * range. Nothing is written until the shared confirm dialog is accepted,
+   * the server re-checks the room, the dates and the overlap
+   * (apps/bookings/views.py BlockDatesView), and the panel is then reloaded
+   * from the server rather than drawn from the client's own math.
+   */
+  // Escape is the way out of block mode without having to find the button
+  // again (the hint strip's Cancel is the other).
+  document.addEventListener("keydown", function (evt) {
+    if (evt.key !== "Escape") return;
+    var data = alpineData();
+    if (data && data.blockMode) data.endBlockMode();
+  });
+
+  panel.addEventListener("pointerdown", function (downEvent) {
+    if (downEvent.button !== 0) return;             // right/middle click isn't a drag
+    if (downEvent.target.closest("[data-booking-id]")) return; // the reschedule drag owns bars
+
+    // Only after the "Block dates" button has been pressed and confirmed -
+    // otherwise a stray drag across the grid would start proposing blocks.
+    var armed = alpineData();
+    if (!armed || !armed.blockMode) return;
+
+    var row = downEvent.target.closest("[data-room-row-id]");
+    var grid = document.getElementById("calendar-grid");
+    if (!row || !grid) return;
+
+    var days = parseInt(grid.dataset.days, 10) || 14;
+    var windowStart = grid.dataset.start;
+    if (!windowStart) return;
+
+    var rowRect = row.getBoundingClientRect();
+    var dayWidth = rowRect.width / days;
+
+    function dayAt(clientX) {
+      var idx = Math.floor((clientX - rowRect.left) / dayWidth);
+      return Math.max(0, Math.min(days - 1, idx));
+    }
+
+    var anchorDay = dayAt(downEvent.clientX);
+    var lastDay = anchorDay;
+    var moved = false;
+
+    // The proposed range, drawn straight into the row so it reads like any
+    // other bar. Removed again whichever way the drag ends.
+    var ghost = document.createElement("div");
+    ghost.className = "cal-block-ghost";
+    row.appendChild(ghost);
+
+    function paint() {
+      var from = Math.min(anchorDay, lastDay);
+      var to = Math.max(anchorDay, lastDay);
+      ghost.style.left = from * dayWidth + 3 + "px";
+      ghost.style.width = (to - from + 1) * dayWidth - 6 + "px";
+    }
+    paint();
+
+    document.body.classList.add("cal-dragging");
+    downEvent.preventDefault();
+
+    function cleanup() {
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+      document.body.classList.remove("cal-dragging");
+      if (ghost.parentNode) ghost.parentNode.removeChild(ghost);
+    }
+
+    function onMove(moveEvent) {
+      if (Math.abs(moveEvent.clientX - downEvent.clientX) > 4) moved = true;
+      lastDay = dayAt(moveEvent.clientX);
+      paint();
+    }
+
+    function onUp() {
+      var from = Math.min(anchorDay, lastDay);
+      var to = Math.max(anchorDay, lastDay);
+      cleanup();
+
+      var data = alpineData();
+      if (!data) return;
+
+      // A plain click on an empty day is not a range - nothing to propose, so
+      // stay armed and let them try the drag again.
+      if (!moved) return;
+
+      var checkIn = addDays(windowStart, from);
+      var checkOut = addDays(windowStart, to + 1); // free again the morning after
+      data.endBlockMode(); // one block per press of the button
+
+      data.confirmTarget = {
+        message: fillTemplate(grid.dataset.msgBlock, {
+          room: row.dataset.roomName,
+          dates: shortDate(checkIn) + " – " + shortDate(checkOut),
+        }),
+        mode: "callback",
+        onConfirm: function () {
+          fetch(grid.dataset.blockUrl, {
+            method: "POST",
+            headers: Object.assign({ "Content-Type": "application/x-www-form-urlencoded" }, csrfHeaders()),
+            body: new URLSearchParams({
+              room: row.dataset.roomRowId, check_in: checkIn, check_out: checkOut,
+            }),
+          })
+            .then(function (r) { return r.json().then(function (body) { return { ok: r.ok && body.ok, body: body }; }); })
+            .then(function (result) {
+              if (result.ok) reloadPanel();
+              else window.alert(result.body.error || grid.dataset.msgBlockFailed);
+            })
+            .catch(function () { window.alert(grid.dataset.msgBlockFailed); });
         },
       };
     }

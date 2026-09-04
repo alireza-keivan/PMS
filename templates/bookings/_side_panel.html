@@ -35,7 +35,7 @@ through the shared confirmTarget dialog (mode "form") - see CLAUDE.md rule 5.
           {% translate "This villa is on a basic calendar link - guest details aren't available, only the dates." %}
         </p>
 
-        <dl class="mb-s4 divide-y divide-sand-300/60 text-sm">
+        <dl class="mb-s4 divide-y divide-sand-300/60 text-sm" x-show="!detail.block">
           {% comment %}A block has no guests and came through no channel -
           showing "0 guests, booked via Other" would just be noise.{% endcomment %}
           <div class="flex justify-between py-2" x-show="!detail.block">
@@ -58,13 +58,13 @@ through the shared confirmTarget dialog (mode "form") - see CLAUDE.md rule 5.
           <button type="button" class="btn btn-ghost whitespace-nowrap px-0 text-red-700"
                   @click="confirmTarget = { message: detail.removeMessage, url: detail.removeUrl, mode: 'form' }; detail = null">
             <span x-show="!detail.block">{% translate "Remove booking" %}</span>
-            <span x-show="detail.block">{% translate "Free these dates" %}</span>
+            <span x-show="detail.block">{% translate "Remove" %}</span>
           </button>
           <div class="flex items-center gap-2">
             <a x-show="detail.guestUrl" :href="detail.guestUrl" class="btn border border-sand-300 text-orange-600 justify-center text-center hover:bg-sand-200 no-underline">
               {% translate "Guest details" %}
             </a>
-            <button type="button" class="btn btn-secondary" @click="detail = null">{% translate "Close" %}</button>
+            <button type="button" class="btn btn-secondary" @click="detail = null">{% translate "Cancel" %}</button>
           </div>
         </div>
       </div>
