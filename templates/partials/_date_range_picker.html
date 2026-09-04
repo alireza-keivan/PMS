@@ -15,6 +15,12 @@ Optional extras:
     min_nights   shortest stay, so the leaving date can't be picked too early
                  (default 1)
     dates_label  the label on the one field (default "Dates")
+    booked_nights_id  id of a json_script holding the nights that are already
+                 taken - {"any": ["2026-09-04", ...], "<room type id>": [...]}.
+                 Those days come up greyed out and cannot be picked.
+    room_select_name  name of the room picker on the same form, when there is
+                 one: which list above applies depends on the room chosen, so
+                 the calendar redraws when that select changes.
     picker_id    only needed if two pickers ever share one page
 
 How it works, and why it's built this way: the two real date inputs are always
@@ -29,6 +35,8 @@ only a nicer way to fill them in.
 
 <div class="drp" data-date-range-picker
      data-min-nights="{{ min_nights|default:1 }}"
+     {% if booked_nights_id %}data-booked-nights="{{ booked_nights_id }}"{% endif %}
+     {% if room_select_name %}data-room-select="{{ room_select_name }}"{% endif %}
      id="{{ picker_id|default:'drp' }}">
 
   {% comment %} The plain fields - the only thing shown when there is no script. {% endcomment %}
@@ -108,6 +116,11 @@ only a nicer way to fill them in.
     <div class="grid grid-cols-7" data-drp-days></div>
 
     <div class="my-s3 h-px bg-sand-300"></div>
+
+    {% if booked_nights_id %}
+      {% comment %} Plain words for what the grey days mean. {% endcomment %}
+      <p class="mb-s3 text-[13px] text-ink-600">{% translate "Grey days are already booked." %}</p>
+    {% endif %}
 
     <div class="flex items-center justify-between gap-2">
       <span class="text-[13px] text-ink-700" data-drp-summary-text

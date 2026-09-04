@@ -34,6 +34,7 @@ from django.utils import translation
 from django.utils.translation import gettext as _
 from django.views.generic import TemplateView, View
 
+from apps.bookings.services import fully_booked_nights
 from apps.marketing.forms import BookingEnquiryForm
 from apps.marketing.models import Experience
 from apps.villas.images import DISPLAY_RATIO, responsive_srcset, webp_variant
@@ -341,6 +342,13 @@ def page_context(request, villa, form=None, **extra) -> dict:
         "experiences": _experiences(villa),
 
         "shortest_stay": _shortest_stay(villa),
+        # Nights with nothing left to sell, so the date picker can grey them
+        # out instead of letting somebody pick dates that come back refused.
+        # Keyed by room type id (as a string, matching the <select> value),
+        # plus "any" for before a room has been picked. Read-only, and it
+        # only ever greys out what it can honestly account for - the real
+        # check is still the form's at submit time.
+        "booked_nights": fully_booked_nights(villa),
         # For the booking panel: no price is shown there until a room is
         # chosen (CLAUDE.md rule 2 - "from Rp X" up front implies every room
         # is that price, which isn't true once there's more than one type).

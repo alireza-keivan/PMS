@@ -469,3 +469,71 @@ def _build_item(booking: Booking, today, payment: dict, can_see_money: bool, roo
         item["amount_owed"] = str(owed) if owed is not None else None
         item["currency"] = payment.get("currency")
     return item
+
+
+# How far ahead the public date picker greys out booked nights. A year is well
+# past the 90-night maximum stay the enquiry form allows, and keeps the scan to
+# one bounded query.
+PUBLIC_AVAILABILITY_DAYS = 365
+
+
+def fully_booked_nights(villa, days: int = PUBLIC_AVAILABILITY_DAYS) -> dict:
+    """Which nights this villa has nothing left to sell, per room type.
+
+    Returns {"any": [...], "<category id>": [...]} - each a sorted list of
+    "YYYY-MM-DD" nights where every active room of that type is already taken.
+    "any" is the intersection: nights where no room type of the villa has
+    anything free, i.e. what to grey out before a visitor has picked a room.
+
+    Read-only, and it only ever says *less* than the real check: a room type
+    with no rooms defined yet is left out entirely rather than guessed at, so
+    the picker never greys out a night it cannot honestly account for. The
+    real answer is still find_available_room() at submit time.
+
+    Nights, not days: a booking from the 3rd to the 5th takes the nights of
+    the 3rd and the 4th - the 5th is a check-out morning and is free to be
+    somebody else's arrival.
+    """
+    today = timezone.localdate()
+    horizon = today + timedelta(days=days)
+
+    rooms_by_category: dict = {}
+    for room in Room.objects.filter(villa=villa, is_active=True).only("id", "category_id"):
+        rooms_by_category.setdefault(room.category_id, set()).add(room.id)
+
+    if not rooms_by_category:
+        return {"any": []}
+
+    all_room_ids = {rid for ids in rooms_by_category.values() for rid in ids}
+    bookings = (
+        Booking.objects.filter(
+            villa=villa,
+            room_id__in=all_room_ids,
+            check_in__lt=horizon,
+            check_out__gt=today,
+        )
+        .exclude(status=Booking.Status.CANCELLED)
+        .only("room_id", "check_in", "check_out")
+    )
+
+    # {night: {room ids taken that night}}
+    taken: dict = {}
+    for booking in bookings:
+        night = max(booking.check_in, today)
+        end = min(booking.check_out, horizon)
+        while night < end:
+            taken.setdefault(night, set()).add(booking.room_id)
+            night += timedelta(days=1)
+
+    out: dict = {}
+    per_category_nights = []
+    for category_id, room_ids in rooms_by_category.items():
+        nights = sorted(
+            night for night, busy in taken.items() if room_ids.issubset(busy)
+        )
+        out[str(category_id)] = [n.isoformat() for n in nights]
+        per_category_nights.append(set(nights))
+
+    common = set.intersection(*per_category_nights) if per_category_nights else set()
+    out["any"] = sorted(n.isoformat() for n in common)
+    return out

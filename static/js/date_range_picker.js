@@ -64,6 +64,52 @@
     var minNights = parseInt(root.dataset.minNights, 10) || 1;
     var today = startOfToday();
 
+    // Nights that are already taken, so they can be shown greyed out and
+    // left unpickable rather than picked and then refused on submit. Shaped
+    // {"any": ["2026-09-04", ...], "<room type id>": [...]} - see
+    // apps.bookings.services.fully_booked_nights. Absent entirely when the
+    // including template passed none, which is the old behaviour: only past
+    // days are off.
+    var bookedSets = {};
+    (function readBooked() {
+      var el = root.dataset.bookedNights
+        ? document.getElementById(root.dataset.bookedNights)
+        : null;
+      if (!el) return;
+      var raw;
+      try {
+        raw = JSON.parse(el.textContent);
+      } catch (e) {
+        return;
+      }
+      Object.keys(raw).forEach(function (key) {
+        bookedSets[key] = {};
+        (raw[key] || []).forEach(function (day) {
+          bookedSets[key][day] = true;
+        });
+      });
+    })();
+
+    // Which of those lists applies right now: the chosen room type's, or
+    // "any" (nights where no room type has anything free) before one is
+    // chosen. The select lives on the same form, not inside the picker.
+    var roomSelect = null;
+    if (root.dataset.roomSelect) {
+      var form = root.closest("form");
+      if (form) {
+        roomSelect = form.querySelector('select[name="' + root.dataset.roomSelect + '"]');
+      }
+    }
+
+    function bookedNights() {
+      var key = roomSelect && roomSelect.value ? roomSelect.value : "any";
+      return bookedSets[key] || bookedSets.any || {};
+    }
+
+    function isBooked(d) {
+      return !!bookedNights()[iso(d)];
+    }
+
     var state = {
       inDate: parse(checkIn.value),
       outDate: parse(checkOut.value),
@@ -124,11 +170,23 @@
 
     function disabled(d) {
       if (d < today) return true;
-      // Leaving has to be at least the shortest stay after arriving.
-      if (state.mode === "out" && state.inDate) {
-        return d.getTime() < state.inDate.getTime() + minNights * DAY;
+      if (state.mode === "out") {
+        // Leaving has to be at least the shortest stay after arriving.
+        if (state.inDate && d.getTime() < state.inDate.getTime() + minNights * DAY) {
+          return true;
+        }
+        // A leaving day is a check-out morning, so that day's own night does
+        // not have to be free - but every night of the stay does. So the
+        // stay can only run up to the first taken night after arriving.
+        if (state.inDate) {
+          for (var t = state.inDate.getTime(); t < d.getTime(); t += DAY) {
+            if (isBooked(new Date(t))) return true;
+          }
+        }
+        return false;
       }
-      return false;
+      // Arriving: that night has to be free.
+      return isBooked(d);
     }
 
     function pick(d) {
@@ -271,6 +329,30 @@
       render();
     });
     root.querySelector("[data-drp-done]").addEventListener("click", close);
+
+    // A different room type can have different nights taken, so the calendar
+    // is redrawn - and a stay that is no longer free on the new room type is
+    // dropped rather than left sitting there looking valid.
+    if (roomSelect) {
+      roomSelect.addEventListener("change", function () {
+        if (state.inDate && isBooked(state.inDate)) {
+          state.inDate = null;
+          state.outDate = null;
+          state.mode = "in";
+          writeBack();
+        } else if (state.inDate && state.outDate) {
+          for (var t = state.inDate.getTime(); t < state.outDate.getTime(); t += DAY) {
+            if (isBooked(new Date(t))) {
+              state.outDate = null;
+              state.mode = "out";
+              writeBack();
+              break;
+            }
+          }
+        }
+        render();
+      });
+    }
 
     // Tap anywhere else on the page and the month folds away again. Picking a
     // day rebuilds the grid (render() clears and redraws every cell), which

@@ -62,8 +62,8 @@
           <div class="mb-3 flex min-h-[2.75rem] items-start justify-between gap-2">
             <h2 class="font-semibold text-ink-900">{{ villa.name }}</h2>
             {% if villa.available_from %}
-              <span class="w-28 shrink-0 rounded-2xl bg-amber-50 px-2 py-1 text-left text-xs leading-snug text-amber-800">
-                {% blocktranslate with date=villa.available_from|date:"j F Y" %}Available {{ date }}{% endblocktranslate %}
+              <span class="w-36 shrink-0 whitespace-nowrap rounded-2xl bg-amber-50 px-2 py-1 text-left text-xs leading-snug text-amber-800">
+                {% blocktranslate with date=villa.available_from|date:"d/m/Y" %}Available {{ date }}{% endblocktranslate %}
               </span>
             {% else %}
               <span class="w-28 shrink-0 rounded-2xl bg-teal-50 px-2 py-1 text-left text-xs leading-snug text-teal-700">{% translate "Available now" %}</span>
@@ -108,8 +108,8 @@
             {% else %}
               <button
                 type="button"
-                data-leave-url="{% url 'villas:activities' 'villa-laguna-biru' %}"
-                @click="confirmTarget = { type: 'leave', message: '{% translate "This villa does not have a website yet. Continue to a sample instead?" %}', url: $el.dataset.leaveUrl }"
+                data-leave-url="{% url 'villas:activities' villa.slug %}"
+                @click="confirmTarget = { type: 'leave', message: '{% translate "This villa does not have a website yet. Go to its activities page instead?" %}', url: $el.dataset.leaveUrl }"
                 aria-label="{% translate "No website yet" %}"
                 title="{% translate "No website yet" %}"
                 class="btn btn-ghost flex h-12 w-12 items-center justify-center !p-0 !text-amber-800 opacity-30 hover:!bg-amber-50"

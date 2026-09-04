@@ -110,7 +110,14 @@ up the same element becomes the sticky sidebar beside the description. See the
       still renders the two real date fields underneath, so with no script this
       is exactly the pair of date boxes it has always been.
       {% endcomment %}
-      {% include "partials/_date_range_picker.html" with ci_field=form.check_in co_field=form.check_out min_nights=shortest_stay %}
+      {% comment %}
+      The nights with nothing left to sell go in with the picker, so those
+      days come up greyed out and unpickable rather than being picked and
+      then refused. Per room type, plus "any" for before one is chosen - the
+      picker re-reads it whenever the room picker changes.
+      {% endcomment %}
+      {{ booked_nights|json_script:"booked-nights" }}
+      {% include "partials/_date_range_picker.html" with ci_field=form.check_in co_field=form.check_out min_nights=shortest_stay booked_nights_id="booked-nights" room_select_name="room_category" %}
 
       {% for field in form.visible_fields %}
         {% if field.name != "check_in" and field.name != "check_out" %}

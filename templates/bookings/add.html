@@ -67,9 +67,17 @@
           </div>
         </div>
 
+        {% comment %}
+        One "Dates" field, not two boxes - the same date range picker the
+        public villa page uses. It still renders the two real date inputs
+        underneath, so with no script this is exactly the pair of date boxes
+        it has always been, and it fires `change` on them when a stay is
+        picked, so the availability box below keeps updating.
+        {% endcomment %}
         <div class="grid gap-4 sm:grid-cols-3">
-          {% include "villas/_field.html" with field=form.check_in %}
-          {% include "villas/_field.html" with field=form.check_out %}
+          <div class="sm:col-span-2">
+            {% include "partials/_date_range_picker.html" with ci_field=form.check_in co_field=form.check_out %}
+          </div>
           {% include "villas/_field.html" with field=form.guest_count %}
         </div>
 
@@ -189,4 +197,12 @@
     </div>
   </form>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+  {% comment %}
+  Turns the two date boxes above into the single "Dates" field. Fails safe:
+  without it the boxes stay as they are.
+  {% endcomment %}
+  <script defer src="{% static 'js/date_range_picker.js' %}"></script>
 {% endblock %}
