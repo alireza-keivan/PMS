@@ -40,6 +40,15 @@ RANGE_CHOICES = [
 ]
 DEFAULT_RANGE = "this_month"
 
+# "What's already booked ahead" - always counted forward from today, never
+# from the chosen range. Widest window last; the view sizes its one query off
+# the largest entry here.
+AHEAD_WINDOWS = [
+    (30, _("Next 30 days")),
+    (60, _("Next 60 days")),
+    (90, _("Next 90 days")),
+]
+
 # How many months the two trend charts draw, ending with the chosen period's
 # last month. Fixed rather than "one bar per month in the range" so that
 # picking "This month" doesn't collapse the chart into a single bar.

@@ -1,0 +1,26 @@
+{% load i18n %}
+{% comment %}
+Title row for one collapsible block on the reporting screen.
+Expects to sit inside an element with x-data="reportSection(...)".
+Takes: title, and optionally subtitle.
+
+Note the {% comment %} block rather than {# #} - the short form is one line
+only, and a multi-line one prints itself onto the page.
+
+The whole title is clickable, not just the button - the button alone is a
+small target on a phone.
+{% endcomment %}
+<div class="flex items-start gap-s3">
+  <button type="button" @click="toggle()"
+    class="btn btn-icon btn-ghost -ml-1.5 -mt-2 flex-none cursor-pointer transition-transform duration-300"
+    :class="{ 'rotate-45': open }"
+    :aria-expanded="open"
+    :aria-label="open ? '{% translate "Hide this" %}' : '{% translate "Show this" %}'"
+    :title="open ? '{% translate "Hide this" %}' : '{% translate "Show this" %}'">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+  </button>
+  <div class="min-w-0 flex-1 cursor-pointer select-none" @click="toggle()">
+    <div class="font-display text-[17px]">{{ title }}</div>
+    {% if subtitle %}<p class="m-0 text-[13px] opacity-60">{{ subtitle }}</p>{% endif %}
+  </div>
+</div>

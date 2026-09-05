@@ -51,6 +51,11 @@ Specifics:
 - **HTMX** for partial page updates (refreshing a booking list, submitting a guest request, updating a compliance status) — prefer this over writing custom JS fetch calls.
 - **Alpine.js** only for small local UI state (dropdowns, modals, toggles). If a component starts needing complex state management, that's a signal the UI is too complicated — simplify it rather than reaching for a heavier tool.
 - **Tailwind CSS** for styling. Define design tokens (spacing, type scale, color palette) up front and reuse them; don't scatter arbitrary values.
+- **Tailwind is compiled to a static file — rebuild it after any styling change.** `static/css/tailwind.css` is generated from the classes found in the templates. A class that isn't in that compiled file simply does nothing in the browser, silently, with no error. So any time you add or change a class in a template, run the build or the change will not appear:
+  - `npm run css` — watch mode, rebuilds as you edit. Use this while working on templates.
+  - `npm run css:build` — one-off minified build.
+
+  Then hard-refresh the browser (Ctrl+Shift+R) to get past the cached stylesheet. If a styling edit appears to do nothing, suspect the stale build first — check whether the class is actually present in `static/css/tailwind.css` before editing the markup again. This applies to variants too: `bg-black` being compiled does not mean `bg-black/50` is.
 - **vis-timeline** (free, open-source) for the multi-villa calendar view — rooms/villas as rows, dates across the top, bookings as colored bars. Do not use FullCalendar's Resource Timeline view for this — that specific layout is part of FullCalendar's paid add-on (roughly $480 one-time), not the free core. Revisit that paid upgrade only once there are paying clients to justify it.
 - Mobile-first for all guest-facing screens — guests are on phones, and so are most staff.
 

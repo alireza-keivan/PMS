@@ -192,6 +192,11 @@ class ReportsView(ManagerRequiredMixin, TemplateView):
         per_night = received / available_nights if available_nights else None
         prev_per_night = prev_received / prev_available if prev_available else None
 
+        # Worked out before the context so it can also answer "is this screen
+        # worth drawing at all" - an operator whose only bookings are still in
+        # the future has nothing in the chosen period but plenty to show.
+        booked_ahead = self._booked_ahead(org, villas, today)
+
         context.update(
             range_key=range_key,
             range_options=[
@@ -204,6 +209,7 @@ class ReportsView(ManagerRequiredMixin, TemplateView):
             currency=org.default_currency,
             has_any_data=bool(
                 received or value or booked_nights or data.unconverted_payments
+                or not booked_ahead["empty"]
             ),
             metrics=self._metrics(
                 org, received, prev_received, value, prev_value, occupancy,
@@ -211,6 +217,7 @@ class ReportsView(ManagerRequiredMixin, TemplateView):
             ),
             unconverted_payments=data.unconverted_payments,
             bookings_without_price=data.bookings_without_price,
+            booked_ahead=booked_ahead,
             earnings_bars=self._earnings_bars(org, villas, period),
             occupancy_trend=self._occupancy_trend(org, villas, period),
             source_shares=self._source_shares(org, villas, period),
@@ -254,7 +261,7 @@ class ReportsView(ManagerRequiredMixin, TemplateView):
                 "change": reports.change(avg_nightly, prev_avg),
             },
             {
-                "label": _("Money received per night, including empty ones"),
+                "label": _("Money received per night"),
                 "value": per_night,
                 "is_money": True,
                 "change": reports.change(per_night, prev_per_night),
@@ -288,7 +295,16 @@ class ReportsView(ManagerRequiredMixin, TemplateView):
                 "label_x": round(x + bar_w / 2, 1),
                 "month": start.strftime("%b"), "total": total,
             })
-        return {"bars": bars, "empty": not top, "color": reports.BAR_COLOR}
+        y_ticks = []
+        for step in range(4):
+            frac = step / 3
+            value = float(top) * frac
+            y = round(reports.CHART_H - 30 - frac * (reports.CHART_H - 40), 1)
+            y_ticks.append({"y": y, "value": round(value)})
+        return {
+            "bars": bars, "empty": not top, "color": reports.BAR_COLOR,
+            "y_ticks": y_ticks,
+        }
 
     def _occupancy_trend(self, org, villas, period):
         months = self._trend_months(period)
@@ -298,18 +314,25 @@ class ReportsView(ManagerRequiredMixin, TemplateView):
         ) / len(months)
         dots = []
         for index, (start, end) in enumerate(months):
-            pct = data.occupancy(start, end)[0]
+            pct, booked, available, _per_villa = data.occupancy(start, end)
             x = reports.CHART_PAD + index * (bar_w + reports.BAR_GAP) + bar_w / 2
             y = reports.CHART_H - 30 - (pct / 100) * (reports.CHART_H - 70)
             dots.append({
                 "x": round(x, 1), "y": round(y, 1),
                 "month": start.strftime("%b"), "pct": pct,
+                "booked": booked, "available": available,
             })
+        y_ticks = []
+        for step in range(4):
+            frac = step / 3
+            y = round(reports.CHART_H - 30 - frac * (reports.CHART_H - 70), 1)
+            y_ticks.append({"y": y, "value": round(frac * 100)})
         return {
             "dots": dots,
             "points": " ".join(f"{d['x']},{d['y']}" for d in dots),
             "empty": not any(d["pct"] for d in dots),
             "color": reports.LINE_COLOR,
+            "y_ticks": y_ticks,
         }
 
     def _source_shares(self, org, villas, period):
@@ -370,6 +393,51 @@ class ReportsView(ManagerRequiredMixin, TemplateView):
             "total": total,
             "domestic_pct": reports.percent(domestic, total),
             "unknown": unknown,
+        }
+
+    def _booked_ahead(self, org, villas, today):
+        """What is already on the books for the coming weeks.
+
+        Deliberately ignores the range picker: every other number on this page
+        looks backwards, this one always looks forward from today, which is why
+        the card says so in words.
+
+        One ReportData covers the longest window and is re-used for the shorter
+        ones - its methods take their own start/end, so nothing is recomputed
+        per window except the aggregation itself. `count_gaps=False` keeps
+        future stays with no price out of the "missing price" warning that
+        belongs to the chosen period.
+        """
+        longest = max(days for days, _label in reports.AHEAD_WINDOWS)
+        data = reports.ReportData(
+            org, villas, reports.Period(today, today + timedelta(days=longest - 1))
+        )
+        check_ins = list(
+            Booking.objects.filter(
+                organization=org,
+                villa_id__in=[v.id for v in villas],
+                status=Booking.Status.CONFIRMED,
+                check_in__gte=today,
+                check_in__lte=today + timedelta(days=longest - 1),
+            ).values_list("check_in", flat=True)
+        )
+
+        windows = []
+        for days, label in reports.AHEAD_WINDOWS:
+            end = today + timedelta(days=days - 1)
+            occupancy, booked_nights, _available, _per_villa = data.occupancy(today, end)
+            value, _by_villa = data.booking_value(today, end, count_gaps=False)
+            windows.append({
+                "label": label,
+                "end": end,
+                "occupancy": occupancy,
+                "nights": booked_nights,
+                "value": value or None,
+                "stays": sum(1 for d in check_ins if d <= end),
+            })
+        return {
+            "windows": windows,
+            "empty": not any(w["nights"] or w["stays"] for w in windows),
         }
 
     def _villa_rows(self, villas, received_by_villa, value_by_villa, occ_by_villa,

@@ -168,6 +168,14 @@
   .disclosure { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 300ms ease-out; }
   .disclosure.is-open { grid-template-rows: 1fr; }
   .disclosure > * { overflow: hidden; }
+  /* A gentler open for the big blocks on the reporting screen, where a whole
+     chart is sliding in rather than a short form. */
+  .disclosure-slow { transition-duration: 500ms; }
+  /* Once open, stop clipping: the occupancy chart's hover tooltip is drawn
+     above its dot and would otherwise be cut off at the top edge. The delay
+     holds the clipping until the slide has finished, so nothing spills out
+     mid-animation. Closing flips back to hidden at once, which is correct. */
+  .disclosure-slow.is-open > * { overflow: visible; transition: overflow 0s 500ms; }
   @media (prefers-reduced-motion: reduce) { .disclosure { transition: none; } }
 
   .card { @apply rounded-card border border-sand-300 bg-sand-100 p-4 shadow-sm; }

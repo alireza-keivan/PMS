@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load humanize i18n %}
+{% load humanize i18n static %}
 
 {% block title %}{% translate "Reports" %}{% endblock %}
 
@@ -48,7 +48,7 @@
 
     <button type="button" class="btn btn-ghost ml-auto whitespace-nowrap" onclick="window.print()">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-      {% translate "Print villa report" %}
+      {% translate "Export" %}
     </button>
   </div>
 
@@ -67,26 +67,31 @@
 {% else %}
 
   {# ── Headline numbers ─────────────────────────────────────────────── #}
+  <div x-data="reportSection('key-numbers', true)">
+  {% include "reporting/_section_head.html" with title=_("Key numbers") subtitle="" %}
+  <div class="disclosure disclosure-slow" :class="{ 'is-open': open }"><div><div class="pt-s4">
   <div class="grid grid-cols-1 gap-s4 sm:grid-cols-2 lg:grid-cols-3">
     {% for metric in metrics %}
-      <div class="card elev-sm px-s6 py-s4">
+      <div class="card elev-sm group relative px-s6 py-s4">
         <div class="text-[10px] uppercase tracking-[.1em] text-teal-700">{{ metric.label }}</div>
-        <div class="mt-1 font-display text-[26px] leading-tight">
+        <div class="mt-1 font-sans text-[26px] font-semibold leading-tight text-ink-900">
           {% if metric.value is None %}<span class="text-ink-600">&mdash;</span>
           {% elif metric.is_percent %}{{ metric.value }}%
           {% else %}{{ currency }} {{ metric.value|floatformat:0|intcomma }}{% endif %}
         </div>
-        <div class="mt-1.5 flex items-center gap-1.5 text-[12.5px]">
-          {% if metric.change is None %}
-            <span class="text-ink-600">{% translate "No earlier period to compare with" %}</span>
-          {% else %}
-            <span class="{% if metric.change < 0 %}text-red-700{% else %}text-accent2-700{% endif %}">
-              {% if metric.change < 0 %}&darr;{% else %}&uarr;{% endif %} {{ metric.change|floatformat:0 }}%
-            </span>
-            <span class="text-ink-600">{% translate "vs. the period before" %}</span>
-          {% endif %}
+        <div class="pointer-events-none absolute left-s6 top-full z-10 mt-1 max-w-[240px] rounded-md bg-ink-900 px-3 py-2 text-[12.5px] leading-snug text-white opacity-0 shadow-lg transition-opacity duration-150 group-hover:opacity-50">
+          <div class="flex items-center gap-1.5">
+            {% if metric.change is None %}
+              <span>{% translate "No earlier period to compare with" %}</span>
+            {% else %}
+              <span class="{% if metric.change < 0 %}text-red-300{% else %}text-accent2-300{% endif %}">
+                {% if metric.change < 0 %}&darr;{% else %}&uarr;{% endif %} {{ metric.change|floatformat:0 }}%
+              </span>
+              <span>{% translate "vs. the period before" %}</span>
+            {% endif %}
+          </div>
+          {% if metric.note %}<div class="mt-1 opacity-80">{{ metric.note }}</div>{% endif %}
         </div>
-        {% if metric.note %}<div class="mt-1 text-[11.5px] text-ink-600">{{ metric.note }}</div>{% endif %}
       </div>
     {% endfor %}
   </div>
@@ -101,15 +106,52 @@
       {% endif %}
     </div>
   {% endif %}
+  </div></div></div>
+  </div>
+
+  {# ── What's already booked ahead ──────────────────────────────────── #}
+  {# The only forward-looking block on the page - the date-range picker above #}
+  {# does not touch it, so the wording has to say that out loud.             #}
+  <div class="card elev-sm mt-s8 p-s6" x-data="reportSection('booked-ahead', true)">
+    {% include "reporting/_section_head.html" with title=_("Already booked ahead") subtitle=_("Counted forward from today, whatever dates are picked above. Confirmed stays only.") %}
+    <div class="disclosure disclosure-slow" :class="{ 'is-open': open }"><div><div class="pt-s4">
+    {% if booked_ahead.empty %}
+      <p class="m-0 py-s4 text-center text-[13px] opacity-60">{% translate "Nothing booked for the coming months yet." %}</p>
+    {% else %}
+      <div class="grid grid-cols-1 gap-s4 sm:grid-cols-3">
+        {% for window in booked_ahead.windows %}
+          <div class="rounded-md border border-sand-300 bg-sand-100 p-s4">
+            <div class="text-[10px] uppercase tracking-[.1em] text-teal-700">{{ window.label }}</div>
+            <div class="mt-1 font-sans text-[22px] font-semibold leading-tight text-ink-900">
+              {% if window.value %}{{ currency }} {{ window.value|floatformat:0|intcomma }}
+              {% else %}<span class="text-ink-600">&mdash;</span>{% endif %}
+            </div>
+            <div class="mt-s2 flex flex-wrap gap-x-s4 gap-y-1 text-[12.5px] text-ink-700">
+              <span>{% blocktranslate count n=window.nights %}{{ n }} night booked{% plural %}{{ n }} nights booked{% endblocktranslate %}</span>
+              <span>{% blocktranslate count n=window.stays %}{{ n }} stay arriving{% plural %}{{ n }} stays arriving{% endblocktranslate %}</span>
+              <span>{% blocktranslate with pct=window.occupancy %}{{ pct }}% full{% endblocktranslate %}</span>
+            </div>
+            <div class="mt-1 text-[11.5px] text-ink-600">{% blocktranslate with day=window.end|date:"j M Y" %}Up to {{ day }}{% endblocktranslate %}</div>
+          </div>
+        {% endfor %}
+      </div>
+      <p class="m-0 mt-s3 text-[11.5px] text-ink-600">{% translate "Money shown is the value of stays arriving in that window - not money received yet. Stays with no price on them aren't counted." %}</p>
+    {% endif %}
+    </div></div></div>
+  </div>
 
   {# ── Money received over time ─────────────────────────────────────── #}
-  <div class="card elev-sm mt-s8 p-s6">
-    <div class="font-display text-[17px]">{% translate "Money received over time" %}</div>
-    <p class="m-0 mb-s4 text-[13px] opacity-60">{% translate "Payments that came in each month, over the last six months." %}</p>
+  <div class="card elev-sm mt-s6 p-s6" x-data="reportSection('earnings', true)">
+    {% include "reporting/_section_head.html" with title=_("Money received over time") subtitle=_("Payments that came in each month, over the last six months.") %}
+    <div class="disclosure disclosure-slow" :class="{ 'is-open': open }"><div><div class="pt-s4">
     {% if earnings_bars.empty %}
       <p class="m-0 py-s6 text-center text-[13px] opacity-60">{% translate "No payments received in these months." %}</p>
     {% else %}
-      <svg viewBox="0 0 640 200" width="100%" height="200" role="img" aria-label="{% translate 'Money received each month' %}">
+      <svg viewBox="-52 0 692 200" width="100%" height="200" role="img" aria-label="{% translate 'Money received each month' %}">
+        {% for tick in earnings_bars.y_ticks %}
+          <line x1="0" y1="{{ tick.y }}" x2="640" y2="{{ tick.y }}" stroke="#dcd3c4"></line>
+          <text x="-8" y="{{ tick.y }}" dy="4" font-size="11" fill="#82796a" text-anchor="end">{{ tick.value|intcomma }}</text>
+        {% endfor %}
         {% for bar in earnings_bars.bars %}
           <rect x="{{ bar.x }}" y="{{ bar.y }}" width="{{ bar.w }}" height="{{ bar.h }}" rx="6" fill="{{ earnings_bars.color }}">
             <title>{{ bar.month }}: {{ currency }} {{ bar.total|floatformat:0|intcomma }}</title>
@@ -118,32 +160,49 @@
         {% endfor %}
       </svg>
     {% endif %}
+    </div></div></div>
   </div>
 
   {# ── Occupancy over time ──────────────────────────────────────────── #}
-  <div class="card elev-sm mt-s6 p-s6">
-    <div class="font-display text-[17px]">{% translate "How full the villas were" %}</div>
-    <p class="m-0 mb-s4 text-[13px] opacity-60">{% translate "Share of room nights that were booked, each month." %}</p>
+  <div class="card elev-sm mt-s6 p-s6" x-data="reportSection('occupancy', true)">
+    {% include "reporting/_section_head.html" with title=_("How full the villas were") subtitle=_("Share of room nights that were booked, each month.") %}
+    <div class="disclosure disclosure-slow" :class="{ 'is-open': open }"><div><div class="pt-s4">
     {% if occupancy_trend.empty %}
       <p class="m-0 py-s6 text-center text-[13px] opacity-60">{% translate "No booked nights in these months." %}</p>
     {% else %}
-      <svg viewBox="0 0 640 200" width="100%" height="200" role="img" aria-label="{% translate 'How full the villas were each month' %}">
-        <line x1="0" y1="40" x2="640" y2="40" stroke="#dcd3c4"></line>
-        <line x1="0" y1="100" x2="640" y2="100" stroke="#dcd3c4"></line>
-        <line x1="0" y1="160" x2="640" y2="160" stroke="#dcd3c4"></line>
-        <polyline points="{{ occupancy_trend.points }}" fill="none" stroke="{{ occupancy_trend.color }}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></polyline>
-        {% for dot in occupancy_trend.dots %}
-          <circle cx="{{ dot.x }}" cy="{{ dot.y }}" r="4.5" fill="{{ occupancy_trend.color }}"><title>{{ dot.month }}: {{ dot.pct }}%</title></circle>
-          <text x="{{ dot.x }}" y="192" font-size="11" fill="#82796a" text-anchor="middle">{{ dot.month }}</text>
-        {% endfor %}
-      </svg>
+      <div class="relative" x-data="{ tip: null }">
+        <svg viewBox="-40 0 680 200" width="100%" height="200" role="img" aria-label="{% translate 'How full the villas were each month' %}">
+          {% for tick in occupancy_trend.y_ticks %}
+            <line x1="0" y1="{{ tick.y }}" x2="640" y2="{{ tick.y }}" stroke="#dcd3c4"></line>
+            <text x="-8" y="{{ tick.y }}" dy="4" font-size="11" fill="#82796a" text-anchor="end">{{ tick.value }}%</text>
+          {% endfor %}
+          <polyline points="{{ occupancy_trend.points }}" fill="none" stroke="{{ occupancy_trend.color }}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></polyline>
+          {% for dot in occupancy_trend.dots %}
+            <circle cx="{{ dot.x }}" cy="{{ dot.y }}" r="4.5" fill="{{ occupancy_trend.color }}" class="pointer-events-none"></circle>
+            <circle cx="{{ dot.x }}" cy="{{ dot.y }}" r="12" fill="transparent" class="cursor-pointer"
+              @mouseenter="tip = { month: '{{ dot.month }}', pct: '{{ dot.pct }}', booked: '{{ dot.booked }}', available: '{{ dot.available }}', x: $el.getBoundingClientRect().left + $el.getBoundingClientRect().width / 2 - $root.getBoundingClientRect().left, y: $el.getBoundingClientRect().top - $root.getBoundingClientRect().top }"
+              @mouseleave="tip = null"
+              @touchstart.passive="tip = { month: '{{ dot.month }}', pct: '{{ dot.pct }}', booked: '{{ dot.booked }}', available: '{{ dot.available }}', x: $el.getBoundingClientRect().left + $el.getBoundingClientRect().width / 2 - $root.getBoundingClientRect().left, y: $el.getBoundingClientRect().top - $root.getBoundingClientRect().top }"
+            ></circle>
+            <text x="{{ dot.x }}" y="192" font-size="11" fill="#82796a" text-anchor="middle" class="pointer-events-none">{{ dot.month }}</text>
+          {% endfor %}
+        </svg>
+        <template x-if="tip">
+          <div class="pointer-events-none absolute z-10 -translate-x-1/2 -translate-y-full whitespace-nowrap rounded-md bg-black px-2.5 py-1.5 text-[11px] text-white shadow-md"
+            :style="`left:${tip.x}px; top:${tip.y - 8}px`">
+            <div class="font-semibold" x-text="`${tip.month}: ${tip.pct}%`"></div>
+            <div class="opacity-80" x-text="`${tip.booked} of ${tip.available} nights booked`"></div>
+          </div>
+        </template>
+      </div>
     {% endif %}
+    </div></div></div>
   </div>
 
   {# ── Booking sources ──────────────────────────────────────────────── #}
-  <div class="card elev-sm mt-s6 p-s6">
-    <div class="font-display text-[17px]">{% translate "Where the bookings came from" %}</div>
-    <p class="m-0 mb-s4 text-[13px] opacity-60">{% translate "Share of bookings by site, this period." %}</p>
+  <div class="card elev-sm mt-s6 p-s6" x-data="reportSection('sources', true)">
+    {% include "reporting/_section_head.html" with title=_("Where the bookings came from") subtitle=_("Share of bookings by site, this period.") %}
+    <div class="disclosure disclosure-slow" :class="{ 'is-open': open }"><div><div class="pt-s4">
     {% if source_shares.total %}
       <div class="mb-s4 flex h-[22px] overflow-hidden rounded-full">
         {% for share in source_shares.shares %}
@@ -162,12 +221,13 @@
     {% else %}
       <p class="m-0 text-[13px] opacity-60">{% translate "No bookings in this period." %}</p>
     {% endif %}
+    </div></div></div>
   </div>
 
   {# ── Guest nationalities ──────────────────────────────────────────── #}
-  <div class="card elev-sm mt-s6 p-s6">
-    <div class="font-display text-[17px]">{% translate "Where guests came from" %}</div>
-    <p class="m-0 mb-s4 text-[13px] opacity-60">{% translate "Guest nationality, for the bookings where we have it." %}</p>
+  <div class="card elev-sm mt-s6 p-s6" x-data="reportSection('nationalities', true)">
+    {% include "reporting/_section_head.html" with title=_("Where guests came from") subtitle=_("Guest nationality, for the bookings where we have it.") %}
+    <div class="disclosure disclosure-slow" :class="{ 'is-open': open }"><div><div class="pt-s4">
     {% if nationalities.total %}
       <div class="flex flex-col gap-2.5">
         {% for row in nationalities.rows %}
@@ -189,48 +249,75 @@
     {% else %}
       <p class="m-0 text-[13px] opacity-60">{% translate "No guest nationalities on file for this period." %}</p>
     {% endif %}
+    </div></div></div>
   </div>
 
   {# ── Villa by villa ───────────────────────────────────────────────── #}
-  <div class="card elev-sm mt-s6 p-s6">
-    <div class="font-display text-[17px]">{% translate "Villa by villa" %}</div>
-    <p class="m-0 mb-s4 text-[13px] opacity-60">{% translate "Sorted by money received, biggest first." %}</p>
+  {# Only useful when looking at every villa at once - with one villa picked #}
+  {# the table just repeats the numbers already shown at the top.           #}
+  {% if villa_filter == "all" %}
+  <div class="card elev-sm mt-s6 p-s6" x-data="reportSection('villa-table', true)">
+    {% include "reporting/_section_head.html" with title=_("Villa by villa") subtitle=_("Sorted by money received, biggest first.") %}
+    <div class="disclosure disclosure-slow" :class="{ 'is-open': open }"><div><div class="pt-s4">
     <div class="overflow-x-auto">
-      <table class="table min-w-[620px]">
+      <table class="w-full min-w-[620px] border-collapse text-[13px]">
         <thead>
-          <tr>
-            <th>{% translate "Villa" %}</th>
-            <th>{% translate "Money received" %}</th>
-            <th>{% translate "Value of bookings" %}</th>
-            <th>{% translate "How full" %}</th>
-            <th>{% translate "Avg. price / night" %}</th>
+          <tr class="border-b border-sand-300 text-[11.5px] uppercase tracking-[.05em] text-ink-600">
+            <th class="px-s3 py-s2 text-left font-semibold">{% translate "Villa" %}</th>
+            <th class="px-s3 py-s2 text-right font-semibold">{% translate "Money received" %}</th>
+            <th class="px-s3 py-s2 text-right font-semibold">{% translate "Value of bookings" %}</th>
+            <th class="px-s3 py-s2 text-right font-semibold">{% translate "How full" %}</th>
+            <th class="px-s3 py-s2 text-right font-semibold">{% translate "Avg. price / night" %}</th>
           </tr>
         </thead>
         <tbody>
           {% for row in villa_rows %}
-            <tr>
-              <td class="font-semibold">{{ row.villa.name }}</td>
+            <tr class="border-b border-sand-200 last:border-0">
+              <td class="px-s3 py-s3 text-left font-semibold">
+                {{ row.villa.name }}
+                {% if not row.has_data %}
+                  <div class="mt-0.5 text-[11.5px] font-normal text-ink-600">{% translate "No data yet" %}</div>
+                {% endif %}
+              </td>
               {% if row.has_data %}
-                <td>{% include "reporting/_money.html" with amount=row.received %}</td>
-                <td>{% include "reporting/_money.html" with amount=row.value %}</td>
-                <td>{{ row.occupancy }}%</td>
-                <td>{% include "reporting/_money.html" with amount=row.avg_nightly %}</td>
+                <td class="whitespace-nowrap px-s3 py-s3 text-right tabular-nums">{% include "reporting/_money.html" with amount=row.received %}</td>
+                <td class="whitespace-nowrap px-s3 py-s3 text-right tabular-nums">{% include "reporting/_money.html" with amount=row.value %}</td>
+                <td class="whitespace-nowrap px-s3 py-s3 text-right tabular-nums">{{ row.occupancy }}%</td>
+                <td class="whitespace-nowrap px-s3 py-s3 text-right tabular-nums">{% include "reporting/_money.html" with amount=row.avg_nightly %}</td>
               {% else %}
-                <td colspan="4"><span class="tag tag-neutral">{% translate "No data yet" %}</span></td>
+                <td class="px-s3 py-s3 text-right text-ink-600">&mdash;</td>
+                <td class="px-s3 py-s3 text-right text-ink-600">&mdash;</td>
+                <td class="px-s3 py-s3 text-right text-ink-600">&mdash;</td>
+                <td class="px-s3 py-s3 text-right text-ink-600">&mdash;</td>
               {% endif %}
             </tr>
           {% endfor %}
         </tbody>
       </table>
     </div>
+    </div></div></div>
   </div>
+  {% endif %}
 
   {# ── Money owed + data freshness ──────────────────────────────────── #}
   <div class="mt-s6 grid grid-cols-1 gap-s6 lg:grid-cols-2">
 
-    <div>
-      <div class="mb-s3 text-[13px] font-bold tracking-[.02em] text-ink-700">{% translate "Money still owed" %}</div>
-      <p class="m-0 mb-s3 text-[11.5px] text-ink-600">{% translate "Grouped by when the stay starts - a stay that has already begun and still owes money is overdue." %}</p>
+    <div x-data="reportSection('owed', true)">
+      {# These two blocks carry a smaller heading than the cards above, so they #}
+      {# get their own title row rather than the shared one.                    #}
+      <div class="flex items-start gap-s3">
+        <button type="button" @click="toggle()"
+          class="btn btn-icon btn-ghost -ml-1.5 -mt-2 flex-none cursor-pointer transition-transform duration-300"
+          :class="{ 'rotate-45': open }" :aria-expanded="open"
+          :aria-label="open ? '{% translate "Hide this" %}' : '{% translate "Show this" %}'">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+        </button>
+        <div class="min-w-0 flex-1 cursor-pointer select-none" @click="toggle()">
+          <div class="text-[13px] font-bold tracking-[.02em] text-ink-700">{% translate "Money still owed" %}</div>
+          <p class="m-0 text-[11.5px] text-ink-600">{% translate "Grouped by when the stay starts - a stay that has already begun and still owes money is overdue." %}</p>
+        </div>
+      </div>
+      <div class="disclosure disclosure-slow" :class="{ 'is-open': open }"><div><div class="pt-s3">
       <div class="flex flex-col gap-s4">
         {% for group in owed_groups %}
           <div class="flex flex-col gap-1.5">
@@ -249,10 +336,22 @@
           </div>
         {% endfor %}
       </div>
+      </div></div></div>
     </div>
 
-    <div>
-      <div class="mb-s3 text-[13px] font-bold tracking-[.02em] text-ink-700">{% translate "Booking data freshness" %}</div>
+    <div x-data="reportSection('freshness', true)">
+      <div class="flex items-start gap-s3">
+        <button type="button" @click="toggle()"
+          class="btn btn-icon btn-ghost -ml-1.5 -mt-2 flex-none cursor-pointer transition-transform duration-300"
+          :class="{ 'rotate-45': open }" :aria-expanded="open"
+          :aria-label="open ? '{% translate "Hide this" %}' : '{% translate "Show this" %}'">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+        </button>
+        <div class="min-w-0 flex-1 cursor-pointer select-none" @click="toggle()">
+          <div class="text-[13px] font-bold tracking-[.02em] text-ink-700">{% translate "Booking data freshness" %}</div>
+        </div>
+      </div>
+      <div class="disclosure disclosure-slow" :class="{ 'is-open': open }"><div><div class="pt-s3">
       <div class="flex flex-col gap-1.5">
         {% for row in freshness %}
           <div class="flex min-h-[44px] items-center gap-s3 rounded-md border border-sand-300 bg-sand-100 px-s4 text-[13px]">
@@ -269,6 +368,7 @@
         {% endfor %}
         <p class="m-0 mt-1 px-0.5 text-[11.5px] text-ink-600">{% translate "Connected accounts update within seconds. Calendar links can be a few hours behind." %}</p>
       </div>
+      </div></div></div>
     </div>
 
   </div>
@@ -305,4 +405,9 @@
 {% endif %}{# no_organization #}
 
 </div>
+{% endblock %}
+
+{% block pre_alpine_js %}
+  {# Defines window.reportSection - must load before Alpine starts, see base.html. #}
+  <script src="{% static 'js/report_sections.js' %}" defer></script>
 {% endblock %}
