@@ -18,6 +18,7 @@ from django import forms
 from django.utils.translation import gettext_lazy as _
 
 from apps.bookings.services import find_available_room
+from apps.core.utils import title_words
 from apps.marketing.models import (
     EXPERIENCE_DESCRIPTION_MAX_LENGTH,
     BookingEnquiry,
@@ -154,7 +155,10 @@ class BookingEnquiryForm(forms.ModelForm):
         self.available_category = None
         next_free = None
         for candidate in big_enough:
-            room, freed_on = find_available_room(candidate, check_in, check_out)
+            # The third value is the room shuffle that would be needed - an
+            # enquiry takes no room, so nothing is moved here. It is planned
+            # for real when the manager turns the enquiry into a booking.
+            room, freed_on, _moves = find_available_room(candidate, check_in, check_out)
             if room is not None:
                 self.available_category = candidate
                 break
@@ -232,6 +236,12 @@ class ExperienceForm(forms.ModelForm):
         # already has a photo, don't force re-upload just to save the form.
         if not (self.instance and self.instance.pk and self.instance.photo):
             self.fields["photo"].required = True
+
+    def clean_name_en(self):
+        return title_words(self.cleaned_data["name_en"])
+
+    def clean_name_id(self):
+        return title_words(self.cleaned_data.get("name_id", ""))
 
     def clean_commission_percent(self):
         # Optional on the form, but the model column can't be empty - so a

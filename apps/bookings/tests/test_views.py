@@ -9,7 +9,6 @@ import pytest
 from django.urls import reverse
 
 
-
 @pytest.fixture
 def owner_client(client, org, user, make_membership):
     make_membership(user, org, manager=True)

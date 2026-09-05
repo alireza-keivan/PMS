@@ -86,8 +86,7 @@
   static/js/calendar.js.{% endcomment %}
   <button type="button" class="btn btn-ghost order-2 flex-none whitespace-nowrap border border-sand-300 md:order-none md:ml-auto"
           :class="blockMode ? 'bg-teal-50 border-teal-500' : ''"
-          data-confirm-message="{% translate 'Mark a room as not available?' %}"
-          @click="blockMode ? endBlockMode() : (confirmTarget = { message: $el.dataset.confirmMessage, mode: 'callback', onConfirm: () => startBlockMode() })">
+          @click="blockMode ? endBlockMode() : startBlockMode()">
     {% translate "Block dates" %}
   </button>
 
@@ -186,7 +185,7 @@ toolbar isn't carrying a permanent instruction nobody needs.{% endcomment %}
           </button>
           <span class="hidden h-[30px] w-[30px] flex-none rounded-full md:block" style="background:{{ row.swatch }};"></span>
           <input
-            type="text" value="{{ row.name }}"
+            type="text" name="name" value="{{ row.name }}"
             x-data="{ full: '{{ row.name|escapejs }}', abbr: '{{ row.short_name|escapejs }}' }"
             x-init="if (window.innerWidth < 768) $el.value = abbr"
             @focus="$el.value = full"
@@ -194,19 +193,19 @@ toolbar isn't carrying a permanent instruction nobody needs.{% endcomment %}
             hx-post="{% url 'villas:rename' row.slug %}" hx-trigger="change" hx-swap="none"
             class="min-w-0 flex-1 truncate rounded-md border-0 bg-transparent px-1.5 py-[3px] text-[13.5px] font-semibold text-ink-900 outline-none hover:bg-sand-200 focus:bg-teal-50 focus:ring-2 focus:ring-teal-600"
           >
-          <button type="button" class="btn btn-icon btn-ghost h-[26px] w-[26px] flex-none opacity-55"
-                  aria-label="{% blocktranslate with name=row.name %}Remove {{ name }}{% endblocktranslate %}"
-                  data-remove-message="{% blocktranslate with name=row.name %}Remove {{ name }}? This can't be undone.{% endblocktranslate %}"
-                  data-remove-url="{% url 'villas:delete' row.slug %}"
-                  @click="confirmTarget = { message: $el.dataset.removeMessage, url: $el.dataset.removeUrl, mode: 'form' }">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
-          </button>
         </div>
         <div class="h-[38px] flex-1"></div>
       </div>
 
     {% elif row.kind == "room" %}
-      <div class="flex border-t border-sand-300/60 bg-sand-50/60" x-show="isOpen({{ row.villa_id }})" x-cloak>
+      <div class="flex overflow-hidden border-t border-sand-300/60 bg-sand-50/60"
+           x-show="isOpen({{ row.villa_id }})" x-cloak
+           x-transition:enter="transition-all duration-200 ease-out"
+           x-transition:enter-start="max-h-0 opacity-0"
+           x-transition:enter-end="max-h-[52px] opacity-100"
+           x-transition:leave="transition-all duration-200 ease-in"
+           x-transition:leave-start="max-h-[52px] opacity-100"
+           x-transition:leave-end="max-h-0 opacity-0">
         {% comment %}The room type is shown as the stripe down the left edge of
         this cell instead of a text tag, so the room name keeps the whole
         (narrow, on a phone) name column. The type's name is still readable as
@@ -216,7 +215,7 @@ toolbar isn't carrying a permanent instruction nobody needs.{% endcomment %}
              style="{{ row.category_style }}"
              {% if row.category_label %}title="{% blocktranslate with name=row.category_label %}Room type: {{ name }}{% endblocktranslate %}"{% endif %}>
           <input
-            type="text" value="{{ row.name }}" maxlength="10"
+            type="text" name="name" value="{{ row.name }}" maxlength="10"
             {% if row.category_label %}aria-describedby="room-type-{{ row.id }}"{% endif %}
             hx-post="{% url 'villas:rename_room' row.villa_slug row.id %}" hx-trigger="change" hx-swap="none"
             class="min-w-0 flex-1 truncate rounded-md border-0 bg-transparent px-1.5 py-[2px] text-[12.5px] text-ink-900 outline-none hover:bg-sand-200 focus:bg-teal-50 focus:ring-2 focus:ring-teal-600"
@@ -246,7 +245,7 @@ toolbar isn't carrying a permanent instruction nobody needs.{% endcomment %}
           {% for bar in row.bars %}
             <button
               type="button"
-              class="absolute inset-y-[9px] z-[2] flex min-w-[36px] md:min-w-[44px] items-center overflow-hidden whitespace-nowrap rounded-sm px-2 text-left text-xs font-semibold shadow-sm"
+              class="absolute inset-y-[9px] z-[2] flex min-w-[36px] md:min-w-[44px] items-center overflow-hidden whitespace-nowrap px-2 text-left text-xs font-semibold shadow-sm"
               style="{{ bar.style }}"
               title="{{ bar.label }}"
               data-booking-id="{{ bar.id }}"
@@ -283,8 +282,14 @@ toolbar isn't carrying a permanent instruction nobody needs.{% endcomment %}
       </div>
 
     {% elif row.kind == "add_room" %}
-      <div class="flex border-t border-sand-300/60 {% if forloop.last %}rounded-b-lg{% endif %}"
+      <div class="flex overflow-hidden border-t border-sand-300/60 {% if forloop.last %}rounded-b-lg{% endif %}"
            x-show="isOpen({{ row.villa_id }})" x-cloak
+           x-transition:enter="transition-all duration-200 ease-out"
+           x-transition:enter-start="max-h-0 opacity-0"
+           x-transition:enter-end="max-h-[44px] opacity-100"
+           x-transition:leave="transition-all duration-200 ease-in"
+           x-transition:leave-start="max-h-[44px] opacity-100"
+           x-transition:leave-end="max-h-0 opacity-0"
            {% if row.categories|length > 1 %}x-data="{ addRoomOpen: false, addRoomCategory: null }"{% endif %}>
         <div class="cal-namecol flex-none bg-sand-100 py-1 pl-s2 pr-s1 md:w-[210px] md:pl-[44px] md:pr-s2">
           {% if row.categories|length > 1 %}
@@ -387,7 +392,7 @@ on screen at the last full page load.
   @click="cancelConfirm()"
   @keydown.escape.window="cancelConfirm()"
 >
-  <div class="w-[90vw] max-w-[360px] rounded-card border border-sand-300 bg-sand-100 p-s6 shadow-lg" @click.stop>
+  <div class="w-[63vw] max-w-[252px] rounded-card border border-sand-300 bg-sand-100 p-s6 shadow-lg" @click.stop>
     <template x-if="confirmTarget">
       <div>
         <p class="mb-s4 text-sm" x-text="confirmTarget.message"></p>

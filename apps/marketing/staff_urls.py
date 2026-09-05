@@ -6,12 +6,11 @@ put an internal view on a public path by mistake.
 """
 
 from django.urls import path
-from django.utils.translation import gettext_lazy as _
 
-from apps.core.views import ComingSoonView
+from apps.marketing.staff_views import MarketingOverviewView
 
 app_name = "marketing_admin"
 
 urlpatterns = [
-    path("", ComingSoonView.as_view(extra_context={"title": _("Marketing")}), name="overview"),
+    path("", MarketingOverviewView.as_view(), name="overview"),
 ]

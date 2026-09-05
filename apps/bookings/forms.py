@@ -131,6 +131,9 @@ class ReservationForm(forms.Form):
         self.villas = villas
         self.hide_money = hide_money
         self.available_room = None
+        # Set alongside available_room: the shuffle of other bookings that has to
+        # happen for that room to be free. The view applies it when it saves.
+        self.room_moves = []
         self.next_free_date = None
 
         villa_ids = [v.id for v in villas]
@@ -166,7 +169,7 @@ class ReservationForm(forms.Form):
             check_out = None
 
         if room_type and check_in and check_out:
-            room, next_free_date = find_available_room(room_type, check_in, check_out)
+            room, next_free_date, moves = find_available_room(room_type, check_in, check_out)
             if room is None:
                 self.next_free_date = next_free_date
                 message = _(
@@ -179,6 +182,7 @@ class ReservationForm(forms.Form):
                 self.add_error(None, message)
             else:
                 self.available_room = room
+                self.room_moves = moves
 
         if not cleaned_data.get("phone") and not cleaned_data.get("email"):
             self.add_error(None, _("Add a phone number or email so staff can reach the guest."))

@@ -17,3 +17,12 @@ def safe_next(request, fallback_url):
     if next_url and url_has_allowed_host_and_scheme(next_url, allowed_hosts={request.get_host()}):
         return next_url
     return fallback_url
+
+
+def title_words(text: str) -> str:
+    """Turns "private  kitchen" into "Private Kitchen".
+
+    Only the first letter of each word is touched - .title() would flatten
+    wording the operator meant, turning "AC" into "Ac" and "BBQ" into "Bbq".
+    """
+    return " ".join(w[:1].upper() + w[1:] for w in text.split())

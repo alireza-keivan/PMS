@@ -23,7 +23,17 @@ doesn't require the listening element to be the one that changed.
   {% if availability.free %}
     <div class="flex items-start gap-2 rounded-sm border border-accent2-300 bg-accent2-100 px-3 py-2.5 text-sm text-accent2-800">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round" class="mt-0.5 flex-none"><path d="M20 6 9 17l-5-5"/></svg>
-      <span>{% translate "This room is free for these dates." %}</span>
+      <span>
+        {% if availability.moves %}
+          {% blocktranslate trimmed count n=availability.moves %}
+            A room can be free for these dates. Saving this will move {{ n }} other booking to a different room of the same type.
+          {% plural %}
+            A room can be free for these dates. Saving this will move {{ n }} other bookings to different rooms of the same type.
+          {% endblocktranslate %}
+        {% else %}
+          {% translate "This room is free for these dates." %}
+        {% endif %}
+      </span>
     </div>
   {% elif availability %}
     {% url 'bookings:calendar' as calendar_url %}

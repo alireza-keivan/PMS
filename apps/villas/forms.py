@@ -13,10 +13,12 @@ from django import forms
 from django.forms import inlineformset_factory
 from django.utils.translation import gettext_lazy as _
 
+from apps.core.utils import title_words
 from apps.villas.models import (
     DEFAULT_CHECK_IN_TIME,
     DEFAULT_CHECK_OUT_TIME,
     MAX_ROOMS_PER_TYPE,
+    MAX_VILLA_AMENITIES,
     Amenity,
     RoomCategory,
     Villa,
@@ -115,6 +117,7 @@ class VillaForm(forms.ModelForm):
             "name", "property_type", "area", "address", "google_maps_url",
             "check_in_time", "check_out_time",
             "description_en", "description_id", "amenities",
+            "auto_reassign_rooms",
         ]
         labels = {
             "name": _("Name"),
@@ -127,6 +130,7 @@ class VillaForm(forms.ModelForm):
             "description_en": _("Description (English)"),
             "description_id": _("Description (Indonesian)"),
             "amenities": _("Amenities"),
+            "auto_reassign_rooms": _("Fit longer stays in by moving rooms around"),
         }
         widgets = {
             "name": forms.TextInput(attrs={"class": INPUT, "placeholder": _("e.g. Villa Kenanga")}),
@@ -150,6 +154,9 @@ class VillaForm(forms.ModelForm):
                 "class": TEXTAREA, "rows": 3, "placeholder": _("A few sentences guests will see"),
             }),
             "amenities": forms.CheckboxSelectMultiple(attrs={"class": CHECKBOX}),
+            "auto_reassign_rooms": forms.CheckboxInput(attrs={
+                "class": "h-4 w-4 rounded border-sand-400 text-teal-600",
+            }),
         }
         error_messages = {
             "name": {"required": _("Give the villa a name.")},
@@ -171,6 +178,16 @@ class VillaForm(forms.ModelForm):
         # operator's, even though they all live in one table.
         self.fields["amenities"].queryset = Amenity.available_to(organization)
         self.fields["amenities"].required = False
+        self.fields["auto_reassign_rooms"].required = False
+
+    def clean_amenities(self):
+        amenities = self.cleaned_data["amenities"]
+        if len(amenities) > MAX_VILLA_AMENITIES:
+            raise forms.ValidationError(
+                _("Pick up to %(limit)s. You have %(picked)s ticked - untick a few.")
+                % {"limit": MAX_VILLA_AMENITIES, "picked": len(amenities)}
+            )
+        return amenities
 
     def clean_check_in_time(self):
         return self.cleaned_data.get("check_in_time") or DEFAULT_CHECK_IN_TIME
@@ -380,7 +397,7 @@ class CustomAmenityForm(forms.ModelForm):
         self.organization = organization
 
     def clean_name_en(self):
-        name = self.cleaned_data["name_en"].strip()
+        name = title_words(self.cleaned_data["name_en"])
         if Amenity.available_to(self.organization).filter(name_en__iexact=name).exists():
             raise forms.ValidationError(_("That one is already on the list."))
         return name

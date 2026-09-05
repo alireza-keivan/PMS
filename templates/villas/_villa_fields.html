@@ -40,11 +40,29 @@ extra homework instead of what it is - genuinely fine to skip.
   </div>
 
   <div class="grid gap-4 sm:grid-cols-2">
-    {% include "villas/_field.html" with field=form.check_in_time hint=_("Left empty, this is 2:00 PM.") %}
-    {% include "villas/_field.html" with field=form.check_out_time hint=_("Left empty, this is 11:00 AM.") %}
+    {% include "villas/_field.html" with field=form.check_in_time hint=_("Left empty, this is 2:00 PM.") time_picker=True %}
+    {% include "villas/_field.html" with field=form.check_out_time hint=_("Left empty, this is 11:00 AM.") time_picker=True %}
   </div>
 
-  {% include "villas/_amenity_checkboxes.html" with field=form.amenities category=villa %}
+  {# Off unless the operator asks for it: it changes which room real, #}
+  {# already-booked guests are in, so it is never switched on for them. #}
+  <label class="flex items-start gap-2.5 rounded-sm border border-sand-300 bg-sand-50 px-3 py-2.5">
+    {{ form.auto_reassign_rooms }}
+    <span class="text-sm text-ink-700">
+      <span class="font-medium text-ink-800">{{ form.auto_reassign_rooms.label }}</span>
+      <span class="mt-0.5 block text-xs text-ink-500">
+        {% blocktranslate trimmed %}
+          A few short bookings spread across rooms of the same type can block a
+          longer one, even when there is really room for it. With this on, we
+          move those bookings together into fewer rooms so the longer stay
+          fits. Only bookings that have not started yet are moved, and only
+          between rooms of the same type.
+        {% endblocktranslate %}
+      </span>
+    </span>
+  </label>
+
+  {% include "villas/_amenity_checkboxes.html" with field=form.amenities category=villa max_amenities=max_amenities %}
 
   <div class="field">
     <label class="mb-1 flex items-baseline gap-1 text-sm text-ink-800">

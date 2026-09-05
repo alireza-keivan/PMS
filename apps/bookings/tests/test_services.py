@@ -174,7 +174,7 @@ def test_villa_nests_its_rooms_as_groups(owner_request, org, villa):
     from apps.villas.models import Room
 
     extra = Room.objects.create(organization=org, villa=villa, name="Room 2")
-    default_room = villa.rooms.get(name="Standard")  # created with the villa
+    default_room = villa.rooms.get(name="Standard A")  # created with the villa
 
     data = build_calendar_data(owner_request, start=date.today(), days=14, q="")
     villa_group = _group_by_id(data, f"villa-{villa.id}")
@@ -260,7 +260,7 @@ def test_rows_are_ordered_area_then_villa_then_its_rooms(owner_request, org, vil
 
 def test_a_booking_becomes_a_bar_on_its_own_room_row(owner_request, org, villa):
     today = date.today()
-    room = villa.rooms.get(name="Standard")
+    room = villa.rooms.get(name="Standard A")
     guest = find_or_create_guest(org, full_name="Anna Petrova")
     _booking(org, villa, today, offset=0, room=room, guest=guest,
              source_detail=Booking.SourceDetail.FULL)
@@ -268,12 +268,12 @@ def test_a_booking_becomes_a_bar_on_its_own_room_row(owner_request, org, villa):
     data = build_calendar_rows(owner_request, start=today, days=14, q="")
     bars = _rows_of_kind(data, "room")[0]["bars"]
     assert [b["label"] for b in bars] == ["Anna Petrova"]
-    assert bars[0]["room_name"] == "Standard"
+    assert bars[0]["room_name"] == "Standard A"
 
 
 def test_a_bar_is_positioned_by_its_offset_into_the_window(owner_request, org, villa):
     today = date.today()
-    room = villa.rooms.get(name="Standard")
+    room = villa.rooms.get(name="Standard A")
     _booking(org, villa, today, offset=2, nights=2, room=room)  # days 2-3 of 10
 
     bar = _rows_of_kind(build_calendar_rows(owner_request, start=today, days=10, q=""), "room")[0]["bars"][0]
@@ -283,7 +283,7 @@ def test_a_bar_is_positioned_by_its_offset_into_the_window(owner_request, org, v
 
 def test_a_stay_starting_before_the_window_is_clamped_to_its_left_edge(owner_request, org, villa):
     today = date.today()
-    room = villa.rooms.get(name="Standard")
+    room = villa.rooms.get(name="Standard A")
     _booking(org, villa, today, offset=-5, nights=8, room=room)  # started 5 days ago
 
     bar = _rows_of_kind(build_calendar_rows(owner_request, start=today, days=10, q=""), "room")[0]["bars"][0]
@@ -293,7 +293,7 @@ def test_a_stay_starting_before_the_window_is_clamped_to_its_left_edge(owner_req
 
 def test_money_owed_is_withheld_from_staff_in_the_rows(org, user, villa, make_membership):
     today = date.today()
-    room = villa.rooms.get(name="Standard")
+    room = villa.rooms.get(name="Standard A")
     booking = _booking(org, villa, today, offset=0, room=room)
     BookingPayment.objects.create(
         organization=org, booking=booking, amount="1000000", currency="IDR", is_outstanding=True,

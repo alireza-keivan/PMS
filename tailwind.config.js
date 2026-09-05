@@ -24,6 +24,7 @@ module.exports = {
     "spinner-indicator",
     "elev-sm", "guest-scroll", "detail-card-fade", "cal-search-focus",
     "pick", "pick-input",
+    "disclosure", "is-open",
   ],
   theme: {
     extend: {

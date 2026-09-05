@@ -1,0 +1,64 @@
+{% load i18n %}
+{% comment %}
+Pick a time of day - the "Time Picker" card from the design handoff.
+
+Three little wheels side by side: hour, minute, and am/pm. The middle row of
+each is the chosen one; the rows above and below fade away. Minutes go in
+half-hour steps, so there are only two of them: 00 and 30.
+
+A row can be tapped, or the wheel spun - dragged with a finger or the mouse,
+rolled with a scroll wheel or trackpad (sideways as well as up and down), or
+turned with the arrow keys once the wheel has the focus.
+
+Reusable anywhere a form asks for a time:
+
+    {% include "partials/_time_picker.html" with field=form.check_in_time %}
+
+Optional extras:
+    step        minutes between choices (default 30)
+    picker_id   only needed if the same field id could appear twice on a page
+
+How it works, and why it's built this way: the real time box is always here
+and always submitted. With no JavaScript it shows as the browser's own time
+box and the form works exactly as before. When the script does run it hides
+that box, shows the one field, and writes back into the same input (firing
+`change`, so anything listening on it still updates). The input stays the one
+source of truth; the wheels are only a nicer way to fill it in.
+{% endcomment %}
+
+<div class="tp" data-time-picker data-step="{{ step|default:30 }}"
+     id="{{ picker_id|default:field.auto_id }}-tp">
+
+  {% comment %} The plain box - the only thing shown when there is no script. {% endcomment %}
+  <div class="tp-native">{{ field }}</div>
+
+  {% comment %} Closed, this is all there is: the time written out, and a clock mark. {% endcomment %}
+  <button type="button" class="tp-trigger" data-tp-trigger hidden
+          aria-haspopup="dialog" aria-expanded="false">
+    <span class="tp-trigger-value min-w-0 flex-1" data-tp-trigger-value
+          data-empty-text="{% translate 'Pick a time' %}">{% translate "Pick a time" %}</span>
+    <svg class="h-[18px] w-[18px] flex-none text-ink-600" viewBox="0 0 24 24" fill="none"
+         stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+      <circle cx="12" cy="12" r="9"/>
+      <path d="M12 7v5l3 2"/>
+    </svg>
+  </button>
+
+  {% comment %} The wheels. Hidden until the field is tapped. {% endcomment %}
+  <div class="tp-panel" hidden role="dialog" aria-label="{% translate 'Pick a time' %}">
+    <div class="tp-wheels">
+      {% comment %} The band behind the middle row, marking what is chosen. {% endcomment %}
+      <div class="tp-band" aria-hidden="true"></div>
+      <div class="tp-col" data-tp-col="hour"></div>
+      <div class="tp-colon" aria-hidden="true">:</div>
+      <div class="tp-col" data-tp-col="minute"></div>
+      <div class="tp-col tp-col-period" data-tp-col="period"></div>
+    </div>
+
+    <div class="my-s3 h-px bg-sand-300"></div>
+
+    <div class="flex justify-center">
+      <button type="button" class="btn btn-primary" data-tp-done>{% translate "Done" %}</button>
+    </div>
+  </div>
+</div>

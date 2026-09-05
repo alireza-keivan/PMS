@@ -35,6 +35,7 @@ urlpatterns += i18n_patterns(
     path("", RedirectView.as_view(pattern_name="bookings:calendar", permanent=False), name="home"),
     path("", include("apps.bookings.urls", namespace="bookings")),
     path("today/", include("apps.reporting.urls", namespace="reporting")),
+    path("reporting/", include("apps.reporting.report_urls", namespace="reports")),
     path("accounts/", include("apps.accounts.urls", namespace="accounts")),
     path("villas/", include("apps.villas.urls", namespace="villas")),
     path("guests/", include("apps.guests.urls", namespace="guests")),

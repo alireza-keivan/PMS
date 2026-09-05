@@ -22,6 +22,13 @@
 }
 
 @layer base {
+  /* Always reserve room for the vertical scrollbar. Without this, anything
+     that grows the page (an opening .disclosure panel, a filtered list) makes
+     the scrollbar appear and shifts every centered layout sideways - reads as
+     the page "jumping" horizontally. */
+  html {
+    scrollbar-gutter: stable;
+  }
   body {
     font-size: 15px;
     line-height: 1.55;
@@ -152,6 +159,16 @@
   .nav-pill:hover { @apply bg-teal-50 text-ink-900; }
   .nav-pill-active { @apply bg-teal-600 text-sand-50 shadow-sm; }
   .nav-pill-active:hover { @apply bg-teal-600; }
+
+  /* Progressive disclosure: a panel that slides open smoothly instead of
+     popping into place. The 0fr -> 1fr grid row is the trick that lets it
+     animate to its natural height, which plain `height: auto` can't do.
+     Usage: <div class="disclosure" :class="{ 'is-open': open }"><div>...</div></div>
+     - the single child is the one that gets clipped while collapsed. */
+  .disclosure { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 300ms ease-out; }
+  .disclosure.is-open { grid-template-rows: 1fr; }
+  .disclosure > * { overflow: hidden; }
+  @media (prefers-reduced-motion: reduce) { .disclosure { transition: none; } }
 
   .card { @apply rounded-card border border-sand-300 bg-sand-100 p-4 shadow-sm; }
   /* Guest detail page: fixed-height card, ~4 rows visible, rest scrollable.
@@ -393,6 +410,79 @@
   .drp-day-inner:hover:not(:disabled) { @apply bg-teal-100; }
   .drp-day-selected, .drp-day-selected:hover { @apply bg-teal-500 font-bold text-sand-50; }
   .drp-day-off { @apply cursor-not-allowed text-ink-400 line-through opacity-60; }
+
+  /* ---- Time picker ----
+     The "Time Picker" card from the design handoff: three little wheels (hour,
+     minute, am/pm) with the chosen row in the middle and the rest faded out.
+     Markup is templates/partials/_time_picker.html, behaviour is
+     static/js/time_picker.js. */
+  .tp { @apply relative; }
+  .tp-native[hidden] { display: none; }
+
+  /* The one field, closed. Shaped like .input so it reads as a field and not
+     as a button. */
+  .tp-trigger {
+    @apply flex w-full cursor-pointer items-center gap-3 rounded-[22px] border border-sand-300
+           bg-sand-100 px-4 py-2 text-left transition-colors;
+  }
+  .tp-trigger:hover { @apply border-sand-400; }
+  .tp-trigger[aria-expanded="true"] { @apply border-teal-600; }
+  .tp-trigger-value { @apply block truncate text-sm text-ink-900; }
+
+  /* Sized at 70% of the original card - it holds three short columns and a
+     button, and any bigger it looks like a dialog rather than a small choice. */
+  .tp-panel {
+    @apply absolute left-0 z-30 mt-2 w-[174px] max-w-[calc(100vw-2rem)] rounded-card
+           border border-sand-300 bg-sand-100 p-s3 shadow-lg;
+    transform-origin: top center;
+    transition: opacity 0.16s ease, transform 0.16s ease;
+  }
+  .tp-panel[hidden] { display: none; }
+  .tp-panel:not(.tp-panel-open) {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.98);
+    pointer-events: none;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .tp-panel { transition: none; }
+  }
+
+  .tp-wheels { @apply relative flex items-center justify-center gap-1; }
+  /* The band behind the middle row. Sits under the wheels, which is why they
+     are lifted with z-10. */
+  .tp-band {
+    @apply pointer-events-none absolute left-0 right-0 top-1/2 h-[26px] -translate-y-1/2
+           rounded-md bg-teal-50;
+  }
+  /* Each wheel is a scrolling strip five rows tall, snapping a row to the
+     middle. Scrolling it natively is what gives a finger flick its momentum,
+     so the row heights here and ROW in time_picker.js must stay in step:
+     5 x 24px. overscroll-behavior keeps the page behind still when a wheel
+     reaches its end; the scrollbar itself is hidden in all three engines. */
+  .tp-col {
+    @apply relative z-10 h-[120px] w-[45px] cursor-grab overflow-y-auto;
+    scroll-snap-type: y mandatory;
+    overscroll-behavior: contain;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    touch-action: pan-y;
+  }
+  .tp-col::-webkit-scrollbar { display: none; }
+  .tp-col:active { @apply cursor-grabbing; }
+  .tp-col:focus-visible { @apply rounded-md outline-none ring-2 ring-teal-600; }
+  .tp-col-period { @apply w-[38px]; }
+  .tp-colon { @apply relative z-10 font-display text-[15px] text-ink-900; }
+  /* The blank space above the first row and below the last, so either end can
+     still reach the middle - two rows' worth at each end. */
+  .tp-pad { @apply h-[48px]; }
+  /* Fixed height, and always the same font size. The shrinking and fading of
+     the rows away from the middle is done with a transform in the script, so
+     the strip never changes height as it moves. */
+  .tp-row {
+    @apply flex h-[24px] w-full cursor-pointer select-none items-center justify-center
+           rounded-md text-center font-display text-[15px] text-ink-900;
+    scroll-snap-align: center;
+  }
 
   /* Loading spinner - one look for every "waiting on something" moment.
      Pure CSS rotation (no JS), terracotta arc on a faint terracotta track.

@@ -1,6 +1,6 @@
 """Rooms are made a type at a time: the operator names the type ("Deluxe")
-and says how many there are, and that many rooms appear - "Deluxe", "Deluxe 2",
-"Deluxe 3" - each renameable afterwards.
+and says how many there are, and that many rooms appear - "Deluxe A",
+"Deluxe B", "Deluxe C" - each renameable afterwards.
 
 So the tests worth having are: the names come out in that series and never
 collide; the number can be raised and lowered from the villa's rooms panel;
@@ -39,7 +39,7 @@ def owner_client(client, org, user, make_membership):
 def test_every_new_villa_starts_with_one_room_type_and_one_room(org):
     villa = Villa.objects.create(organization=org, name="Fresh", slug="fresh")
     assert [c.name for c in villa.room_categories.all()] == ["Standard"]
-    assert [r.name for r in villa.rooms.all()] == ["Standard"]
+    assert [r.name for r in villa.rooms.all()] == ["Standard A"]
 
 
 def test_a_villa_created_with_bedrooms_starts_with_that_many_rooms(org):
@@ -49,14 +49,14 @@ def test_a_villa_created_with_bedrooms_starts_with_that_many_rooms(org):
     """
     villa = Villa.objects.create(organization=org, name="Big", slug="big", bedrooms=4)
     assert [r.name for r in villa.rooms.all()] == [
-        "Standard", "Standard 2", "Standard 3", "Standard 4",
+        "Standard A", "Standard B", "Standard C", "Standard D",
     ]
 
 
 def test_a_room_type_names_its_rooms_after_itself(org, villa):
     create_room_type(villa, "Deluxe", how_many=3)
     deluxe = villa.room_categories.get(name="Deluxe")
-    assert [r.name for r in deluxe.rooms.order_by("id")] == ["Deluxe", "Deluxe 2", "Deluxe 3"]
+    assert [r.name for r in deluxe.rooms.order_by("id")] == ["Deluxe A", "Deluxe B", "Deluxe C"]
 
 
 def test_more_rooms_follow_the_first_rooms_name_after_it_is_renamed(org, villa):
@@ -70,24 +70,25 @@ def test_more_rooms_follow_the_first_rooms_name_after_it_is_renamed(org, villa):
 
     add_rooms(villa, deluxe, 2)
     assert [r.name for r in deluxe.rooms.order_by("id")] == [
-        "Kenanga", "Deluxe 2", "Deluxe 3", "Kenanga 4", "Kenanga 5",
+        "Kenanga", "Deluxe B", "Deluxe C", "Kenanga D", "Kenanga E",
     ]
 
 
 def test_new_room_names_skip_ones_already_used_in_the_villa(org, villa):
     deluxe = create_room_type(villa, "Deluxe", how_many=1)
-    Room.objects.create(organization=org, villa=villa, name="Deluxe 2", category=deluxe)
-    assert next_room_names(villa, deluxe, 2) == ["Deluxe 3", "Deluxe 4"]
+    Room.objects.create(organization=org, villa=villa, name="Deluxe B", category=deluxe)
+    assert next_room_names(villa, deluxe, 2) == ["Deluxe C", "Deluxe D"]
 
 
-def test_numbering_carries_on_from_a_room_that_already_ends_in_a_number(org):
-    """Older villas have rooms called "Standard 1", "Standard 2" - adding more
-    continues that series instead of starting a second one.
+def test_lettering_carries_on_from_an_older_numbered_room(org):
+    """Rooms used to be numbered - older villas still have a "Standard 1".
+    Adding more reads the series name off it and carries on lettering from
+    where the type left off, instead of starting a second series.
     """
     villa = Villa.objects.create(organization=org, name="Old", slug="old")
     standard = villa.room_categories.get(name="Standard")
     villa.rooms.update(name="Standard 1")
-    assert next_room_names(villa, standard, 2) == ["Standard 2", "Standard 3"]
+    assert next_room_names(villa, standard, 2) == ["Standard B", "Standard C"]
 
 
 def test_adding_rooms_keeps_the_villas_room_count_right(org, villa):
@@ -109,7 +110,7 @@ def test_lowering_the_number_removes_the_newest_rooms(org, villa):
     deluxe = create_room_type(villa, "Deluxe", how_many=3)
     added, removed = set_room_count(villa, deluxe, 1)
     assert (added, removed) == (0, 2)
-    assert [r.name for r in deluxe.rooms.all()] == ["Deluxe"]
+    assert [r.name for r in deluxe.rooms.all()] == ["Deluxe A"]
 
 
 def test_lowering_the_number_skips_a_room_that_still_has_bookings(org, villa):
@@ -199,7 +200,7 @@ def test_renaming_a_room_type_renames_its_rooms_too(owner_client, villa):
     assert response.status_code == 302
     deluxe.refresh_from_db()
     assert deluxe.name == "Kenanga"
-    assert [r.name for r in deluxe.rooms.order_by("id")] == ["Kenanga", "Kenanga 2"]
+    assert [r.name for r in deluxe.rooms.order_by("id")] == ["Kenanga A", "Kenanga B"]
 
 
 def test_a_room_renamed_by_hand_keeps_its_name_when_the_type_is_renamed(owner_client, villa):
@@ -217,7 +218,7 @@ def test_a_room_renamed_by_hand_keeps_its_name_when_the_type_is_renamed(owner_cl
         _blocks(villa, **{f"rooms-{i}-name": "Garden"}),
     )
 
-    assert [r.name for r in deluxe.rooms.order_by("id")] == ["Kenanga", "Garden 2"]
+    assert [r.name for r in deluxe.rooms.order_by("id")] == ["Kenanga", "Garden B"]
 
 
 def test_rooms_added_in_the_same_save_follow_the_new_name(owner_client, villa):
@@ -232,7 +233,7 @@ def test_rooms_added_in_the_same_save_follow_the_new_name(owner_client, villa):
         _blocks(villa, **{f"rooms-{i}-name": "Garden", f"rooms-{i}-room_count": "3"}),
     )
 
-    assert [r.name for r in deluxe.rooms.order_by("id")] == ["Garden", "Garden 2", "Garden 3"]
+    assert [r.name for r in deluxe.rooms.order_by("id")] == ["Garden A", "Garden B", "Garden C"]
 
 
 def test_a_room_type_has_to_have_at_least_one_room(owner_client, villa):
@@ -406,9 +407,9 @@ def test_rename_room_updates_the_name(owner_client, villa):
 def test_quick_add_room_follows_the_villas_first_room_type(owner_client, villa):
     response = owner_client.post(reverse("villas:quick_add_room", args=[villa.slug]))
     assert response.status_code == 302
-    assert villa.rooms.count() == 2  # the starter "Standard" plus this one
-    new_room = villa.rooms.exclude(name="Standard").get()
-    assert new_room.name == "Standard 2"
+    assert villa.rooms.count() == 2  # the starter "Standard A" plus this one
+    new_room = villa.rooms.exclude(name="Standard A").get()
+    assert new_room.name == "Standard B"
     assert new_room.category.name == "Standard"
 
 

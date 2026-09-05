@@ -220,7 +220,12 @@
   }
 
   function watchDirty(form) {
+    // The button usually sits inside the form, but it can also live outside
+    // and point back with form="<id>" (the activities page does this).
     var button = form.querySelector("[data-dirty-submit]");
+    if (!button && form.id) {
+      button = document.querySelector('[data-dirty-submit][form="' + form.id + '"]');
+    }
     if (!button) return;
     var clean = snapshot(form);
     var photosChanged = false;

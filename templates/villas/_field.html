@@ -13,6 +13,9 @@ quiet until they get close to the limit, then turns into a warning once they
 go over - the box itself never blocks typing, so nobody loses words
 mid-sentence.
 
+Pass `time_picker` for a time field, and the plain time box is swapped for the
+wheel picker (half-hour steps).
+
 Errors are hidden when `hide_errors` is set, which is how the room blocks come
 back after one is added or removed: that is work in progress, not a rejected
 submission.
@@ -40,6 +43,8 @@ submission.
                    ? '{{ counter_over_msg|escapejs }}'.replace('NUM', used - max)
                    : '{{ counter_ok_msg|escapejs }}'.replace('NUM', used)"></p>
     </div>
+  {% elif time_picker %}
+    {% include "partials/_time_picker.html" with field=field step=30 %}
   {% else %}
     {{ field }}
   {% endif %}

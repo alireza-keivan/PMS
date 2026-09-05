@@ -44,6 +44,7 @@ from apps.villas.models import (
     MAX_PHOTO_SIZE_MB,
     MAX_PHOTOS_PER_OWNER,
     MAX_ROOMS_PER_TYPE,
+    MAX_VILLA_AMENITIES,
     MIN_PHOTO_WIDTH_PX,
     Amenity,
     Room,
@@ -537,6 +538,7 @@ class VillaDetailsView(ManagerRequiredMixin, View):
             "organization": self.organization,
             "areas": BALI_AREAS,
             "step": 1,
+            "max_amenities": MAX_VILLA_AMENITIES,
             # Only amenities this operator typed in themselves can be removed -
             # never one of the shared, built-in ones.
             "custom_amenity_ids": {
@@ -998,16 +1000,10 @@ class VillaActivitiesView(ManagerRequiredMixin, View):
         return self._render(getattr(self, "experience_form", None) or ExperienceForm())
 
     def _render(self, experience_form):
-        website_path = reverse(
-            "marketing:villa_page",
-            args=[self.villa.organization.slug, self.villa.slug],
-        )
         return render(self.request, self.template_name, {
             "villa": self.villa,
             "experiences": self.villa.experiences.all(),
             "experience_form": experience_form,
-            "website_url": self.request.build_absolute_uri(website_path),
-            "website_missing_requirements": self.villa.website_missing_requirements(),
         })
 
 
@@ -1032,7 +1028,7 @@ class VillaWebsiteToggleView(ManagerRequiredMixin, View):
                     _("Add these first before turning the website on: %(items)s")
                     % {"items": "; ".join(missing)},
                 )
-                return redirect("villas:activities", slug=villa.slug)
+                return redirect("marketing_admin:overview")
 
         villa.is_listed_publicly = want_website
         villa.save(update_fields=["is_listed_publicly"])
@@ -1044,7 +1040,7 @@ class VillaWebsiteToggleView(ManagerRequiredMixin, View):
             messages.success(request, _("Your villa's website is now on."))
         else:
             messages.success(request, _("Your villa's website is now off."))
-        return redirect("villas:activities", slug=villa.slug)
+        return redirect("marketing_admin:overview")
 
 
 class VillaExperienceCreateView(ManagerRequiredMixin, View):

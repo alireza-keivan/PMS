@@ -12,75 +12,6 @@ edit page. See apps.villas.views.VillaActivitiesView and friends.
   <h2 class="mb-0.5 text-[32px]">{% translate "Things to do nearby" %}</h2>
   <p class="m-0 mb-6 text-ink-600">{{ villa.name }}</p>
 
-  {% if website_missing_requirements %}
-    <div class="card mb-6 border-teal-300 bg-teal-50">
-      <p class="m-0 mb-2 text-sm font-medium text-teal-800">
-        {% translate "Finish these before turning the website on:" %}
-      </p>
-      <ul class="m-0 list-disc space-y-1 pl-5 text-sm text-teal-800">
-        {% for item in website_missing_requirements %}
-          <li>{{ item }}</li>
-        {% endfor %}
-      </ul>
-    </div>
-  {% endif %}
-
-  <div class="card mb-6">
-    <div class="mb-3 flex items-center gap-2" x-data="{ copied: false }">
-      <input
-        type="text"
-        readonly
-        value="{{ website_url }}"
-        onclick="this.select()"
-        class="min-w-0 flex-1 rounded border border-sand-300 bg-sand-50 px-2 py-1.5 text-xs text-ink-600"
-      >
-      <button
-        type="button"
-        @click="navigator.clipboard.writeText('{{ website_url|escapejs }}').then(() => { copied = true; setTimeout(() => copied = false, 2000) })"
-        class="btn btn-ghost flex h-9 w-9 flex-none items-center justify-center !p-0"
-        aria-label="{% translate 'Copy website link' %}"
-        title="{% translate 'Copy website link' %}"
-      >
-        <svg x-show="!copied" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
-          <rect x="9" y="9" width="13" height="13" rx="2" />
-          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-        </svg>
-        <span x-show="copied" x-cloak class="text-xs text-accent2-800">{% translate "Copied" %}</span>
-      </button>
-      {% if villa.is_listed_publicly %}
-        <a
-          href="{{ website_url }}"
-          target="_blank"
-          rel="noopener"
-          aria-label="{% translate "View website" %}"
-          title="{% translate "View website" %}"
-          class="btn btn-ghost flex h-9 w-9 flex-none items-center justify-center !p-0 !text-amber-800 hover:!bg-amber-50"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
-            <rect x="3" y="4" width="18" height="12" rx="1" />
-            <path d="M2 20h20" />
-          </svg>
-        </a>
-      {% endif %}
-    </div>
-
-    <form method="post" action="{% url 'villas:toggle_website' villa.slug %}">
-      {% csrf_token %}
-      <label class="flex items-center gap-2 text-sm text-ink-900">
-        <input
-          type="checkbox"
-          name="want_website"
-          value="1"
-          onchange="this.form.submit()"
-          {% if villa.is_listed_publicly %}checked{% endif %}
-          {% if website_missing_requirements and not villa.is_listed_publicly %}disabled{% endif %}
-          class="h-4 w-4 rounded-full border-sand-300 text-teal-600 focus:ring-0 focus:ring-offset-0 disabled:cursor-not-allowed disabled:opacity-50"
-        >
-        {% translate "I want to have my website" %}
-      </label>
-    </form>
-  </div>
-
   <div class="card">
     <p class="m-0 mb-4 text-sm text-ink-600">
       {% translate "Tours, classes, and activities shown on this villa's public page." %}
@@ -101,8 +32,16 @@ edit page. See apps.villas.views.VillaActivitiesView and friends.
             {% else %}
               <div class="h-12 w-12 flex-none rounded bg-sand-100"></div>
             {% endif %}
-            <a href="{% url 'villas:edit_experience' villa.slug experience.pk %}" class="btn btn-ghost">
-              {% translate "Edit" %}
+            <a
+              href="{% url 'villas:edit_experience' villa.slug experience.pk %}"
+              aria-label="{% translate "Edit" %}"
+              title="{% translate "Edit" %}"
+              class="btn btn-icon btn-ghost flex-none opacity-60 hover:opacity-100 hover:!text-amber-800"
+            >
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 20h9" />
+                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z" />
+              </svg>
             </a>
             <form method="post" action="{% url 'villas:remove_experience' villa.slug experience.pk %}">
               {% csrf_token %}
@@ -122,19 +61,31 @@ edit page. See apps.villas.views.VillaActivitiesView and friends.
       <p class="mb-4 text-sm text-ink-600">{% translate "Nothing added yet." %}</p>
     {% endif %}
 
-    <details class="mt-4"{% if experience_form.errors %} open{% endif %}>
-      <summary class="btn btn-ghost cursor-pointer list-none [&::-webkit-details-marker]:hidden">
-        {% translate "Add an activity" %}
-      </summary>
-      <form id="add-experience-form" method="post" enctype="multipart/form-data" action="{% url 'villas:add_experience' villa.slug %}" class="mt-4 space-y-4">
-        {% csrf_token %}
-        {% include "villas/_experience_fields.html" with form=experience_form %}
-      </form>
-    </details>
+    <div class="mt-4" x-data="{ open: {% if experience_form.errors %}true{% else %}false{% endif %} }">
+      <button
+        type="button"
+        @click="open = !open"
+        class="btn btn-icon btn-ghost cursor-pointer transition-transform duration-200"
+        :class="{ 'rotate-45': open }"
+        title="{% translate 'Add an activity' %}"
+        aria-label="{% translate 'Add an activity' %}"
+        :aria-expanded="open"
+      >
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+      </button>
+      <div class="disclosure" :class="{ 'is-open': open }">
+        <div>
+          <form id="add-experience-form" method="post" enctype="multipart/form-data" action="{% url 'villas:add_experience' villa.slug %}" class="mt-4 space-y-4" data-dirty-guard>
+            {% csrf_token %}
+            {% include "villas/_experience_fields.html" with form=experience_form %}
+          </form>
+        </div>
+      </div>
+    </div>
 
     <div class="mt-8 flex items-center justify-between">
       <a href="{% url 'villas:edit' villa.slug %}" class="btn btn-ghost">{% translate "Back" %}</a>
-      <button type="submit" form="add-experience-form" class="btn btn-ghost">{% translate "Add" %}</button>
+      <button type="submit" form="add-experience-form" class="btn btn-ghost" data-dirty-submit>{% translate "Save" %}</button>
     </div>
   </div>
 </div>

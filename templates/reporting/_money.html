@@ -1,0 +1,1 @@
+{% load humanize i18n %}{% if amount is None %}<span class="text-ink-600">&mdash;</span>{% else %}{{ currency }} {{ amount|floatformat:0|intcomma }}{% endif %}

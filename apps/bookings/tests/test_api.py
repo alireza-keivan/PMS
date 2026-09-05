@@ -6,7 +6,6 @@ once wired into config/api.py.
 import pytest
 
 
-
 @pytest.fixture
 def owner_client(client, org, user, make_membership):
     make_membership(user, org, manager=True)

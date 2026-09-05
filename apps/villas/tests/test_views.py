@@ -362,7 +362,7 @@ def test_step_two_saves_each_room_types_details(owner_client, org, pool):
     assert category.nightly_rate == 1_500_000
     assert category.monthly_rate == 30_000_000
     assert list(category.amenities.all()) == [pool]
-    assert [r.name for r in villa.rooms.all()] == ["Garden", "Garden 2", "Garden 3"]
+    assert [r.name for r in villa.rooms.all()] == ["Garden A", "Garden B", "Garden C"]
 
 
 @pytest.mark.parametrize("typed", ["1.500.000", "1,500,000", "1 500 000", "1500000"])

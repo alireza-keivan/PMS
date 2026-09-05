@@ -29,6 +29,7 @@ from apps.bookings.models import Booking, BookingPayment
 from apps.bookings.services import (
     CALENDAR_STATUS_LABELS,
     STATUS_BAR_STYLE,
+    apply_room_moves,
     build_calendar_rows,
     find_available_room,
 )
@@ -183,6 +184,10 @@ class ReservationCreateView(LoginRequiredMixin, View):
                 guest.preferred_language = data["language"]
                 guest.save(update_fields=["preferred_language"])
 
+            # Before the new booking takes its room, slide the upcoming ones
+            # out of the way - only ever non-empty when this villa has
+            # "move upcoming bookings between rooms" switched on.
+            apply_room_moves(form.room_moves)
             booking = Booking.objects.create(
                 organization=org, villa=data["villa"], room=form.available_room, guest=guest,
                 check_in=data["check_in"], check_out=data["check_out"],
@@ -351,9 +356,9 @@ def _reservation_preview(villas, room_type_id, check_in, check_out):
 
     context = {"nights": (check_out - check_in).days if valid_range else None, "availability": None}
     if room_type and valid_range:
-        room, next_free_date = find_available_room(room_type, check_in, check_out)
+        room, next_free_date, moves = find_available_room(room_type, check_in, check_out)
         if room is not None:
-            context["availability"] = {"free": True}
+            context["availability"] = {"free": True, "moves": len(moves)}
         else:
             context["availability"] = {
                 "free": False,

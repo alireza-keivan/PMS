@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% comment %}
+Marketing section landing page. Currently just the mini-website on/off
+switch per villa (feature #13) - moved here from villas/activities.html so
+it lives next to the rest of marketing & distribution instead of buried on
+a per-villa activities page. See apps.marketing.staff_views.MarketingOverviewView.
+{% endcomment %}
+
+{% block title %}{% translate "Marketing" %}{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-2xl">
+  <h2 class="mb-0.5 text-[32px]">{% translate "Marketing" %}</h2>
+  <p class="m-0 mb-6 text-ink-600">{% translate "Your villas' mini websites." %}</p>
+
+  {% if villa_rows %}
+    <div class="space-y-3">
+      {% for row in villa_rows %}
+        <div class="card !p-0" x-data="{ open: false }">
+          {% comment %}Header is the fold toggle - a manager with a dozen
+          villas sees one short row each instead of a wall of link boxes and
+          checklists.{% endcomment %}
+          <button
+            type="button"
+            @click="open = !open"
+            :aria-expanded="open ? 'true' : 'false'"
+            class="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-left hover:bg-sand-100"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                 class="h-4 w-4 flex-none text-ink-600 transition-transform duration-200"
+                 :class="open ? 'rotate-90' : ''">
+              <path d="M9 18l6-6-6-6" />
+            </svg>
+            <span class="min-w-0 flex-1 truncate text-sm font-medium text-ink-900">{{ row.villa.name }}</span>
+            {% if row.villa.is_listed_publicly %}
+              <span class="flex-none rounded-full bg-teal-50 px-2 py-0.5 text-xs text-teal-800">{% translate "Website on" %}</span>
+            {% elif row.website_missing_requirements %}
+              <span class="flex-none rounded-full bg-amber-50 px-2 py-0.5 text-xs text-amber-800">{% translate "Needs finishing" %}</span>
+            {% else %}
+              <span class="flex-none rounded-full bg-sand-100 px-2 py-0.5 text-xs text-ink-600">{% translate "Website off" %}</span>
+            {% endif %}
+          </button>
+
+          {% comment %}grid-rows 0fr to 1fr animates a box of unknown height,
+          which max-height cannot do without guessing a number.{% endcomment %}
+          <div class="grid transition-all duration-200 ease-out"
+               style="grid-template-rows: 0fr"
+               :style="open ? 'grid-template-rows: 1fr' : 'grid-template-rows: 0fr'"
+               :class="open ? 'opacity-100' : 'opacity-0'">
+            <div class="overflow-hidden">
+              <div class="border-t border-sand-300/60 px-4 py-3">
+
+                {% if row.website_missing_requirements %}
+                  <div class="card mb-3 border-teal-300 bg-teal-50">
+                    <p class="m-0 mb-2 text-sm font-medium text-teal-800">
+                      {% translate "Finish these before turning the website on:" %}
+                    </p>
+                    <ul class="m-0 list-disc space-y-1 pl-5 text-sm text-teal-800">
+                      {% for item in row.website_missing_requirements %}
+                        <li>{{ item }}</li>
+                      {% endfor %}
+                    </ul>
+                    <a href="{% url 'villas:edit' row.villa.slug %}"
+                       class="btn btn-primary mt-3 inline-flex items-center gap-1.5 text-sm">
+                      {% translate "Finish villa details" %}
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
+                        <path d="M5 12h14" />
+                        <path d="M12 5l7 7-7 7" />
+                      </svg>
+                    </a>
+                  </div>
+                {% endif %}
+
+                <div class="mb-3 flex items-center gap-2" x-data="{ copied: false }">
+                  <input
+                    type="text"
+                    readonly
+                    value="{{ row.website_url }}"
+                    onclick="this.select()"
+                    class="min-w-0 flex-1 rounded border border-sand-300 bg-sand-50 px-2 py-1.5 text-xs text-ink-600"
+                  >
+                  <button
+                    type="button"
+                    @click="navigator.clipboard.writeText('{{ row.website_url|escapejs }}').then(() => { copied = true; setTimeout(() => copied = false, 2000) })"
+                    class="btn btn-ghost flex h-9 w-9 flex-none items-center justify-center !p-0"
+                    aria-label="{% translate 'Copy website link' %}"
+                    title="{% translate 'Copy website link' %}"
+                  >
+                    <svg x-show="!copied" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
+                      <rect x="9" y="9" width="13" height="13" rx="2" />
+                      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                    </svg>
+                    <span x-show="copied" x-cloak class="text-xs text-accent2-800">{% translate "Copied" %}</span>
+                  </button>
+                  {% if row.villa.is_listed_publicly %}
+                    <a
+                      href="{{ row.website_url }}"
+                      target="_blank"
+                      rel="noopener"
+                      aria-label="{% translate "View website" %}"
+                      title="{% translate "View website" %}"
+                      class="btn btn-ghost flex h-9 w-9 flex-none items-center justify-center !p-0 !text-amber-800 hover:!bg-amber-50"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
+                        <rect x="3" y="4" width="18" height="12" rx="1" />
+                        <path d="M2 20h20" />
+                      </svg>
+                    </a>
+                  {% endif %}
+                </div>
+
+                <form method="post" action="{% url 'villas:toggle_website' row.villa.slug %}">
+                  {% csrf_token %}
+                  <label class="flex items-center gap-2 text-sm text-ink-900">
+                    <input
+                      type="checkbox"
+                      name="want_website"
+                      value="1"
+                      onchange="this.form.submit()"
+                      {% if row.villa.is_listed_publicly %}checked{% endif %}
+                      {% if row.website_missing_requirements and not row.villa.is_listed_publicly %}disabled{% endif %}
+                      class="h-4 w-4 rounded-full border-sand-300 text-teal-600 focus:ring-0 focus:ring-offset-0 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                    {% translate "I want to have my website" %}
+                  </label>
+                </form>
+
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="card">
+      <p class="m-0 text-sm text-ink-600">{% translate "No villas yet." %}</p>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

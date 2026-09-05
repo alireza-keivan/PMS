@@ -7,7 +7,8 @@ Two presenters over one query:
   - build_calendar_data() backs the JSON endpoint (apps.bookings.api).
 """
 
-import math
+import logging
+from collections import namedtuple
 from datetime import timedelta
 from decimal import Decimal
 
@@ -22,6 +23,8 @@ from apps.bookings.models import Booking, BookingPayment
 from apps.organizations.permissions import can_see_money as _can_see_money
 from apps.organizations.scoping import scoped_villas
 from apps.villas.models import Room, RoomCategory
+
+logger = logging.getLogger(__name__)
 
 def _villa_abbreviation(name: str) -> str:
     """Short initials for narrow screens, e.g. "Bamboo Loft Canggu" -> "BLC"."""
@@ -277,72 +280,34 @@ def build_calendar_rows(request, start, days, q) -> dict:
     return {"day_columns": day_columns, "rows": rows}
 
 
-_CHANGEOVER_NOTCH_PX = 9
-
-
-_NOTCH_ARC_STEPS = 8
-
-
-def _notch_arc_points(radius, corner) -> str:
-    """Polygon points tracing a quarter-circle of the given radius, cut into
-    one corner of the bar's box. `corner` is "top-right" or "bottom-left" -
-    the two corners where a bar can touch a back-to-back booking (see
-    _bar_shape_style). Walking theta from 0 to 90 degrees always produces
-    points in the same order the enclosing polygon visits that corner
-    (top edge -> down, or bottom edge -> up), so callers can drop the list
-    straight into their point sequence.
-    """
-    points = []
-    for step in range(_NOTCH_ARC_STEPS + 1):
-        theta = math.radians(90 * step / _NOTCH_ARC_STEPS)
-        if corner == "top-right":
-            x = f"calc(100% - {radius * math.cos(theta):.2f}px)"
-            y = f"{radius * math.sin(theta):.2f}px"
-        else:
-            x = f"{radius * math.cos(theta):.2f}px"
-            y = f"calc(100% - {radius * math.sin(theta):.2f}px)"
-        points.append(f"{x} {y}")
-    return ",".join(points)
-
-
 def _bar_shape_style(left, width, adjoins_prev, adjoins_next) -> str:
-    """left/width plus, on any edge that touches a back-to-back booking, a
-    rounded notch cut into that corner - the check-out bar's top-right
-    corner and the check-in bar's bottom-left corner each curve back a few
-    pixels, so the two bars meet on a rounded seam instead of a flat one.
+    """left/width for the bar, with each free end capped as a half circle -
+    the radius is larger than the bar is tall, so the cap reads as a full
+    ")" / "(" curve rather than a slightly softened corner. The two corners
+    on a side that touches a back-to-back booking are squared off instead,
+    so the two bars butt flush against each other on that shared day rather
+    than leaving a rounded notch of gap between them. A solid border (see
+    STATUS_BAR_STYLE) is what actually shows "this day is shared" between
+    two touching bars.
 
-    Deliberately stays inside each bar's own day range rather than
-    stretching bars into each other's space - an earlier version of this
-    extended both bars half a day into the shared cell to draw a full
-    diagonal "cross", but with two independently-labelled bars overlapping
-    the same pixels their text collided and it read as broken/messy rather
-    than intentional. This trades the full-cross look for one that stays
-    legible: a corner notch plus a solid border (see STATUS_BAR_STYLE) is
-    enough to show "this day is shared" without stacking two labels. The
-    notch itself is a quarter-circle arc (approximated with straight
-    polygon segments, since clip-path can't mix arcs with the percentage
-    coordinates a variable-width bar needs) rather than a straight diagonal
-    cut, so the seam reads as rounded.
+    An earlier version of this cut a quarter-circle notch out of the
+    touching corner via clip-path, but a clip-path mask always renders with
+    hard polygon facets - there's no way to blend it into the box's own
+    border-radius curve - so the "rounded" corner ended up reading as a
+    sharp diagonal cut instead. Plain border-radius has no such limit.
     """
     left_pad = 0 if adjoins_prev else 3
     right_pad = 0 if adjoins_next else 3
-    notch = _CHANGEOVER_NOTCH_PX
-
-    if not adjoins_prev and not adjoins_next:
-        clip = ""
-    else:
-        top_right = (
-            _notch_arc_points(notch, "top-right") if adjoins_next else "100% 0"
-        )
-        bottom_left = (
-            _notch_arc_points(notch, "bottom-left") if adjoins_prev else "0 100%"
-        )
-        clip = f"clip-path:polygon(0 0,{top_right},100% 100%,{bottom_left});"
+    radius = "999px"
+    top_left = "0" if adjoins_prev else radius
+    bottom_left = "0" if adjoins_prev else radius
+    top_right = "0" if adjoins_next else radius
+    bottom_right = "0" if adjoins_next else radius
 
     return (
         f"left:calc({left:.4f}% + {left_pad}px);"
         f"width:calc({width:.4f}% - {left_pad + right_pad}px);"
-        + clip
+        f"border-radius:{top_left} {top_right} {bottom_right} {bottom_left};"
     )
 
 
@@ -417,20 +382,171 @@ def _build_bar(booking, today, payment, can_see_money, start, days, adjoins_prev
     return bar
 
 
+# A booking we may pick up and put in a different room of the same type, as
+# a plain tuple so the packer never touches the database while it thinks.
+# `booking_id` is None for the stay being asked about, which isn't saved yet.
+_Stay = namedtuple("_Stay", "booking_id room_id check_in check_out movable")
+
+
+def _overlaps(a: _Stay, b: _Stay) -> bool:
+    """True when two stays want the same room on the same night.
+
+    Check-out day is not a night: a stay ending on the 3rd and one starting
+    on the 3rd do not clash, which is exactly the case that makes the
+    repacking below worth doing at all.
+    """
+    return a.check_in < b.check_out and a.check_out > b.check_in
+
+
+def _pack(stays: list, room_ids: list, prefer_current: bool) -> dict:
+    """Fit every stay into a room, or give up. Returns {stay_index: room_id}
+    or {} if some stay had nowhere to go.
+
+    First-fit by check-in date. On a set of date ranges this is the textbook
+    optimal answer when everything is free to move - it never needs more
+    rooms than the busiest single night needs - which is why the second pass
+    below drops `prefer_current` and simply retries.
+
+    With `prefer_current` on, a stay stays where it already is whenever that
+    room still works. That is what keeps the number of guests told "you're in
+    a different room now" as small as it can be, at the cost of the optimality
+    guarantee - hence the two passes.
+    """
+    placed = {room_id: [] for room_id in room_ids}
+    assignment = {}
+
+    order = sorted(range(len(stays)), key=lambda i: (stays[i].check_in, stays[i].check_out))
+    for index in order:
+        stay = stays[index]
+
+        # A stay we're not allowed to move has exactly one candidate room.
+        if not stay.movable:
+            candidates = [stay.room_id]
+        elif prefer_current and stay.room_id in placed:
+            candidates = [stay.room_id] + [r for r in room_ids if r != stay.room_id]
+        else:
+            candidates = room_ids
+
+        for room_id in candidates:
+            if room_id not in placed:
+                continue
+            if any(_overlaps(stay, other) for other in placed[room_id]):
+                continue
+            placed[room_id].append(stay)
+            assignment[index] = room_id
+            break
+        else:
+            return {}
+
+    return assignment
+
+
+def plan_room_moves(room_category: RoomCategory, check_in, check_out, today=None):
+    """Work out whether shuffling this room type's upcoming bookings would
+    make space for a stay from `check_in` to `check_out`.
+
+    The problem this solves: three rooms of one type, booked 1-3 Sep, 3-5 Sep
+    and 5-7 Sep, one room each. Every room is busy at some point in that week,
+    so a guest asking for 1-7 Sep is turned away - even though the three short
+    stays would all fit in a single room and leave the other two completely
+    empty. This slides them together and hands back the room that frees up.
+
+    Only ever looks at rooms of this one room type, never at the villa's other
+    types - a guest who booked a Deluxe is not moved into a Standard.
+
+    What it will not move:
+      - a stay that has already started or is over: someone in the room
+        tonight keeps their room number
+      - a cancelled booking (it isn't occupying anything to begin with)
+      - anything in a room that has been switched off
+
+    Returns (room, moves): the room the new stay can have, and the list of
+    (booking_id, from_room_id, to_room_id) that has to happen first - possibly
+    empty, if it fits without moving anyone. Returns (None, []) when even a
+    full reshuffle can't make it fit.
+
+    Plans only - it writes nothing. apply_room_moves() does that, inside the
+    same transaction that saves the booking.
+    """
+    today = today or timezone.localdate()
+
+    rooms = list(room_category.rooms.filter(is_active=True).order_by("id"))
+    room_ids = [room.id for room in rooms]
+    if not room_ids:
+        return None, []
+
+    # Everything still ahead of us in these rooms. Stays already finished
+    # can't be in the way of a future one, so they never enter the packing.
+    bookings = (
+        Booking.objects.filter(
+            organization=room_category.organization_id,
+            room_id__in=room_ids,
+            check_out__gt=min(check_in, today),
+        )
+        .exclude(status=Booking.Status.CANCELLED)
+        .only("id", "room_id", "check_in", "check_out")
+    )
+
+    stays = [
+        _Stay(b.id, b.room_id, b.check_in, b.check_out, movable=b.check_in > today)
+        for b in bookings
+    ]
+    wanted = len(stays)  # index of the new stay, added last
+    stays.append(_Stay(None, None, check_in, check_out, movable=True))
+
+    assignment = _pack(stays, room_ids, prefer_current=True)
+    if not assignment:
+        assignment = _pack(stays, room_ids, prefer_current=False)
+    if not assignment:
+        return None, []
+
+    moves = [
+        (stay.booking_id, stay.room_id, assignment[index])
+        for index, stay in enumerate(stays)
+        if stay.booking_id is not None and assignment[index] != stay.room_id
+    ]
+    room_by_id = {room.id: room for room in rooms}
+    return room_by_id[assignment[wanted]], moves
+
+
+def apply_room_moves(moves: list) -> None:
+    """Write out a plan from plan_room_moves(). Call inside the transaction
+    that saves the booking the moves were planned for - half a shuffle is
+    worse than none, and the plan is only correct alongside that new booking.
+    """
+    for booking_id, from_room_id, to_room_id in moves:
+        Booking.objects.filter(pk=booking_id).update(room_id=to_room_id)
+        logger.info(
+            "Booking %s moved from room %s to room %s to free up space",
+            booking_id, from_room_id, to_room_id,
+        )
+
+
 def find_available_room(room_category: RoomCategory, check_in, check_out):
-    """The first of this room type's rooms that's free for the given dates,
-    and, if none are, the soonest date one of them frees up.
+    """The room this room type can give a stay over the given dates, and what
+    it would take to give it.
+
+    Returns (room, next_free_date, moves):
+      - a room is free right now            -> (room, None, [])
+      - a room frees up by moving others    -> (room, None, [move, ...])
+      - the type really is full             -> (None, next_free_date, [])
+
+    `next_free_date` is the earliest check-out among the bookings in the way,
+    i.e. the soonest any of them opens up - not a promise it stays open past
+    that date, just where to look next.
+
+    `moves` is only ever non-empty when the villa's manager has switched
+    "move upcoming bookings between rooms" on for that villa
+    (Villa.auto_reassign_rooms) - see plan_room_moves for the rules it plays
+    by. The caller must pass the list to apply_room_moves() in the same
+    transaction that saves the booking; anything only previewing availability
+    can ignore it.
 
     Used by the Add Reservation form both for the live availability check
     (apps.bookings.views.ReservationAvailabilityView) and to actually assign a
     room on save - re-run server-side at submit time rather than trusting
     whatever the live check last showed the client, same principle as
     BookingRescheduleView's overlap check.
-
-    Returns (room, None) if a room is free, or (None, next_free_date) if every
-    room of this type is booked - next_free_date is the earliest check-out
-    among the bookings in the way, i.e. the soonest any of them opens up (not
-    a guarantee it stays open past that date - just where to look next).
     """
     rooms = list(room_category.rooms.filter(is_active=True).order_by("id"))
     overlapping = list(
@@ -443,9 +559,25 @@ def find_available_room(room_category: RoomCategory, check_in, check_out):
     booked_room_ids = {b.room_id for b in overlapping}
     for room in rooms:
         if room.id not in booked_room_ids:
-            return room, None
+            return room, None, []
+
+    # Every room is busy at some point in these dates. If this villa's manager
+    # asked us to, see whether sliding the upcoming stays together opens one.
+    if room_category.villa.auto_reassign_rooms and len(rooms) > 1:
+        room, moves = plan_room_moves(room_category, check_in, check_out)
+        if room is not None:
+            logger.info(
+                "Room type %s (villa %s) has space for %s to %s after moving %s booking(s)",
+                room_category.pk, room_category.villa_id, check_in, check_out, len(moves),
+            )
+            return room, None, moves
+        logger.info(
+            "Room type %s (villa %s) is full for %s to %s even after reshuffling",
+            room_category.pk, room_category.villa_id, check_in, check_out,
+        )
+
     next_free_date = min((b.check_out for b in overlapping), default=None)
-    return None, next_free_date
+    return None, next_free_date, []
 
 
 def _rooms_by_villa(villa_ids: list) -> dict:

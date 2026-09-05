@@ -55,10 +55,18 @@ through the shared confirmTarget dialog (mode "form") - see CLAUDE.md rule 5.
         </dl>
 
         <div class="flex items-center justify-between">
-          <button type="button" class="btn btn-ghost whitespace-nowrap px-0 text-red-700"
+          {% comment %}A block has no guests and no channel booking behind it,
+          so removing it is low-stakes - the detail card the user already saw
+          before clicking Remove is confirmation enough; skip the second
+          "are you sure" dialog and submit straight away.{% endcomment %}
+          <form x-show="detail.block" :action="detail.removeUrl" method="post">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+            <button type="submit" class="btn btn-ghost whitespace-nowrap px-0 text-red-700">{% translate "Remove" %}</button>
+          </form>
+          <button type="button" x-show="!detail.block" class="btn btn-ghost whitespace-nowrap px-0 text-red-700"
                   @click="confirmTarget = { message: detail.removeMessage, url: detail.removeUrl, mode: 'form' }; detail = null">
-            <span x-show="!detail.block">{% translate "Remove booking" %}</span>
-            <span x-show="detail.block">{% translate "Remove" %}</span>
+            {% translate "Remove booking" %}
           </button>
           <div class="flex items-center gap-2">
             <a x-show="detail.guestUrl" :href="detail.guestUrl" class="btn border border-sand-300 text-orange-600 justify-center text-center hover:bg-sand-200 no-underline">

@@ -7,7 +7,7 @@
 <div class="mb-6 flex items-center justify-between">
   <h1 class="text-xl font-semibold text-ink-900">{% translate "Team" %}</h1>
   <a href="{% url 'organizations:staff_add' %}" class="btn bg-teal-600 text-xs text-white hover:bg-teal-700">
-    {% translate "Add staff" %}
+    {% translate "Staff +" %}
   </a>
 </div>
 
@@ -47,7 +47,17 @@
             </td>
             <td class="whitespace-nowrap px-4 py-3 text-right">
               {% if not membership.is_manager_member %}
-                <a href="{% url 'organizations:staff_villas' membership.pk %}" class="btn whitespace-nowrap bg-teal-600 text-xs text-white hover:bg-teal-700">{% translate "Edit villas" %}</a>
+                <a
+                  href="{% url 'organizations:staff_villas' membership.pk %}"
+                  aria-label="{% translate "Edit villas" %}"
+                  title="{% translate "Edit villas" %}"
+                  class="btn btn-ghost inline-flex h-12 w-12 items-center justify-center !p-0 !text-amber-800 hover:!bg-amber-50"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6">
+                    <path d="M12 20h9" />
+                    <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z" />
+                  </svg>
+                </a>
               {% endif %}
             </td>
           </tr>

@@ -15,7 +15,9 @@
   </div>
 {% else %}
 
-  <div x-data="{ confirmTarget: null }" @keydown.escape.window="confirmTarget = null">
+  <div x-data="{ confirmTarget: null }"
+       @keydown.escape.window="confirmTarget = null"
+       x-init="window.addEventListener('pageshow', (e) => { if (e.persisted) confirmTarget = null })">
 
   <div class="mb-6 flex items-center justify-between">
     <h1 class="text-xl font-semibold text-ink-900">{% translate "Your villas" %}</h1>
@@ -108,8 +110,8 @@
             {% else %}
               <button
                 type="button"
-                data-leave-url="{% url 'villas:activities' villa.slug %}"
-                @click="confirmTarget = { type: 'leave', message: '{% translate "This villa does not have a website yet. Go to its activities page instead?" %}', url: $el.dataset.leaveUrl }"
+                data-leave-url="{% url 'marketing_admin:overview' %}"
+                @click="confirmTarget = { type: 'leave', message: '{% translate "This villa does not have a website yet. Go to Marketing to turn it on." %}', url: $el.dataset.leaveUrl }"
                 aria-label="{% translate "No website yet" %}"
                 title="{% translate "No website yet" %}"
                 class="btn btn-ghost flex h-12 w-12 items-center justify-center !p-0 !text-amber-800 opacity-30 hover:!bg-amber-50"

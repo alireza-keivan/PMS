@@ -105,6 +105,11 @@ DEFAULT_ROOM_TYPE = "Standard"
 # like 300 from filling a villa with hundreds of rooms nobody asked for.
 MAX_ROOMS_PER_TYPE = 60
 
+# A villa's amenity list is meant to be skimmed on a phone, so it is capped.
+# Past twenty ticks the list stops telling a guest what makes the place
+# special and just becomes a wall of words.
+MAX_VILLA_AMENITIES = 20
+
 # Keeps the picture row usable and the villa's storage bill sane - a villa or
 # room type never needs more than this many pictures to show what it looks
 # like, and a picture this big is almost always an accidental full-res upload.
@@ -200,6 +205,19 @@ class Villa(TenantOwnedModel):
 
     is_listed_publicly = models.BooleanField(
         default=False, help_text=_("Show this villa's own web page and direct booking.")
+    )
+
+    # Off by default, and deliberately the operator's choice: it moves real
+    # guests between rooms of the same type to close the gaps a run of short
+    # stays leaves behind, so a longer stay that would otherwise be turned
+    # away fits. See apps.bookings.services.plan_room_moves for what it will
+    # and won't move. Never crosses room types, and never crosses villas.
+    auto_reassign_rooms = models.BooleanField(
+        default=False,
+        help_text=_(
+            "Move upcoming bookings between rooms of the same type so longer "
+            "stays can fit."
+        ),
     )
     is_active = models.BooleanField(default=True)
 
@@ -596,23 +614,40 @@ class Amenity(models.Model):
         )
 
 
-_TRAILING_NUMBER = re.compile(r"\s*\d+$")
+# Rooms are lettered, not numbered - "Deluxe A", "Deluxe B". Older data was
+# numbered, so both are recognised when reading a room's series name back.
+# A letter only counts as a label when it stands on its own after a space -
+# otherwise "Kenanga" would read as the series "Kenang" plus an "a". Two
+# letters are allowed for the same reason "AA" follows "Z"; more than that is
+# a word the operator typed, not a label, and is left alone.
+_TRAILING_LABEL = re.compile(r"(?:\s*\d+|\s+[A-Za-z]{1,2})$")
 
 
 def _base_room_name(name: str) -> str:
-    """"Deluxe 3" -> "Deluxe": a room's series name, without its number."""
-    return _TRAILING_NUMBER.sub("", name).strip() or name.strip()
+    """"Deluxe C" -> "Deluxe": a room's series name, without its letter."""
+    return _TRAILING_LABEL.sub("", name).strip() or name.strip()
+
+
+def _room_letter(position: int) -> str:
+    """1 -> "A", 2 -> "B" ... 27 -> "AA". Spreadsheet-style, so a villa with
+    more than 26 rooms of one type still gets names that don't repeat.
+    """
+    letters = ""
+    while position > 0:
+        position, remainder = divmod(position - 1, 26)
+        letters = chr(ord("A") + remainder) + letters
+    return letters
 
 
 def next_room_names(villa, category, how_many: int) -> list:
     """The names the next `how_many` rooms of this type should be given.
 
     Rooms follow the type's first room, which itself starts out named after
-    the type: "Deluxe", then "Deluxe 2", "Deluxe 3". Rename that first room
-    to "Kenanga" and the next ones become "Kenanga 4", "Kenanga 5" - they
-    keep following it, and the number stays the room's place in the type.
-    Any name already used elsewhere in the villa is skipped, so two rooms
-    never end up with the same name.
+    the type and lettered from A: "Deluxe A", then "Deluxe B", "Deluxe C".
+    Rename that first room to "Kenanga" and the next ones become "Kenanga D",
+    "Kenanga E" - they keep following it, and the letter stays the room's
+    place in the type. Any name already used elsewhere in the villa is
+    skipped, so two rooms never end up with the same name.
     """
     if how_many <= 0:
         return []
@@ -629,15 +664,11 @@ def next_room_names(villa, category, how_many: int) -> list:
     taken = {name.strip().casefold() for name in villa.rooms.values_list("name", flat=True)}
     names = []
 
-    # The bare name belongs to the first room, so it is only free while the
-    # type has none - after that, numbering picks up where the type left off.
-    if first is None and base.casefold() not in taken:
-        names.append(base)
-        taken.add(base.casefold())
-
-    n = max(len(rooms) + 1, 2)
+    # Lettering picks up where the type left off - and starts at A, so the
+    # very first room of a type reads "Deluxe A", not a bare "Deluxe".
+    n = len(rooms) + 1
     while len(names) < how_many:
-        candidate = f"{base} {n}"
+        candidate = f"{base} {_room_letter(n)}"
         if candidate.casefold() not in taken:
             names.append(candidate)
             taken.add(candidate.casefold())

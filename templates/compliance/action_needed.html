@@ -20,7 +20,7 @@
       <h1 class="text-xl font-semibold text-ink-900">{% translate "Compliance" %}</h1>
       <p class="text-sm text-ink-600">{% translate "What needs doing - not a verified-compliant checklist." %}</p>
     </div>
-    <a href="{% url 'compliance:documents' %}" class="text-sm text-teal-700 underline">{% translate "View all documents" %}</a>
+    <a href="{% url 'compliance:documents' %}" class="btn btn-ghost">{% translate "Documents" %}</a>
   </div>
 
   <div class="mb-8 rounded-lg border border-sand-200 bg-sand-100 p-4 shadow-sm sm:p-6">
@@ -78,7 +78,7 @@
               </div>
               <button
                 hx-post="{% url 'compliance:mark_police_report_done' report.pk %}"
-                hx-target="closest li" hx-swap="outerHTML"
+                hx-target="this" hx-swap="outerHTML"
                 class="flex-shrink-0 rounded bg-sand-200 px-3 py-1.5 text-xs font-medium text-ink-900 hover:bg-sand-300"
               >
                 {% translate "Mark as done" %}
